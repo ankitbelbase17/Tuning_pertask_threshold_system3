@@ -1,0 +1,75 @@
+"""
+run.py — entrypoint: build config, load backend, wire the three threads.
+
+Pipeline (all sharing ONE Qwen3-VL model + ONE linear KV cache via the manager):
+    vision_stream  --frames-->  orchestrator  --trigger-->  writer
+                                     |                          |
+                                     +------ shared KV cache ----+
+Each runs in its own thread at its own pace; the manager serializes GPU/cache
+access by priority so the writer never blocks the orchestrator.
+"""
+import argparse
+import dataclasses
+import queue
+import threading
+
+from config import AsyncOmniConfig
+from backend import Qwen3VLBackend
+from manager import KVCacheManager
+from vision_stream import vision_thread
+from orchestrator import orchestrator_thread
+from writer import writer_thread
+from util import log
+
+
+def parse_args():
+    cfg = AsyncOmniConfig()
+    ap = argparse.ArgumentParser(description="async-omni v2 (Qwen3-VL)")
+    # expose every dataclass field as --flag with the dataclass default
+    for f in dataclasses.fields(cfg):
+        if f.type in (list,):
+            continue
+        if f.type is bool:
+            ap.add_argument(f"--{f.name}", action="store_true", default=getattr(cfg, f.name))
+            ap.add_argument(f"--no_{f.name}", dest=f.name, action="store_false")
+        else:
+            ap.add_argument(f"--{f.name}", type=type(getattr(cfg, f.name)),
+                            default=getattr(cfg, f.name))
+    return ap.parse_args()
+
+
+def main():
+    args = parse_args()
+    cfg = AsyncOmniConfig(**{k: v for k, v in vars(args).items()
+                             if k in {f.name for f in dataclasses.fields(AsyncOmniConfig)}})
+    if not cfg.video_path:
+        raise SystemExit("--video_path is required")
+
+    backend = Qwen3VLBackend(cfg)
+    mgr = KVCacheManager(backend)
+
+    frame_q = queue.Queue(maxsize=cfg.frame_q_size)
+    writer_q = queue.Queue(maxsize=1)
+    stop = threading.Event()
+
+    threads = [
+        threading.Thread(target=vision_thread, args=(cfg, frame_q, stop),
+                         name="vision", daemon=True),
+        threading.Thread(target=orchestrator_thread, args=(cfg, mgr, frame_q, writer_q, stop),
+                         name="orchestrator", daemon=True),
+        threading.Thread(target=writer_thread, args=(cfg, mgr, writer_q, stop),
+                         name="writer", daemon=True),
+    ]
+    log("main", 0.0, f"start: model={cfg.model_id} fps={cfg.fps} "
+                     f"max={cfg.max_seconds}s budget={cfg.kv_budget} "
+                     f"realtime={cfg.realtime} speed={cfg.speed}")
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+    mgr.shutdown()
+    log("main", 0.0, "done")
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,18 @@
+# data / large assets
+*.webm
+*.mp4
+*.mkv
+
+# python
+__pycache__/
+*.pyc
+*.pyo
+
+# logs / runtime
+*.log
+run.log
+
+# checkpoints / caches
+checkpoints/
+*.pt
+*.safetensors
