@@ -24,14 +24,14 @@ class AsyncOmniConfig:
     # ---- video / pacing ----
     video_path: str = ""
     fps: float = 2.0                  # encoder base frame rate (frames/s of video)
-    max_seconds: float = 120.0
+    max_seconds: float = 300.0
     realtime: bool = True             # pace the encoder to a wall clock
     speed: float = 1.0                # real-time multiplier (1.0 = live)
     frame_q_size: int = 8             # vis_q depth (encoder -> orchestrator buffer)
 
     # ---- encoder control (proactive INPUT gate, orchestrator-steered) ----
-    encoder_focus_fps: float = 3.0    # fps when the orchestrator says "focus"
-    encoder_idle_fps: float = 1.0     # fps when the action is boring
+    encoder_focus_fps: float = 10.0    # fps when the orchestrator says "focus"
+    encoder_idle_fps: float = 3.0     # fps when the action is boring
 
     # ---- memory management (shared linear KV cache) ----
     kv_budget: int = 262144           # 256K-token context (eviction only past this)
@@ -39,7 +39,7 @@ class AsyncOmniConfig:
 
     # ---- proactivity gating ----
     goal_threshold: float = 0.5       # writer fires when goal yes_share >= this
-    debounce_s: float = 1.0           # min video-seconds between writer triggers
+    debounce_s: float = 10.0           # min video-seconds between writer triggers
     vision_gate_every: int = 8        # run the "important?" probe every N frames
     log_gate_every: int = 1           # log the goal probe every N frames
 
