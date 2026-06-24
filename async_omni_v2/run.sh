@@ -10,15 +10,17 @@ MODEL="Qwen/Qwen3-VL-8B-Instruct"           # HF id (downloads on first run)
 VIDEO="/iopsstor/scratch/cscs/dbartaula/system_3/Highlights ｜ France 3-1 Senegal ｜ FIFA World Cup 2026™ [n3JDGlOwMJ4].webm"    # <-- set this on the server
 
 MODE="${1:-realtime}"
-if [ "$MODE" = "batch" ]; then CLOCK="--no_realtime"; else CLOCK="--realtime --speed 2.0"; fi
+# realtime = ~1x wall clock (speed 1.0); batch = as fast as the GPU allows.
+if [ "$MODE" = "batch" ]; then CLOCK="--no_realtime"; else CLOCK="--realtime --speed 1.0"; fi
 
 PYTHONPATH="$HERE" "$PY" run.py \
   --model_id "$MODEL" \
   --video_path "$VIDEO" \
   --dtype float16 \
-  --fps 1.5 \
+  --fps 2.0 \
   --max_seconds 120 \
-  --kv_budget 4096 \
+  --kv_budget 262144 \
+  --max_pixels 200704 \
   --goal_threshold 0.5 \
   --log_gate_every 1 \
   $CLOCK

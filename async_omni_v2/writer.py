@@ -1,25 +1,28 @@
 """
-writer.py — the WRITER thread (the mouth).
+writer.py — the WRITER (the mouth), now fully decoupled.
 
-Waits for a trigger from the orchestrator, then free-generates a short
-commentary line. Two design points:
+On a trigger it takes an MVCC SNAPSHOT of the shared cache (an independent
+clone) and free-generates a short commentary line ON THE CLONE. Because the
+clone is private:
 
-  * It generates ONE token per `submit` at PRIO_WRITER, so the orchestrator
-    preempts between every token -> the writer can never block the thinker.
-    (On Mobile-O we saw the writer fall tens of video-seconds behind the
-    orchestrator; that lag IS the async decoupling working.)
-  * Temperature sampling + a simple anti-repeat guard, because greedy decoding
-    on these prompts collapses into loops ("0 - 0 - 0 ..."). This is the fix for
-    the gibberish you saw.
+  * it holds NO lock while generating, so it never blocks the orchestrator and
+    the orchestrator never blocks it;
+  * the orchestrator's concurrent eviction/ingest cannot rip context out from
+    under it mid-sentence (the v2 corruption / gibberish bug);
+  * its tokens are NOT written back into the primary cache, preserving the
+    single-writer invariant. (Feeding a compact summary back to the orchestrator
+    is a deliberate future step, not done here.)
 
-Its tokens are appended to the shared cache, so the orchestrator later sees what
-the writer said.
+Temperature sampling + an anti-repeat guard keep greedy loops from collapsing.
+On one GPU the writer's forwards still time-share kernels with the orchestrator;
+move it to a 2nd GPU replica and it becomes truly parallel — no code change to
+the concurrency model, only where the snapshot's tensors live.
 """
 import queue
+import time
 
 import torch
 
-from manager import PRIO_WRITER
 from util import log
 
 
@@ -31,7 +34,6 @@ def _sample(logits, temperature):
 
 
 def _looping(ids, window):
-    """Stop if the tail collapses (same token x3, or a repeated 2-gram)."""
     if len(ids) >= 3 and ids[-1] == ids[-2] == ids[-3]:
         return True
     if len(ids) >= 4 and ids[-2:] == ids[-4:-2]:
@@ -39,20 +41,45 @@ def _looping(ids, window):
     return len(ids) >= window and len(set(ids[-window:])) <= 2
 
 
-def writer_thread(cfg, mgr, writer_q, stop):
+def writer_thread(cfg, mgr, writer_q, stop, prof=None, evaluator=None):
     b = mgr.b
     while not stop.is_set() or not writer_q.empty():
         try:
             vt = writer_q.get(timeout=0.5)
         except queue.Empty:
             continue
-        logits = mgr.submit(PRIO_WRITER, mgr.op_append_text(cfg.writer_cue))
+        t_trig = time.time()
+
+        # MVCC snapshot: independent clone + logical position. No lock held below.
+        cache, pos, phys = mgr.snapshot_clone()
+
+        def step(embeds):
+            nonlocal pos, phys, cache
+            logits, cache = b.forward(embeds, cache, pos_start=pos, phys_start=phys)
+            pos += embeds.shape[1]
+            phys += embeds.shape[1]
+            return logits
+
+        logits = step(b.embed_text(cfg.writer_cue))
+        t_first = time.time()
         ids = []
         for _ in range(cfg.writer_max_tokens):
             tok_id = _sample(logits, cfg.writer_temperature)
             if tok_id == b.eos_id or tok_id in b.newline_ids or _looping(ids, cfg.writer_repeat_window):
                 break
             ids.append(tok_id)
-            logits = mgr.submit(PRIO_WRITER, mgr.op_append_token(tok_id))
-        log("WRITER", vt, f"\U0001F4E2  {b.decode(ids)!r}")
+            tt = time.time()
+            logits = step(b.embed_token(tok_id))
+            if prof is not None:
+                prof.observe("writer_token_ms", 1000 * (time.time() - tt))
+
+        total = time.time() - t_trig
+        if prof is not None:
+            prof.observe("writer_trig2first_s", t_first - t_trig)
+            prof.observe("writer_total_s", total)
+            prof.observe("writer_tokens", len(ids))
+        text = b.decode(ids)
+        if evaluator is not None:
+            evaluator.record_write(vt, text, total)
+        log("WRITER", vt, f"\U0001F4E2  {text!r}")
     log("writer", 0.0, "writer stopped")

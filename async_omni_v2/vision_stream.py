@@ -1,31 +1,36 @@
 """
-vision_stream.py — the streaming vision encoder thread (the pacemaker).
+vision_stream.py — the streaming VISION ENCODER (its own async component).
 
-Genuinely parallel, CPU-only: decodes the video with PyAV, samples at `fps`,
-and pushes (video_time, PIL frame) onto a bounded queue. It NEVER touches the
-GPU — the heavy vision-tower work happens later in the manager thread when the
-orchestrator chooses to ingest a frame.
+Unlike v2 (where this thread was CPU-only and the orchestrator did the encode),
+here the encoder OWNS the vision GPU work and is a first-class concurrent
+component:
 
-Real-time clock: if `realtime`, each frame is held until wall-clock has reached
-its video timestamp (scaled by `speed`). This makes "async at its own pace"
-literally true against a wall clock and turns the vision stream into the
-pacemaker for the whole pipeline. With realtime off, frames flow as fast as
-decoding allows (batch mode). If the orchestrator can't keep up, the oldest
-queued frame is dropped (real streaming, bounded latency).
+  * It decodes the video and paces itself to REAL wall-clock time (so a 120 s
+    clip takes ~120 s at speed 1.0) — true streaming, not batch.
+  * It runs the ViT + multimodal projector (`backend.embed_frame`) and pushes
+    PROJECTED visual tokens `[1, N, H]` (already in LLM space) onto `vis_q`.
+    `vis_q` is the buffer "in between" the encoder and the orchestrator.
+  * Its frame rate is controlled live by the orchestrator through
+    `EncoderControl` — the proactive INPUT gate. Focus => encode more frames
+    right now; boring => fewer. The orchestrator never has to wait for the
+    encoder and vice-versa.
+
+The encode touches NO KV cache, so it runs concurrently with the orchestrator
+and writer with zero locking.
 """
 import queue
 import time
 
 import av
+import torch
 
 from util import log
 
 
-def vision_thread(cfg, frame_q, stop):
+def encoder_thread(cfg, backend, vis_q, ctrl, stop, prof=None):
     container = av.open(cfg.video_path)
     vstream = container.streams.video[0]
-    interval = 1.0 / cfg.fps
-    last_t = -1e9
+    last_emit = -1e9
     wall_start = time.time()
     for frame in container.decode(video=0):
         if stop.is_set():
@@ -33,22 +38,35 @@ def vision_thread(cfg, frame_q, stop):
         vt = float(frame.pts * vstream.time_base)
         if vt > cfg.max_seconds:
             break
-        if vt - last_t < interval:
+        interval = 1.0 / ctrl.get_fps()          # live, orchestrator-controlled
+        if vt - last_emit < interval:
             continue
-        last_t = vt
-        if cfg.realtime:
+        last_emit = vt
+        if cfg.realtime:                         # pace to wall clock
             delay = (wall_start + vt / cfg.speed) - time.time()
             if delay > 0:
                 time.sleep(delay)
+
         img = frame.to_image()
+        t = time.time()
+        embeds = backend.embed_frame(img)        # ViT + projector (GPU)
+        if torch.cuda.is_available():
+            torch.cuda.synchronize()
+        if prof is not None:
+            prof.observe("vis_encode_ms", 1000 * (time.time() - t))
+            prof.observe("vis_tokens_per_frame", embeds.shape[1])
+            prof.incr("frames_emitted")
+
         try:
-            frame_q.put_nowait((vt, img))
+            vis_q.put_nowait((vt, embeds))
         except queue.Full:
             try:
-                frame_q.get_nowait()          # drop oldest
+                vis_q.get_nowait()               # drop oldest (bounded latency)
+                if prof is not None:
+                    prof.incr("frames_dropped")
             except queue.Empty:
                 pass
-            frame_q.put_nowait((vt, img))
+            vis_q.put_nowait((vt, embeds))
     container.close()
     stop.set()
-    log("vision", cfg.max_seconds, "video stream ended")
+    log("encoder", cfg.max_seconds, "video stream ended")

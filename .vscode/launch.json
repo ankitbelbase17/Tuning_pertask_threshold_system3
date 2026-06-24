@@ -1,0 +1,32 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug async-omni realtime",
+            "type": "debugpy",
+            "request": "launch",
+            "python": "/iopsstor/scratch/cscs/dbartaula/miniforge3/envs/async_omni/bin/python",
+            "program": "${workspaceFolder}/run.py",
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONNOUSERSITE": "1",
+                "PYTHONPATH": "${workspaceFolder}"
+            },
+            "args": [
+                "--model_id", "Qwen/Qwen3-VL-8B-Instruct",
+                "--video_path", "/iopsstor/scratch/cscs/dbartaula/system_3/Highlights ｜ France 3-1 Senegal ｜ FIFA World Cup 2026™ [n3JDGlOwMJ4].webm",
+                "--dtype", "float16",
+                "--fps", "2.0",
+                "--max_seconds", "120",
+                "--kv_budget", "262144",
+                "--max_pixels", "200704",
+                "--goal_threshold", "0.5",
+                "--log_gate_every", "1",
+                "--realtime",
+                "--speed", "1.0"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false
+        }
+    ]
+}

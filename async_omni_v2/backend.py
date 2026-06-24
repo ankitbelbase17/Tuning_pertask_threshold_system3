@@ -78,6 +78,7 @@ class Qwen3VLBackend(ModelBackend):
             low_cpu_mem_usage=True).eval()
         self.processor = AutoProcessor.from_pretrained(cfg.model_id)
         self.tok = self.processor.tokenizer
+        self._cap_image_resolution(cfg.max_pixels)
 
         self._resolve_modules()        # find visual / language_model / lm_head
         self.hidden_size = self.model.config.get_text_config().hidden_size \
@@ -89,6 +90,46 @@ class Qwen3VLBackend(ModelBackend):
         self.no_ids = _word_ids(self.tok, cfg.no_words)
         if not self.yes_ids or not self.no_ids:
             raise RuntimeError("could not map yes/no to single tokens for this tokenizer")
+
+    # -- cap vision tokens/frame by limiting image pixels (perf + KV memory) --
+    def _cap_image_resolution(self, max_pixels):
+        """For Qwen2VLImageProcessor the pixel-AREA bounds live in
+        `size.longest_edge` (max pixels) / `size.shortest_edge` (min pixels) --
+        these are total-pixel counts, not edge lengths. Vision tokens =
+        pixels / (patch_size*merge_size)^2, so capping longest_edge caps the
+        token count. Confirmed by the profiler's vis_tokens_per_frame sample."""
+        if not max_pixels:
+            return
+        ip = getattr(self.processor, "image_processor", None)
+        if ip is None:
+            return
+        per_tok = (getattr(ip, "patch_size", 16) * getattr(ip, "merge_size", 2)) ** 2
+        size = getattr(ip, "size", None)
+
+        def _set(obj, key, val):            # SizeDict supports both attr + item
+            try:
+                setattr(obj, key, val)
+            except Exception:
+                pass
+            try:
+                obj[key] = val
+            except Exception:
+                pass
+
+        if size is not None:
+            cur_min = getattr(size, "shortest_edge", None) or (size.get("shortest_edge")
+                      if hasattr(size, "get") else None) or per_tok
+            _set(size, "longest_edge", max_pixels)
+            _set(size, "shortest_edge", min(cur_min, max_pixels))
+        # legacy flat attrs, if a future processor uses them
+        if hasattr(ip, "max_pixels"):
+            ip.max_pixels = max_pixels
+        # also push onto the processor wrapper so apply-chat-template paths agree
+        for attr in ("max_pixels",):
+            if hasattr(self.processor, attr):
+                setattr(self.processor, attr, max_pixels)
+        print(f"[backend] capped image to <= {max_pixels} px "
+              f"(~{max_pixels // per_tok} vision tokens/frame)", flush=True)
 
     # -- module resolution: tolerate transformers' shifting attribute layout --
     def _resolve_modules(self):

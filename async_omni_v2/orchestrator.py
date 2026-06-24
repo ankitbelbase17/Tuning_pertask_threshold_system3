@@ -1,62 +1,66 @@
 """
-orchestrator.py — the decoupled THINKER thread.
+orchestrator.py — the async THINKER / brain.
 
-Owns all the proactive decisions; runs at PRIO_ORCH so it always wins the GPU
-over the writer. Per frame it:
-  1. (every N frames) runs the VISION gate probe "should I keep looking?" and
-     proactively skips the frame if the model says no;
-  2. ingests the frame into the shared cache (vision tower runs here, in the
-     manager thread);
-  3. evicts old vision tokens past the KV budget (bounded memory);
-  4. runs the WRITER gate probe "did a goal just happen?" and, on a confident +
-     debounced yes, triggers the writer.
+Continuously consumes the streaming visual tokens (from the encoder's `vis_q`),
+appends them to the shared KV cache, and thinks. It is the SOLE writer of the
+primary cache (single-writer invariant => no write-write conflict). Each frame:
 
-It never generates the user-facing text itself — it only decides *when* the
-writer should speak. The writer's tokens land in the same shared cache, so on
-later frames the orchestrator implicitly "sees what the writer already said".
+  1. ingest the projected visual tokens into the shared cache;
+  2. bound memory (StreamingLLM eviction past the KV budget);
+  3. INPUT proactivity: every N frames probe "is this important?" and steer the
+     encoder's fps up/down via EncoderControl (focus vs idle);
+  4. OUTPUT proactivity: probe "did a goal just happen?" and, on a confident +
+     debounced yes, trigger the writer.
+
+It never blocks: ingest/probe hold the cache lock only briefly, and the writer
+works off an independent snapshot, so the orchestrator keeps thinking while the
+writer speaks.
 """
 import queue
 
-from manager import PRIO_ORCH
 from util import log
 
 
-def orchestrator_thread(cfg, mgr, frame_q, writer_q, stop):
-    sink = mgr.submit(PRIO_ORCH, mgr.op_seed(cfg.system_prompt))
-    log("orch", 0.0, f"seeded cache, sink={sink} tokens")
+def orchestrator_thread(cfg, mgr, vis_q, writer_q, ctrl, stop, prof=None, evaluator=None):
+    sink = mgr.seed(cfg.system_prompt)
+    log("orch", 0.0, f"seeded cache, sink={sink} tokens, budget={cfg.kv_budget}")
     n_frames = 0
     last_trigger_vt = -1e9
 
-    while not stop.is_set() or not frame_q.empty():
+    while not stop.is_set() or not vis_q.empty():
         try:
-            vt, img = frame_q.get(timeout=0.5)
+            vt, embeds = vis_q.get(timeout=0.5)
         except queue.Empty:
             continue
         n_frames += 1
+        if prof is not None:
+            prof.observe("visq_depth", vis_q.qsize())
 
-        # 1. proactive vision gate
-        if n_frames % cfg.vision_gate_every == 0:
-            share = mgr.submit(PRIO_ORCH, mgr.op_probe(cfg.vision_question))
-            look = share >= 0.5
-            log("orch.vgate", vt, f"look-closer? yes_share={share:.2f} -> {look}")
-            if not look:
-                continue
+        # 1. ingest streaming visual tokens
+        mgr.ingest(embeds)
 
-        # 2. ingest frame (vision tower + LLM forward happen in the manager)
-        mgr.submit(PRIO_ORCH, mgr.op_ingest_frame(img))
-
-        # 3. bounded memory
-        dropped = mgr.submit(PRIO_ORCH, mgr.op_evict(cfg.kv_budget, sink))
+        # 2. bounded memory
+        dropped = mgr.evict()
         if dropped:
             log("orch.evict", vt, f"evicted {dropped} KV tokens (budget={cfg.kv_budget})")
 
-        # 4. writer gate
-        share = mgr.submit(PRIO_ORCH, mgr.op_probe(cfg.goal_question))
+        # 3. INPUT proactivity -> steer the encoder's frame rate
+        if n_frames % cfg.vision_gate_every == 0:
+            share = mgr.probe(cfg.vision_question, "probe.vision")
+            target = cfg.encoder_focus_fps if share >= 0.5 else cfg.encoder_idle_fps
+            ctrl.set_fps(target)
+            log("orch.vgate", vt,
+                f"important={share:.2f} -> encoder fps={ctrl.get_fps():.1f}")
+
+        # 4. OUTPUT proactivity -> trigger the writer
+        share = mgr.probe(cfg.goal_question, "probe.goal")
         if n_frames % cfg.log_gate_every == 0:
             log("orch.ggate", vt, f"goal yes_share={share:.2f}")
         if share >= cfg.goal_threshold and (vt - last_trigger_vt) > cfg.debounce_s:
             last_trigger_vt = vt
             log("orch", vt, f">>> GOAL suspected (yes_share={share:.2f}) -> trigger writer")
+            if evaluator is not None:
+                evaluator.record_trigger(vt, share)
             try:
                 writer_q.put_nowait(vt)
             except queue.Full:
