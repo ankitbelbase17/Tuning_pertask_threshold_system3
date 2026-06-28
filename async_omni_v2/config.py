@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 @dataclass
 class AsyncOmniConfig:
     # ---- model ----
-    model_id: str = "Qwen/i -Instruct"
+    model_id: str = "Qwen/Qwen3-VL-8B-Instruct"
     device: str = "cuda"
     writer_device: str = ""
     encoder_device: str = "" #for independent vision encoder
@@ -19,6 +19,16 @@ class AsyncOmniConfig:
     # near-memoryless). Lower = cheaper/blurrier; higher = more detail/cost.
     max_pixels: int = 200704
     profile: bool = True              # collect + print the profiling summary
+
+    # ---- visual token pruning (VisionZip, training-free) ----
+    # When on, each frame's projected tokens are reduced BEFORE they enter the KV
+    # cache: keep the top `prune_dominant_frac` tokens by attention-received
+    # (dominant), then merge the rest into `prune_contextual_frac` representative
+    # tokens by key-similarity (contextual). Total kept ~= dominant+contextual.
+    # Text-agnostic, runs in the vision encoder (off the LLM critical path).
+    prune_img_tokens: bool = False
+    prune_dominant_frac: float = 0.65     # ~0.65 + 0.05 = 70% retention (safe)
+    prune_contextual_frac: float = 0.05
 
     # ---- video / pacing ----
     video_path: str = ""

@@ -64,7 +64,7 @@ class Qwen3VLBackend(ModelBackend):
         from transformers import AutoProcessor
         dtype = {"float16": torch.float16, "bfloat16": torch.bfloat16,
                  "float32": torch.float32}[cfg.dtype]
-        self.device, self.dtype = cfg.device, dtype
+        self.device, self.dtype, self.cfg = cfg.device, dtype, cfg
         print(f"[backend] loading {cfg.model_id} ({cfg.dtype}) ...", flush=True)
 
         # Qwen3-VL needs a recent transformers; class name may be
@@ -83,6 +83,18 @@ class Qwen3VLBackend(ModelBackend):
         self._resolve_modules()        # find visual / language_model / lm_head
         self.hidden_size = self.model.config.get_text_config().hidden_size \
             if hasattr(self.model.config, "get_text_config") else self.model.config.hidden_size
+
+        # VisionZip token pruning: patch the last vision block to expose its
+        # attention, so embed_frame can drop low-info tokens before ingest.
+        self._prune = bool(getattr(cfg, "prune_img_tokens", False))
+        if self._prune:
+            from visionzip import enable_capture
+            self.merge_unit = getattr(self.visual, "spatial_merge_unit",
+                                      self.model.config.vision_config.spatial_merge_size ** 2)
+            self._vz_attn_mod = enable_capture(self.visual)
+            print(f"[backend] VisionZip ON: keep ~{cfg.prune_dominant_frac + cfg.prune_contextual_frac:.0%} "
+                  f"of vision tokens (dominant={cfg.prune_dominant_frac}, "
+                  f"contextual={cfg.prune_contextual_frac}, merge_unit={self.merge_unit})", flush=True)
 
         self.eos_id = self.tok.eos_token_id
         self.newline_ids = set(_word_ids(self.tok, ["\n"]))
@@ -171,7 +183,13 @@ class Qwen3VLBackend(ModelBackend):
         if hasattr(out, "pooler_output"):
             out = out.pooler_output
         embeds = out[0] if isinstance(out, (list, tuple)) else out
-        return embeds.reshape(1, -1, self.hidden_size).to(self.dtype)   # [1, N, H]
+        embeds = embeds.reshape(1, -1, self.hidden_size)               # [1, N, H]
+        if self._prune:                                                # drop low-info tokens
+            from visionzip import prune_tokens
+            embeds = prune_tokens(embeds, self._vz_attn_mod._vz_attn,
+                                  self._vz_attn_mod._vz_key, self.merge_unit,
+                                  self.cfg.prune_dominant_frac, self.cfg.prune_contextual_frac)
+        return embeds.to(self.dtype)                                   # [1, N', H]
 
     # -------------------------------------------------------------- forward
     @torch.no_grad()
