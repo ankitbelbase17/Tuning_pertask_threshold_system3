@@ -32,6 +32,7 @@ def encoder_thread(cfg, backend, vis_q, ctrl, stop, prof=None):
     vstream = container.streams.video[0]
     last_emit = -1e9
     wall_start = time.time()
+    printed_tok = False                      # print real tokens/frame once
     for frame in container.decode(video=0):
         if stop.is_set():
             break
@@ -52,6 +53,15 @@ def encoder_thread(cfg, backend, vis_q, ctrl, stop, prof=None):
         embeds = backend.embed_frame(img)        # ViT + projector (GPU)
         if torch.cuda.is_available():
             torch.cuda.synchronize()
+        if not printed_tok:                      # one-time: real tokens/frame
+            ip = getattr(backend.processor, "image_processor", None)
+            px_per_tok = (getattr(ip, "patch_size", 16) * getattr(ip, "merge_size", 2)) ** 2
+            n_tok = embeds.shape[1]
+            log("encoder", vt,
+                f"FIRST FRAME: {n_tok} vision tokens/frame "
+                f"(orig img {img.size[0]}x{img.size[1]}px, "
+                f"~{px_per_tok}px/token, max_pixels={cfg.max_pixels})")
+            printed_tok = True
         if prof is not None:
             prof.observe("vis_encode_ms", 1000 * (time.time() - t))
             prof.observe("vis_tokens_per_frame", embeds.shape[1])

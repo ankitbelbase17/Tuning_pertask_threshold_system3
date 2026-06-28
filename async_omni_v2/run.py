@@ -50,6 +50,24 @@ def main():
     prof = Profiler(enabled=cfg.profile)
     mgr = KVCacheManager(backend, kv_budget=cfg.kv_budget, prof=prof)
 
+    # Optional writer replica on a 2nd GPU; else the writer shares the primary
+    # model. The MVCC snapshot is shipped to its GPU inside the writer thread.
+    writer_backend = backend
+    if cfg.writer_device and cfg.writer_device != cfg.device:
+        log("main", 0.0, f"loading writer replica on {cfg.writer_device}")
+        writer_backend = Qwen3VLBackend(dataclasses.replace(cfg, device=cfg.writer_device))
+    else:
+        log("main", 0.0, f"writer shares the model on {cfg.device}")
+
+    # Optional encoder replica on a 3rd GPU; else the encoder shares the primary
+    # model. Projected tokens are moved to the orchestrator's GPU in forward().
+    encoder_backend = backend
+    if cfg.encoder_device and cfg.encoder_device != cfg.device:
+        log("main", 0.0, f"loading encoder replica on {cfg.encoder_device}")
+        encoder_backend = Qwen3VLBackend(dataclasses.replace(cfg, device=cfg.encoder_device))
+    else:
+        log("main", 0.0, f"encoder shares the model on {cfg.device}")
+
     vis_q = queue.Queue(maxsize=cfg.frame_q_size)   # encoder -> orchestrator
     writer_q = queue.Queue(maxsize=1)
     stop = threading.Event()
@@ -59,12 +77,13 @@ def main():
         log("main", 0.0, "ground-truth eval ON (France 3-1 Senegal highlight)")
 
     threads = [
-        threading.Thread(target=encoder_thread, args=(cfg, backend, vis_q, ctrl, stop, prof),
+        threading.Thread(target=encoder_thread, args=(cfg, encoder_backend, vis_q, ctrl, stop, prof),
                          name="encoder", daemon=True),
         threading.Thread(target=orchestrator_thread,
                          args=(cfg, mgr, vis_q, writer_q, ctrl, stop, prof, evaluator),
                          name="orchestrator", daemon=True),
-        threading.Thread(target=writer_thread, args=(cfg, mgr, writer_q, stop, prof, evaluator),
+        threading.Thread(target=writer_thread,
+                         args=(cfg, mgr, writer_q, stop, prof, evaluator, writer_backend),
                          name="writer", daemon=True),
     ]
     log("main", 0.0, f"start: model={cfg.model_id} fps={cfg.fps} "

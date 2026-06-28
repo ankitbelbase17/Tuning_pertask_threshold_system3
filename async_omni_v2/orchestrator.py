@@ -52,19 +52,27 @@ def orchestrator_thread(cfg, mgr, vis_q, writer_q, ctrl, stop, prof=None, evalua
             log("orch.vgate", vt,
                 f"important={share:.2f} -> encoder fps={ctrl.get_fps():.1f}")
 
-        # 4. OUTPUT proactivity -> trigger the writer
-        share = mgr.probe(cfg.goal_question, "probe.goal")
-        if n_frames % cfg.log_gate_every == 0:
-            log("orch.ggate", vt, f"goal yes_share={share:.2f}")
-        if share >= cfg.goal_threshold and (vt - last_trigger_vt) > cfg.debounce_s:
-            last_trigger_vt = vt
-            log("orch", vt, f">>> GOAL suspected (yes_share={share:.2f}) -> trigger writer")
-            if evaluator is not None:
-                evaluator.record_trigger(vt, share)
-            try:
-                writer_q.put_nowait(vt)
-            except queue.Full:
-                pass
+        # 4. OUTPUT proactivity -> trigger the writer (one forward pass; gated to
+        #    every goal_gate_every frames since it's the dominant GPU op).
+        if n_frames % cfg.goal_gate_every == 0:
+            share = mgr.probe(cfg.goal_question, "probe.goal")
+            # log_gate_every == -1 -> only log when the probe crosses threshold;
+            # otherwise log every N probes.
+            if cfg.log_gate_every == -1:
+                do_log = share >= cfg.goal_threshold
+            else:
+                do_log = (n_frames % (cfg.goal_gate_every * cfg.log_gate_every) == 0)
+            if do_log:
+                log("orch.ggate", vt, f"goal yes_share={share:.2f}")
+            if share >= cfg.goal_threshold and (vt - last_trigger_vt) > cfg.debounce_s:
+                last_trigger_vt = vt
+                log("orch", vt, f">>> GOAL suspected (yes_share={share:.2f}) -> trigger writer")
+                if evaluator is not None:
+                    evaluator.record_trigger(vt, share)
+                try:
+                    writer_q.put_nowait(vt)
+                except queue.Full:
+                    pass
 
     stop.set()
     log("orch", 0.0, "orchestrator stopped")
