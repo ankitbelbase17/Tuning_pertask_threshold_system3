@@ -22,3 +22,8 @@ checkpoints/
 core
 core.*
 core_*
+
+# omnipro eval outputs (regenerable predictions/metrics)
+omniprofast/output*/
+
+.env

@@ -1,0 +1,1090 @@
+[
+  {
+    "id": "instant_event_alert::Lno78zPUEXs::183",
+    "task": "instant_event_alert",
+    "video_id": "Lno78zPUEXs",
+    "video_path": "raw_videos/Lno78zPUEXs.mp4",
+    "duration": 60.96,
+    "question": "Let me know when the participants in the training start laughing.",
+    "question_time": "00:00",
+    "question_time_sec": 0,
+    "audio_dependency": "none",
+    "ground_truth": [
+      {
+        "trigger_time": "00:46",
+        "trigger_time_sec": 46,
+        "response": "The whole group is laughing together now.",
+        "trigger_type": "visual",
+        "event_description": "A woman in a maroon top is seen and heard laughing during the training session at 00:44."
+      }
+    ],
+    "event": "the participants in the training start laughing"
+  },
+  {
+    "id": "instant_event_alert::2Vh-xCGMLzg::295",
+    "task": "instant_event_alert",
+    "video_id": "2Vh-xCGMLzg",
+    "video_path": "raw_videos/2Vh-xCGMLzg.mp4",
+    "duration": 83.8,
+    "question": "Let me know when the guests start clapping for the performance.",
+    "question_time": "00:00",
+    "question_time_sec": 0,
+    "audio_dependency": "none",
+    "ground_truth": [
+      {
+        "trigger_time": "01:06",
+        "trigger_time_sec": 66,
+        "response": "The guests are clapping now\u2014it looks like they really enjoyed the show.",
+        "trigger_type": "visual",
+        "event_description": "The audience begins to clap at 01:06 following the musical performance."
+      }
+    ],
+    "event": "the guests start clapping for the performance"
+  },
+  {
+    "id": "instant_event_alert::7shRl0Lxycc::26",
+    "task": "instant_event_alert",
+    "video_id": "7shRl0Lxycc",
+    "video_path": "raw_videos/7shRl0Lxycc.mp4",
+    "duration": 100.133467,
+    "question": "Let me know if you hear a referee blow a whistle.",
+    "question_time": "00:00",
+    "question_time_sec": 0,
+    "audio_dependency": "none",
+    "ground_truth": [
+      {
+        "trigger_time": "00:51",
+        "trigger_time_sec": 51,
+        "response": "I just heard a referee's whistle blow in the football game.",
+        "trigger_type": "visual",
+        "event_description": "A referee's whistle is heard during the football game segment at 00:50."
+      }
+    ],
+    "event": "you hear a referee blow a whistle"
+  },
+  {
+    "id": "semantic_condition_alert::sNm_rmkzt3Y::265",
+    "task": "semantic_condition_alert",
+    "video_id": "sNm_rmkzt3Y",
+    "video_path": "raw_videos/sNm_rmkzt3Y.mp4",
+    "duration": 41.075729,
+    "question": "Please alert me whenever the camera shifts its focus from the dancing guests to highlight the reception hall's decor or table arrangements.",
+    "question_time": "00:00",
+    "question_time_sec": 0,
+    "audio_dependency": "none",
+    "ground_truth": [
+      {
+        "trigger_time": "00:09",
+        "trigger_time_sec": 9,
+        "response": "The camera is now panning across the guest tables, showcasing the white linens and lit candles.",
+        "trigger_type": "visual",
+        "event_description": "Camera pans across guest tables and decor"
+      },
+      {
+        "trigger_time": "00:19",
+        "trigger_time_sec": 19,
+        "response": "The focus has shifted to a specific table arrangement, highlighting the centerpieces and guest belongings.",
+        "trigger_type": "visual",
+        "event_description": "Camera focus on table centerpiece and candles"
+      },
+      {
+        "trigger_time": "00:38",
+        "trigger_time_sec": 38,
+        "response": "The camera is performing a final sweep of the room, capturing the tables and overall venue setup.",
+        "trigger_type": "visual",
+        "event_description": "Camera pans across the hall layout"
+      }
+    ],
+    "event": "the camera shifts its focus from the dancing guests to highlight the reception hall's decor or table arrangements"
+  },
+  {
+    "id": "semantic_condition_alert::YnUdAck_oM0::261",
+    "task": "semantic_condition_alert",
+    "video_id": "YnUdAck_oM0",
+    "video_path": "raw_videos/YnUdAck_oM0.mp4",
+    "duration": 55.355355,
+    "question": "Alert me whenever the Korean text on screen uses gaming slang or hyperbolic metaphors to describe the gameplay performance or the player's skill.",
+    "question_time": "00:00",
+    "question_time_sec": 0,
+    "audio_dependency": "none",
+    "ground_truth": [
+      {
+        "trigger_time": "00:08",
+        "trigger_time_sec": 8,
+        "response": "The text uses 'crazy' (\ubbf8\ucce4\ub2e4\ub9ac) to describe the control ability, which is a common hyperbolic gaming slang.",
+        "trigger_type": "visual",
+        "event_description": "Text 'crazy' describes control ability"
+      },
+      {
+        "trigger_time": "00:20",
+        "trigger_time_sec": 20,
+        "response": "It claims the mouse is 'science' (\uacfc\ud559\uc785\ub2c8\ub2e4), a metaphorical way of saying its precision is an undeniable fact.",
+        "trigger_type": "visual",
+        "event_description": "Text 'science' describes mouse precision"
+      },
+      {
+        "trigger_time": "00:25",
+        "trigger_time_sec": 25,
+        "response": "The caption mentions 'massacring commoners' (\uc591\ubbfc\ud559\uc0b4), a slang term for dominating less skilled players.",
+        "trigger_type": "visual",
+        "event_description": "Text 'massacring commoners' describes dominating gameplay"
+      },
+      {
+        "trigger_time": "00:32",
+        "trigger_time_sec": 32,
+        "response": "The term 'honey' (\uafc0) is used to describe the ease of getting kills, which is Korean gaming slang.",
+        "trigger_type": "visual",
+        "event_description": "Text 'honey' describes easy kills"
+      },
+      {
+        "trigger_time": "00:36",
+        "trigger_time_sec": 36,
+        "response": "It describes the play as 'god-tier' (\ucc9c\uc0c1\uacc4), a common hyperbolic gaming metaphor for high-level skill.",
+        "trigger_type": "visual",
+        "event_description": "Text 'god-tier' describes high skill level"
+      },
+      {
+        "trigger_time": "00:41",
+        "trigger_time_sec": 41,
+        "response": "The efficiency is called 'bug-level' (\ubc84\uadf8\uc218\uc900), a metaphor implying the performance is so good it seems like a glitch.",
+        "trigger_type": "visual",
+        "event_description": "Text 'bug-level' describes extreme efficiency"
+      }
+    ],
+    "event": "the Korean text on screen uses gaming slang or hyperbolic metaphors to describe the gameplay performance or the player's skill"
+  },
+  {
+    "id": "semantic_condition_alert::ospuzS4zfdE::231",
+    "task": "semantic_condition_alert",
+    "video_id": "ospuzS4zfdE",
+    "video_path": "raw_videos/ospuzS4zfdE.mp4",
+    "duration": 62.495767,
+    "question": "Alert me whenever the video transitions to a distinctly different performance environment or stage setting.",
+    "question_time": "00:00",
+    "question_time_sec": 0,
+    "audio_dependency": "none",
+    "ground_truth": [
+      {
+        "trigger_time": "00:17",
+        "trigger_time_sec": 17,
+        "response": "The scene transitions from the stage to an ornate room with gold-trimmed walls.",
+        "trigger_type": "visual",
+        "event_description": "Scene transitions to an ornate room"
+      },
+      {
+        "trigger_time": "00:20",
+        "trigger_time_sec": 20,
+        "response": "The video shifts to a large concert stage with backup dancers and a digital screen.",
+        "trigger_type": "visual",
+        "event_description": "Scene transitions to a concert stage"
+      },
+      {
+        "trigger_time": "00:43",
+        "trigger_time_sec": 43,
+        "response": "The setting changes to a smoky stage with blue lighting for the final routine.",
+        "trigger_type": "visual",
+        "event_description": "Scene transitions to a smoky blue stage"
+      },
+      {
+        "trigger_time": "00:51",
+        "trigger_time_sec": 51,
+        "response": "The performance ends and the video transitions to a stylized graphic outro sequence.",
+        "trigger_type": "visual",
+        "event_description": "Scene transitions to graphic outro"
+      }
+    ],
+    "event": "the video transitions to a distinctly different performance environment or stage setting"
+  },
+  {
+    "id": "explicit_target_grounding::Y4dQgIbjTWI::166",
+    "task": "explicit_target_grounding",
+    "video_id": "Y4dQgIbjTWI",
+    "video_path": "raw_videos/Y4dQgIbjTWI.mp4",
+    "duration": 115.482033,
+    "question": "For the first time you see a player wave his hand to the crowd, tell me where the number 33 on his jersey is in the frame.",
+    "question_time": "00:00",
+    "question_time_sec": 0,
+    "audio_dependency": "none",
+    "ground_truth": [
+      {
+        "trigger_time": "00:38",
+        "trigger_time_sec": 38,
+        "response": "The player is waving \u2014 the number 33 is located in the center of the frame.",
+        "trigger_type": "visual",
+        "event_description": "Henrik Sedin waves to the crowd at 00:41",
+        "position": "center"
+      }
+    ],
+    "event": "a player wave his hand to the crowd",
+    "target": "the number 33 on the player's jersey"
+  },
+  {
+    "id": "explicit_target_grounding::YJV5yWfrB98::167",
+    "task": "explicit_target_grounding",
+    "video_id": "YJV5yWfrB98",
+    "video_path": "raw_videos/YJV5yWfrB98.mp4",
+    "duration": 152.919433,
+    "question": "When you see a person's hand touch the orange wheel, tell me where the black center cap is in the frame.",
+    "question_time": "00:00",
+    "question_time_sec": 0,
+    "audio_dependency": "none",
+    "ground_truth": [
+      {
+        "trigger_time": "01:53",
+        "trigger_time_sec": 113,
+        "response": "A hand just touched the wheel; the black center cap is in the center-right of the frame.",
+        "trigger_type": "visual",
+        "event_description": "Hand touches orange wheel, center cap at center",
+        "position": "center-right"
+      }
+    ],
+    "event": "a person's hand touch the orange wheel",
+    "target": "the black center cap"
+  },
+  {
+    "id": "explicit_target_grounding::5cD4CAHexWs::25",
+    "task": "explicit_target_grounding",
+    "video_id": "5cD4CAHexWs",
+    "video_path": "raw_videos/5cD4CAHexWs.mp4",
+    "duration": 174.007167,
+    "question": "When a plane first appears, tell me its position in the picture",
+    "question_time": "00:00",
+    "question_time_sec": 0,
+    "audio_dependency": "none",
+    "ground_truth": [
+      {
+        "trigger_time": "00:27",
+        "trigger_time_sec": 27,
+        "response": "The plane appeared \u2014 it is in the center of the frame.",
+        "trigger_type": "visual",
+        "event_description": "Narrator says 'app' while a person is shown holding a smartphone in the center of the screen.",
+        "position": "center"
+      }
+    ],
+    "event": "a plane first appears",
+    "target": "the plane"
+  },
+  {
+    "id": "snapshot_counting::HAFLLtAcRKY::153",
+    "task": "snapshot_counting",
+    "video_id": "HAFLLtAcRKY",
+    "video_path": "raw_videos/HAFLLtAcRKY.mp4",
+    "duration": 53.04,
+    "question": "When the video moves outside to the pool area, count the lounge chairs on the deck.",
+    "question_time": "00:00",
+    "question_time_sec": 0,
+    "audio_dependency": "none",
+    "ground_truth": [
+      {
+        "trigger_time": "00:24",
+        "trigger_time_sec": 24,
+        "response": "Pool area shown \u2014 I count 4 lounge chairs on the deck.",
+        "trigger_type": "visual",
+        "event_description": "The scene transitions to the backyard pool area at 00:22, showing 4 lounge chairs.",
+        "count": 4
+      }
+    ],
+    "event": "the video moves outside to the pool area",
+    "target": "lounge chairs on the deck"
+  },
+  {
+    "id": "snapshot_counting::IenLTYaTvuY::253",
+    "task": "snapshot_counting",
+    "video_id": "IenLTYaTvuY",
+    "video_path": "raw_videos/IenLTYaTvuY.mp4",
+    "duration": 60.26001,
+    "question": "When the video shows the bride posing for a photo with her bridesmaids on the steps, count how many bridesmaids are there.",
+    "question_time": "00:00",
+    "question_time_sec": 0,
+    "audio_dependency": "none",
+    "ground_truth": [
+      {
+        "trigger_time": "00:30",
+        "trigger_time_sec": 30,
+        "response": "Photo pose started \u2014 I count 7 bridesmaids on the stairs.",
+        "trigger_type": "visual",
+        "event_description": "Scene shifts to the bride and her bridesmaids posing on the stairs at 00:29, with 7 bridesmaids visible.",
+        "count": 7
+      }
+    ],
+    "event": "the video shows the bride posing for a photo with her bridesmaids on the steps",
+    "target": "bridesmaids on the steps"
+  },
+  {
+    "id": "snapshot_counting::TmqbLiW4cl8::11",
+    "task": "snapshot_counting",
+    "video_id": "TmqbLiW4cl8",
+    "video_path": "raw_videos/TmqbLiW4cl8.mp4",
+    "duration": 62.56,
+    "question": "When the 'Times of India' intro animation starts, count the colored squares that appear on the screen.",
+    "question_time": "00:00",
+    "question_time_sec": 0,
+    "audio_dependency": "none",
+    "ground_truth": [
+      {
+        "trigger_time": "00:01",
+        "trigger_time_sec": 1,
+        "response": "Animation started \u2014 I count 6 colored squares on screen.",
+        "trigger_type": "visual",
+        "event_description": "Intro animation begins at 00:01, showing 9 colored squares sliding horizontally.",
+        "count": 6
+      }
+    ],
+    "event": "the 'Times of India' intro animation starts",
+    "target": "colored squares that appear on the screen"
+  },
+  {
+    "id": "cumulative_counting::3ga91VB8myI::33",
+    "task": "cumulative_counting",
+    "video_id": "3ga91VB8myI",
+    "video_path": "raw_videos/3ga91VB8myI.mp4",
+    "duration": 38.671967,
+    "question": "Count how many times the video shows the interior of the car.",
+    "question_time": "00:00",
+    "question_time_sec": 0,
+    "audio_dependency": "none",
+    "ground_truth": [
+      {
+        "trigger_time": "00:08",
+        "trigger_time_sec": 8,
+        "response": "First interior shot: we see the driver's hands on the steering wheel.",
+        "trigger_type": "visual",
+        "event_description": "Interior shot of steering wheel",
+        "count": 1
+      },
+      {
+        "trigger_time": "00:15",
+        "trigger_time_sec": 15,
+        "response": "Second interior view, talking about the navigation screen.",
+        "trigger_type": "visual",
+        "event_description": "Interior shot of driver's profile",
+        "count": 2
+      },
+      {
+        "trigger_time": "00:17",
+        "trigger_time_sec": 17,
+        "response": "Third interior shot as the driver mentions controlling his audio experience.",
+        "trigger_type": "visual",
+        "event_description": "Interior shot of driver talking",
+        "count": 3
+      },
+      {
+        "trigger_time": "00:21",
+        "trigger_time_sec": 21,
+        "response": "A fourth interior shot provides a close-up of the driver's face.",
+        "trigger_type": "visual",
+        "event_description": "Interior shot of navigation screen",
+        "count": 4
+      },
+      {
+        "trigger_time": "00:27",
+        "trigger_time_sec": 27,
+        "response": "Fifth interior view, showing the dashboard and the screen retracting.",
+        "trigger_type": "visual",
+        "event_description": "Interior shot of driver explaining controls",
+        "count": 5
+      }
+    ],
+    "target": "the video shows the interior of the car"
+  },
+  {
+    "id": "cumulative_counting::HAFLLtAcRKY::103",
+    "task": "cumulative_counting",
+    "video_id": "HAFLLtAcRKY",
+    "video_path": "raw_videos/HAFLLtAcRKY.mp4",
+    "duration": 53.04,
+    "question": "Count each time the video cuts to a new scene or camera angle.",
+    "question_time": "00:00",
+    "question_time_sec": 0,
+    "audio_dependency": "none",
+    "ground_truth": [
+      {
+        "trigger_time": "00:16",
+        "trigger_time_sec": 16,
+        "response": "The first transition takes us from the living room to the house's floor plan.",
+        "trigger_type": "visual",
+        "event_description": "Transition from living room to floor plan",
+        "count": 1
+      },
+      {
+        "trigger_time": "00:21",
+        "trigger_time_sec": 21,
+        "response": "We've cut back to the living area to see the space from another angle.",
+        "trigger_type": "visual",
+        "event_description": "Transition back to living room",
+        "count": 2
+      },
+      {
+        "trigger_time": "00:26",
+        "trigger_time_sec": 26,
+        "response": "Third cut, the scene moves outside to show the swimming pool and deck.",
+        "trigger_type": "visual",
+        "event_description": "Transition to swimming pool",
+        "count": 3
+      },
+      {
+        "trigger_time": "00:31",
+        "trigger_time_sec": 31,
+        "response": "The fourth transition shifts the view to the covered patio and dining area.",
+        "trigger_type": "visual",
+        "event_description": "Transition to patio area",
+        "count": 4
+      },
+      {
+        "trigger_time": "00:36",
+        "trigger_time_sec": 36,
+        "response": "Fifth cut, the scene changes to a night view of the illuminated pool.",
+        "trigger_type": "visual",
+        "event_description": "Transition to night view of pool",
+        "count": 5
+      },
+      {
+        "trigger_time": "00:41",
+        "trigger_time_sec": 41,
+        "response": "The sixth transition moves the tour inside to the modern kitchen area.",
+        "trigger_type": "visual",
+        "event_description": "Transition to kitchen",
+        "count": 6
+      },
+      {
+        "trigger_time": "00:46",
+        "trigger_time_sec": 46,
+        "response": "Final transition, the video concludes with a summary of the property details.",
+        "trigger_type": "visual",
+        "event_description": "Transition to property details text",
+        "count": 7
+      }
+    ],
+    "target": "the video cuts to a new scene or camera angle"
+  },
+  {
+    "id": "cumulative_counting::10fOVZIj5zg::7",
+    "task": "cumulative_counting",
+    "video_id": "10fOVZIj5zg",
+    "video_path": "raw_videos/10fOVZIj5zg.mp4",
+    "duration": 55.791667,
+    "question": "Keep track of how many times the camera cuts to a new scene or shot.",
+    "question_time": "00:00",
+    "question_time_sec": 0,
+    "audio_dependency": "none",
+    "ground_truth": [
+      {
+        "trigger_time": "00:06",
+        "trigger_time_sec": 6,
+        "response": "The scene just switched from the title card to the host.",
+        "trigger_type": "visual",
+        "event_description": "Cut from title card to host",
+        "count": 1
+      },
+      {
+        "trigger_time": "00:17",
+        "trigger_time_sec": 17,
+        "response": "Now it's showing footage from inside a factory.",
+        "trigger_type": "visual",
+        "event_description": "Cut from host to factory footage",
+        "count": 2
+      },
+      {
+        "trigger_time": "00:22",
+        "trigger_time_sec": 22,
+        "response": "The camera angle changed to a close-up of the engines.",
+        "trigger_type": "visual",
+        "event_description": "Cut to engine close-up",
+        "count": 3
+      },
+      {
+        "trigger_time": "00:27",
+        "trigger_time_sec": 27,
+        "response": "Another cut, now we see a worker handling parts.",
+        "trigger_type": "visual",
+        "event_description": "Cut to worker handling components",
+        "count": 4
+      },
+      {
+        "trigger_time": "00:31",
+        "trigger_time_sec": 31,
+        "response": "The shot transitioned to workers walking through the plant.",
+        "trigger_type": "visual",
+        "event_description": "Cut to workers walking in safety vests",
+        "count": 5
+      },
+      {
+        "trigger_time": "00:52",
+        "trigger_time_sec": 52,
+        "response": "The video just cut to the closing contact information.",
+        "trigger_type": "visual",
+        "event_description": "Cut back to the host in studio",
+        "count": 6
+      }
+    ],
+    "target": "the camera cuts to a new scene or shot"
+  },
+  {
+    "id": "dedup_counting::2aw1yFx9qeo::24",
+    "task": "dedup_counting",
+    "video_id": "2aw1yFx9qeo",
+    "video_path": "raw_videos/2aw1yFx9qeo.mp4",
+    "duration": 30.08,
+    "question": "Count how many different people are shown in a close-up shot (head and shoulders) in this video.",
+    "question_time": "00:00",
+    "question_time_sec": 0,
+    "audio_dependency": "none",
+    "ground_truth": [
+      {
+        "trigger_time": "00:00",
+        "trigger_time_sec": 0,
+        "response": "First person in close-up \u2014 a woman in a pink athletic shirt running on a treadmill.",
+        "trigger_type": "visual",
+        "event_description": "Woman in pink shirt shown in close-up",
+        "count": 1
+      },
+      {
+        "trigger_time": "00:05",
+        "trigger_time_sec": 5,
+        "response": "Second person in close-up \u2014 a man in a light blue shirt struggling to keep up.",
+        "trigger_type": "visual",
+        "event_description": "Man in light blue shirt shown in close-up",
+        "count": 2
+      },
+      {
+        "trigger_time": "00:19",
+        "trigger_time_sec": 19,
+        "response": "Third person in close-up \u2014 a man in a purple shirt taking a supplement capsule.",
+        "trigger_type": "visual",
+        "event_description": "Man in purple shirt shown in close-up",
+        "count": 3
+      }
+    ],
+    "target": "people shown in a close-up shot (head and shoulders)"
+  },
+  {
+    "id": "dedup_counting::ZA8BslrJ0IQ::208",
+    "task": "dedup_counting",
+    "video_id": "ZA8BslrJ0IQ",
+    "video_path": "raw_videos/ZA8BslrJ0IQ.mp4",
+    "duration": 49.866667,
+    "question": "Count how many different people take a turn throwing a ball at the dunk tank target.",
+    "question_time": "00:00",
+    "question_time_sec": 0,
+    "audio_dependency": "none",
+    "ground_truth": [
+      {
+        "trigger_time": "00:03",
+        "trigger_time_sec": 3,
+        "response": "First person \u2014 a woman in a black and white swimsuit is at the line throwing a ball.",
+        "trigger_type": "visual",
+        "event_description": "Woman in black and white swimsuit first appears as a thrower",
+        "count": 1
+      },
+      {
+        "trigger_time": "00:34",
+        "trigger_time_sec": 34,
+        "response": "Second person \u2014 a woman in a white tank top and patterned skirt is now preparing to throw.",
+        "trigger_type": "visual",
+        "event_description": "Man in yellow shirt first appears as a thrower",
+        "count": 2
+      },
+      {
+        "trigger_time": "00:50",
+        "trigger_time_sec": 50,
+        "response": "Third person \u2014 a man in a blue polo shirt is the next one ready to throw.",
+        "trigger_type": "visual",
+        "event_description": "Woman in white tank top first appears as a thrower",
+        "count": 3
+      }
+    ],
+    "target": "thoughtful"
+  },
+  {
+    "id": "dedup_counting::-powI0eeLbw::1",
+    "task": "dedup_counting",
+    "video_id": "-powI0eeLbw",
+    "video_path": "raw_videos/-powI0eeLbw.mp4",
+    "duration": 52.4,
+    "question": "Count how many different background settings or visual environments are used for the scenes in this video.",
+    "question_time": "00:00",
+    "question_time_sec": 0,
+    "audio_dependency": "none",
+    "ground_truth": [
+      {
+        "trigger_time": "00:01",
+        "trigger_time_sec": 1,
+        "response": "First setting: the solid cyan background used for the opening title card.",
+        "trigger_type": "visual",
+        "event_description": "Initial cyan background setting appears",
+        "count": 1
+      },
+      {
+        "trigger_time": "00:03",
+        "trigger_time_sec": 3,
+        "response": "Second setting: the spooky nighttime environment\uff0cthe background is dark blue, featuring a haunted house on a hill.",
+        "trigger_type": "visual",
+        "event_description": "Spooky night scene setting first appears",
+        "count": 2
+      },
+      {
+        "trigger_time": "00:07",
+        "trigger_time_sec": 7,
+        "response": "Third setting: the spooky nighttime environment,the background is red,featuring a haunted house on a hill.",
+        "trigger_type": "visual",
+        "event_description": "Flashing blue/red background setting first appears",
+        "count": 3
+      },
+      {
+        "trigger_time": "00:15",
+        "trigger_time_sec": 15,
+        "response": "Fourth setting: the abstract background that flashes between blue and red colors.",
+        "trigger_type": "visual",
+        "event_description": "Solid black background setting first appears",
+        "count": 4
+      },
+      {
+        "trigger_time": "00:46",
+        "trigger_time_sec": 46,
+        "response": "Fifth setting: the solid black background shown during the close-up of the face.",
+        "trigger_type": "visual",
+        "event_description": "",
+        "count": 5
+      },
+      {
+        "trigger_time": "00:48",
+        "trigger_time_sec": 48,
+        "response": "Sixth setting: a kids' channel promotional poster with a bright yellow background.",
+        "trigger_type": "visual",
+        "event_description": "",
+        "count": 6
+      }
+    ],
+    "target": "background settings or visual environments used for the scenes in this video"
+  },
+  {
+    "id": "realtime_state_monitor::6rho9EbHtyc::150",
+    "task": "realtime_state_monitor",
+    "video_id": "6rho9EbHtyc",
+    "video_path": "raw_videos/6rho9EbHtyc.mp4",
+    "duration": 35.967,
+    "question": "Monitor the Corgi's location and tell me whenever it moves between the floor and the couch.",
+    "question_time": "00:00",
+    "question_time_sec": 0,
+    "audio_dependency": "none",
+    "object": "the Corgi's location",
+    "trigger": "the Corgi moves between the floor and the couch",
+    "states": [
+      "floor",
+      "couch"
+    ],
+    "initial_state": "floor",
+    "ground_truth": [
+      {
+        "trigger_time": "00:05",
+        "trigger_time_sec": 5,
+        "response": "The Corgi moved from the floor to the couch.",
+        "trigger_type": "visual",
+        "event_description": "floor to couch",
+        "state_from": "floor",
+        "state_to": "couch"
+      },
+      {
+        "trigger_time": "00:12",
+        "trigger_time_sec": 12,
+        "response": "He jumped from the couch back to the floor.",
+        "trigger_type": "visual",
+        "event_description": "couch to floor",
+        "state_from": "couch",
+        "state_to": "floor"
+      },
+      {
+        "trigger_time": "00:18",
+        "trigger_time_sec": 18,
+        "response": "The dog moved from the floor to the couch again.",
+        "trigger_type": "visual",
+        "event_description": "floor to couch",
+        "state_from": "floor",
+        "state_to": "couch"
+      },
+      {
+        "trigger_time": "00:22",
+        "trigger_time_sec": 22,
+        "response": "Toki hopped from the couch back to the floor.",
+        "trigger_type": "visual",
+        "event_description": "couch to floor",
+        "state_from": "couch",
+        "state_to": "floor"
+      },
+      {
+        "trigger_time": "00:27",
+        "trigger_time_sec": 27,
+        "response": "He moved from the floor back onto the couch.",
+        "trigger_type": "visual",
+        "event_description": "floor to couch",
+        "state_from": "floor",
+        "state_to": "couch"
+      }
+    ]
+  },
+  {
+    "id": "realtime_state_monitor::VGCmpZTvSm8::238",
+    "task": "realtime_state_monitor",
+    "video_id": "VGCmpZTvSm8",
+    "video_path": "raw_videos/VGCmpZTvSm8.mp4",
+    "duration": 40.3403,
+    "question": "Monitor whether the main speaker is visible on screen or if the video is showing other footage.",
+    "question_time": "00:00",
+    "question_time_sec": 0,
+    "audio_dependency": "none",
+    "object": "the main speaker's visibility on screen",
+    "trigger": "the view switches between the main speaker being visible on screen and the video showing other footage",
+    "states": [
+      "on screen",
+      "off screen"
+    ],
+    "initial_state": "on screen",
+    "ground_truth": [
+      {
+        "trigger_time": "00:03",
+        "trigger_time_sec": 3,
+        "response": "Speaker is off screen \u2014 showing pub footage.",
+        "trigger_type": "visual",
+        "event_description": "Speaker on-screen to off-screen",
+        "state_from": "on screen",
+        "state_to": "off screen"
+      },
+      {
+        "trigger_time": "00:17",
+        "trigger_time_sec": 17,
+        "response": "The speaker is back on screen.",
+        "trigger_type": "visual",
+        "event_description": "Speaker off-screen to on-screen",
+        "state_from": "off screen",
+        "state_to": "on screen"
+      },
+      {
+        "trigger_time": "00:21",
+        "trigger_time_sec": 21,
+        "response": "Switched to exterior shots; speaker is off screen.",
+        "trigger_type": "visual",
+        "event_description": "Speaker on-screen to off-screen",
+        "state_from": "on screen",
+        "state_to": "off screen"
+      },
+      {
+        "trigger_time": "00:30",
+        "trigger_time_sec": 30,
+        "response": "Speaker is back on screen.",
+        "trigger_type": "visual",
+        "event_description": "Speaker off-screen to on-screen",
+        "state_from": "off screen",
+        "state_to": "on screen"
+      },
+      {
+        "trigger_time": "00:34",
+        "trigger_time_sec": 34,
+        "response": "Speaker is off screen; showing closing credits.",
+        "trigger_type": "visual",
+        "event_description": "Speaker on-screen to off-screen",
+        "state_from": "on screen",
+        "state_to": "off screen"
+      }
+    ]
+  },
+  {
+    "id": "realtime_state_monitor::uEQhiiFCvFI::106",
+    "task": "realtime_state_monitor",
+    "video_id": "uEQhiiFCvFI",
+    "video_path": "raw_videos/uEQhiiFCvFI.mp4",
+    "duration": 41.9,
+    "question": "Monitor the puppy's location and let me know whenever he moves between the treadmill and the floor.",
+    "question_time": "00:00",
+    "question_time_sec": 0,
+    "audio_dependency": "none",
+    "object": "the puppy's location",
+    "trigger": "the puppy moves between the treadmill and the floor",
+    "states": [
+      "treadmill",
+      "carpet floor"
+    ],
+    "initial_state": "treadmill",
+    "ground_truth": [
+      {
+        "trigger_time": "00:18",
+        "trigger_time_sec": 18,
+        "response": "He just moved from the treadmill onto the carpet floor.",
+        "trigger_type": "visual",
+        "event_description": "Treadmill to carpet",
+        "state_from": "treadmill",
+        "state_to": "carpet floor"
+      },
+      {
+        "trigger_time": "00:22",
+        "trigger_time_sec": 22,
+        "response": "The puppy hopped back onto the treadmill from the floor.",
+        "trigger_type": "visual",
+        "event_description": "Carpet to treadmill",
+        "state_from": "carpet floor",
+        "state_to": "treadmill"
+      },
+      {
+        "trigger_time": "00:41",
+        "trigger_time_sec": 41,
+        "response": "He just moved from the treadmill onto the carpet floor.",
+        "trigger_type": "speech",
+        "event_description": "",
+        "state_from": "treadmill",
+        "state_to": "carpet floor"
+      }
+    ]
+  },
+  {
+    "id": "event_narration::ln-yFLZ5wcc::33",
+    "task": "event_narration",
+    "video_id": "ln-yFLZ5wcc",
+    "video_path": "raw_videos/ln-yFLZ5wcc.mp4",
+    "duration": 108.1,
+    "question": "As you watch, narrate the natural landscapes and local scenes shown as the journey progresses through this Himalayan region.",
+    "question_time": "00:00",
+    "question_time_sec": 0,
+    "audio_dependency": "none",
+    "ground_truth": [
+      {
+        "trigger_time": "00:25",
+        "trigger_time_sec": 25,
+        "response": "Snow-capped mountain peaks are shown under a clear blue sky. The scene includes close-up views of rocky ridges and the mountain range reflected in the rear window of a car.",
+        "trigger_type": "visual",
+        "event_description": "Initial mountain views and car reflection"
+      },
+      {
+        "trigger_time": "00:50",
+        "trigger_time_sec": 50,
+        "response": "Winding mountain roads and power lines appear amidst the landscape. Clouds gather around the peaks, and a red-and-white cell tower stands tall against the snowy backdrop.",
+        "trigger_type": "visual",
+        "event_description": "Man-made elements in the snowy landscape"
+      },
+      {
+        "trigger_time": "01:15",
+        "trigger_time_sec": 75,
+        "response": "A shovel lies on wet ground with autumn leaves, and a white car is covered in a heavy pile of snow. A hillside village with multi-colored houses overlooks the valley.",
+        "trigger_type": "visual",
+        "event_description": "Snow accumulation and village scene"
+      },
+      {
+        "trigger_time": "01:48",
+        "trigger_time_sec": 108,
+        "response": "A deep rocky valley is shown, followed by golden sunset light hitting the mountain tips. A traditional temple complex in Kalpa features dark tiered roofs against the Kinner Kailash range.",
+        "trigger_type": "visual",
+        "event_description": "Sunset and traditional temple complex"
+      }
+    ]
+  },
+  {
+    "id": "event_narration::JormXeC21gM::284",
+    "task": "event_narration",
+    "video_id": "JormXeC21gM",
+    "video_path": "raw_videos/JormXeC21gM.mp4",
+    "duration": 117.283833,
+    "question": "As you watch, narrate the key features and benefits of the ASI SMART Assessments being demonstrated.",
+    "question_time": "00:00",
+    "question_time_sec": 0,
+    "audio_dependency": "none",
+    "ground_truth": [
+      {
+        "trigger_time": "00:34",
+        "trigger_time_sec": 34,
+        "response": "ASI introduces SMART Assessments as a modern recruitment solution. It aims to help candidates express their individual strengths, overcoming the stress and frustration associated with traditional paper-and-pencil testing methods.",
+        "trigger_type": "visual",
+        "event_description": "Introduction of SMART Assessments and its core purpose"
+      },
+      {
+        "trigger_time": "01:06",
+        "trigger_time_sec": 66,
+        "response": "The platform is user-friendly and requires no prior computer experience. Described as fun and innovative, it allows candidates to complete assessments anytime and anywhere using any digital device.",
+        "trigger_type": "visual",
+        "event_description": "User experience and accessibility features"
+      },
+      {
+        "trigger_time": "01:16",
+        "trigger_time_sec": 76,
+        "response": "The 'SMART Validate' feature ensures security through identity verification. By confirming the correct candidate is completing the test, it prevents faking and maintains the integrity of the recruitment process.",
+        "trigger_type": "visual",
+        "event_description": "Security and identity verification features"
+      },
+      {
+        "trigger_time": "01:32",
+        "trigger_time_sec": 92,
+        "response": "These assessments provide deeper insights into candidate profiles, facilitating better hiring decisions. The system is designed to be applicable across a wide range of diverse professional roles.",
+        "trigger_type": "visual",
+        "event_description": "Business value and professional versatility"
+      },
+      {
+        "trigger_time": "01:42",
+        "trigger_time_sec": 102,
+        "response": "The system provides a positive experience for both employers and candidates. It aims to help companies attract the best talent through a modern, engaging assessment process.",
+        "trigger_type": "visual",
+        "event_description": "Overall value proposition for employers and candidates"
+      }
+    ]
+  },
+  {
+    "id": "event_narration::SXhqgUW3mjw::97",
+    "task": "event_narration",
+    "video_id": "SXhqgUW3mjw",
+    "video_path": "raw_videos/SXhqgUW3mjw.mp4",
+    "duration": 163.733333,
+    "question": "Please provide a running narration of the specific design features and components of the KTM Duke 125 as they are shown.",
+    "question_time": "00:00",
+    "question_time_sec": 0,
+    "audio_dependency": "none",
+    "ground_truth": [
+      {
+        "trigger_time": "00:25",
+        "trigger_time_sec": 25,
+        "response": "The KTM Duke 125 is showcased, highlighting its LED headlight, WP upside-down front forks, and orange alloy wheels with disc brakes. Black and orange graphics are visible on the side panels.",
+        "trigger_type": "visual",
+        "event_description": "Front-end component showcase"
+      },
+      {
+        "trigger_time": "00:55",
+        "trigger_time_sec": 55,
+        "response": "Recent shots reveal the 'RACING KTM' engine casing and the white rear monoshock suspension. The aggressive fuel tank lines and 'DUKE 125' decals emphasize the bike's sporty design.",
+        "trigger_type": "visual",
+        "event_description": "Engine and mid-section detail reveal"
+      },
+      {
+        "trigger_time": "01:40",
+        "trigger_time_sec": 100,
+        "response": "The underbelly exhaust, rear tire with orange rim, and LED tail light have been shown. Wide shots capture the bike's muscular silhouette as it sits prominently in the showroom.",
+        "trigger_type": "visual",
+        "event_description": "Rear-end and silhouette presentation"
+      },
+      {
+        "trigger_time": "02:15",
+        "trigger_time_sec": 135,
+        "response": "A full left-side pan was followed by a rider's perspective view. This included the handlebars, controls, digital instrument cluster, and the fuel tank with its filler cap.",
+        "trigger_type": "visual",
+        "event_description": "Side profile and cockpit overview"
+      }
+    ]
+  },
+  {
+    "id": "sequential_step_instruction::dkDUFlHIh64::258",
+    "task": "sequential_step_instruction",
+    "video_id": "dkDUFlHIh64",
+    "video_path": "raw_videos/dkDUFlHIh64.mp4",
+    "duration": 24.101667,
+    "question": "I'm interested in learning this paper magic trick. Please guide me through each step as it happens so I can follow along.",
+    "question_time": "00:00",
+    "question_time_sec": 0,
+    "audio_dependency": "none",
+    "ground_truth": [
+      {
+        "trigger_time": "00:01",
+        "trigger_time_sec": 1,
+        "response": "Start by holding up a rectangular piece of white paper. Flip it over to demonstrate to your audience that it is blank on both sides.",
+        "trigger_type": "visual",
+        "event_description": "Showing the blank paper"
+      },
+      {
+        "trigger_time": "00:06",
+        "trigger_time_sec": 6,
+        "response": "Now, fold the paper in half by bringing the top edge down to the bottom, then fold it again from left to right to create a smaller rectangle.",
+        "trigger_type": "visual",
+        "event_description": "First set of folds"
+      },
+      {
+        "trigger_time": "00:11",
+        "trigger_time_sec": 11,
+        "response": "Fold the paper one more time into a small square and press the edges firmly. Now, begin to carefully unfold the paper to reveal the hidden texture inside.",
+        "trigger_type": "visual",
+        "event_description": "Final fold and start of reveal"
+      },
+      {
+        "trigger_time": "00:16",
+        "trigger_time_sec": 16,
+        "response": "Continue unfolding the layers completely to reveal the 2000 Vietnamese Dong banknote. Hold it wide with both hands to showcase the bill clearly to the camera.",
+        "trigger_type": "visual",
+        "event_description": "Full reveal of the banknote"
+      }
+    ]
+  },
+  {
+    "id": "sequential_step_instruction::X_HOEPXVcCc::278",
+    "task": "sequential_step_instruction",
+    "video_id": "X_HOEPXVcCc",
+    "video_path": "raw_videos/X_HOEPXVcCc.mp4",
+    "duration": 25.913467,
+    "question": "I'm interested in learning this traditional sugar craft. Please guide me through the steps of making a sugar deer as they happen.",
+    "question_time": "00:00",
+    "question_time_sec": 0,
+    "audio_dependency": "none",
+    "ground_truth": [
+      {
+        "trigger_time": "00:01",
+        "trigger_time_sec": 1,
+        "response": "Start by picking up a piece of warm sugar dough. Knead it between your hands to ensure it's soft and ready for the blowing process.",
+        "trigger_type": "visual",
+        "event_description": "Dough preparation"
+      },
+      {
+        "trigger_time": "00:05",
+        "trigger_time_sec": 5,
+        "response": "Insert a thin tube into the dough. Gently blow into it to inflate the sugar, using your hands to control the size and initial shape.",
+        "trigger_type": "visual",
+        "event_description": "Inflating the sugar"
+      },
+      {
+        "trigger_time": "00:10",
+        "trigger_time_sec": 10,
+        "response": "Now, quickly pinch and pull the sugar to define the deer's features, like the head and legs. You must finish before the sugar cools and hardens.",
+        "trigger_type": "visual",
+        "event_description": "Shaping the deer's features"
+      },
+      {
+        "trigger_time": "00:14",
+        "trigger_time_sec": 14,
+        "response": "Take a wooden stick and carefully insert it into the base of the deer. This provides a stable handle for the finished craft.",
+        "trigger_type": "visual",
+        "event_description": "Mounting the craft on a stick"
+      }
+    ]
+  },
+  {
+    "id": "sequential_step_instruction::g8etIwpQKVk::296",
+    "task": "sequential_step_instruction",
+    "video_id": "g8etIwpQKVk",
+    "video_path": "raw_videos/g8etIwpQKVk.mp4",
+    "duration": 27.816667,
+    "question": "I'm following along with this tutorial on how to prepare a grapefruit. Please guide me through each step as it happens.",
+    "question_time": "00:00",
+    "question_time_sec": 0,
+    "audio_dependency": "none",
+    "ground_truth": [
+      {
+        "trigger_time": "00:01",
+        "trigger_time_sec": 1,
+        "response": "First, place your grapefruit on a cutting board and cut it in half using a serrated knife.",
+        "trigger_type": "visual",
+        "event_description": "Cutting the grapefruit in half"
+      },
+      {
+        "trigger_time": "00:05",
+        "trigger_time_sec": 5,
+        "response": "Now, take one of the halves and cut it into four equal wedges. This makes the fruit much easier to peel.",
+        "trigger_type": "visual",
+        "event_description": "Cutting a half into wedges"
+      },
+      {
+        "trigger_time": "00:11",
+        "trigger_time_sec": 11,
+        "response": "Pick up a wedge and carefully slide your knife between the fruit and the white rind to loosen the segment while keeping it intact.",
+        "trigger_type": "visual",
+        "event_description": "Loosening the fruit from the rind"
+      },
+      {
+        "trigger_time": "00:17",
+        "trigger_time_sec": 17,
+        "response": "Place the separated segment on a plate. Repeat this process for the remaining wedges until all the fruit is ready to serve.",
+        "trigger_type": "visual",
+        "event_description": "Plating and repeating the process"
+      }
+    ]
+  }
+]

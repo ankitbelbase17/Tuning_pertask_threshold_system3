@@ -17,7 +17,7 @@ from config import AsyncOmniConfig
 from backend import Qwen3VLBackend
 from manager import KVCacheManager
 from vision_stream import encoder_thread
-from orchestrator import orchestrator_thread
+from input_ingester import input_ingester_thread
 from writer import writer_thread
 from util import log, Profiler, EncoderControl, seed_everything
 from eval_gt import make_evaluator
@@ -85,9 +85,9 @@ def main():
     threads = [
         threading.Thread(target=encoder_thread, args=(cfg, encoder_backend, vis_q, ctrl, stop, prof),
                          name="encoder", daemon=True),
-        threading.Thread(target=orchestrator_thread,
+        threading.Thread(target=input_ingester_thread,
                          args=(cfg, mgr, vis_q, writer_q, ctrl, stop, prof, evaluator),
-                         name="orchestrator", daemon=True),
+                         name="input_ingester", daemon=True),
         threading.Thread(target=writer_thread,
                          args=(cfg, mgr, writer_q, stop, prof, evaluator, writer_backend),
                          name="writer", daemon=True),

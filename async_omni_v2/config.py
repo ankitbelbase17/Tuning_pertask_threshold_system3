@@ -151,7 +151,7 @@ class AsyncOmniConfig:
     # Prepend a short text timestamp before each frame's tokens so the model can
     # reason about real match time (in-distribution for Qwen3-VL, which was
     # trained with timestamp tokens). {t} = video seconds of the frame.
-    timestamp_tokens: bool = False
+    timestamp_tokens: bool = True
     timestamp_fmt: str = "\ntime {t:.1f}s\n"
 
     # ---- visual token pruning (VisionZip, training-free) ----
@@ -183,10 +183,38 @@ class AsyncOmniConfig:
     # ---- proactivity gating ----
     goal_threshold: float = 0.5       # writer fires when goal yes_share >= this
     debounce_s: float = 2.0           # min video-seconds between writer triggers
+    # ---- edge-triggered gate (hysteresis / Schmitt) — precision fix ----
+    # Baseline gate fires on LEVEL: every probe with share>=goal_threshold re-fires
+    # while a condition stays true -> over-triggering. With gate_hysteresis, fire
+    # only on a RISING crossing: emit once when share>=gate_high_thr (while armed),
+    # then disarm; re-arm only after share drops below gate_low_thr. => one emit per
+    # onset. Set gate_high_thr==goal_threshold to isolate the edge effect alone.
+    gate_hysteresis: bool = False
+    gate_high_thr: float = 0.5        # rising threshold to FIRE (when armed)
+    gate_low_thr: float = 0.45        # re-arm after share falls below this (narrow
+                                      # band -> re-arms on small dips -> more onsets)
+    gate_rearm_s: float = 3.0         # ALSO re-arm this many seconds after a fire even
+                                      # if the signal stayed high (recurring events);
+                                      # 0 = signal-only re-arm.
     goal_gate_every: int = 3          # run the "goal?" probe every N frames (1 fwd
                                       # pass each). 2 halves the dominant GPU op.
     vision_gate_every: int = 8        # run the "important?" probe every N frames
     log_gate_every: int = -1           # log the goal probe every N probes
+
+    # ---- benchmark matrix (ablation switches; toggle these per experiment) ----
+    # input_gate: run the INPUT proactivity probe ("is this important?") to steer
+    #   the encoder fps (focus/idle). False => NO input probe: the encoder feeds
+    #   every frame at the fixed base fps (cfg.fps). [wired]
+    input_gate: bool = True
+    # output_gate: run the OUTPUT proactivity probe ("did a goal happen?") that
+    #   triggers the writer. [wired]
+    output_gate: bool = True
+    # writer_cache: writer reuses the ingester's KV cache via an MVCC snapshot
+    #   (True, current) vs. generates without it (False). [scaffold: False TODO]
+    writer_cache: bool = True
+    # proactivity_in_prompt: bake the proactivity question into the system prompt
+    #   instead of splicing a per-frame probe. [scaffold: TODO]
+    proactivity_in_prompt: bool = False
 
 
     # ---- writer sampling (official Qwen3-VL-8B-Instruct *text* preset) ----
