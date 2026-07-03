@@ -22,6 +22,31 @@ _T0 = time.time()
 _LOCK = threading.Lock()
 
 
+def seed_everything(seed, deterministic=False):
+    """Seed python/numpy/torch RNGs. With deterministic=True also force
+    deterministic CUDA kernels (cuBLAS + cuDNN + deterministic algorithms) so
+    two runs of the same config produce bit-identical logits. Combine with batch
+    mode + no frame drops (see vision_stream) for fully reproducible eval."""
+    import os
+    import random
+    import numpy as np
+    import torch
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
+    if deterministic:
+        os.environ["CUBLAS_WORKSPACE_CONFIG"] = ":4096:8"   # required for det. cuBLAS
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
+        try:
+            torch.use_deterministic_algorithms(True, warn_only=True)
+        except Exception:
+            pass
+    log("seed", 0.0, f"seed={seed} deterministic={deterministic}")
+
+
 def log(tag, vid_t, msg):
     with _LOCK:
         print(f"[{time.time()-_T0:6.1f}s | vid {vid_t:6.1f}s] {tag:<12} {msg}", flush=True)

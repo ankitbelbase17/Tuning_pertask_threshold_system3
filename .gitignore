@@ -16,3 +16,9 @@ run.log
 checkpoints/
 *.pt
 *.safetensors
+.claude/
+
+# core dumps
+core
+core.*
+core_*

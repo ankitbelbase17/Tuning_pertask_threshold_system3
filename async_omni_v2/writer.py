@@ -148,4 +148,5 @@ def writer_thread(cfg, mgr, writer_q, stop, prof=None, evaluator=None, wb=None):
         if evaluator is not None:
             evaluator.record_write(vt, text, total)
         log("WRITER", vt, f"\U0001F4E2  {text!r}")
+        writer_q.task_done()                     # release orchestrator's join() (deterministic mode)
     log("writer", 0.0, "writer stopped")

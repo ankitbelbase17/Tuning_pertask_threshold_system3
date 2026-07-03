@@ -14,8 +14,8 @@ PY=/iopsstor/scratch/cscs/dbartaula/miniforge3/envs/async_omni/bin/python   # Qw
 MODEL="Qwen/Qwen3-VL-8B-Instruct"           # HF id (downloads on first run)
 VIDEO="/iopsstor/scratch/cscs/dbartaula/system_3/Highlights ｜ France 3-1 Senegal ｜ FIFA World Cup 2026™ [n3JDGlOwMJ4].webm"    # <-- set this on the server
 
-MODE="${1:-realtime}"
-GPUS="${2:-1}"        # 1 = all on cuda:0; 2 = + writer on cuda:1; 3 = + encoder on cuda:2
+MODE="${1:-batch}"
+GPUS="${2:-3}"        # 1 = all on cuda:0; 2 = + writer on cuda:1; 3 = + encoder on cuda:2
 # realtime = ~1x wall clock (speed 1.0); batch = as fast as the GPU allows.
 if [ "$MODE" = "batch" ]; then CLOCK="--no_realtime"; else CLOCK="--realtime --speed 1.0"; fi
 
@@ -29,16 +29,20 @@ case "$GPUS" in
   *) GPUFLAGS="--device cuda:0" ;;
 esac
 
+# Reproducible eval needs --deterministic + a fixed --seed AND batch mode
+# (realtime pacing is wall-clock, inherently nondeterministic). Drop --deterministic
+# for max speed (non-reproducible). PRUNE toggles VisionZip token pruning.
+REPRO="--deterministic --seed 0"
+PRUNE=""    # e.g. PRUNE="--prune_img_tokens --prune_dominant_frac 0.60 --prune_contextual_frac 0.05"
+
 PYTHONPATH="$HERE" "$PY" run.py \
   --model_id "$MODEL" \
   --video_path "$VIDEO" \
   --dtype float16 \
-  --fps 2.0 \
+  --fps 8.0 \
   --max_seconds 120 \
   --kv_budget 262144 \
-  --max_pixels 200704 \
   --goal_threshold 0.5 \
   --log_gate_every 1 \
-  --device cuda:0 --writer_device cuda:1 --encoder_device cuda:2 \
-  $GPUFLAGS \
-  $CLOCK
+  --timestamp_tokens \
+  $REPRO $PRUNE $GPUFLAGS $CLOCK

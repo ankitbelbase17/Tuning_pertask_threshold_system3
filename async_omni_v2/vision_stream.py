@@ -39,7 +39,9 @@ def encoder_thread(cfg, backend, vis_q, ctrl, stop, prof=None):
         vt = float(frame.pts * vstream.time_base)
         if vt > cfg.max_seconds:
             break
-        interval = 1.0 / ctrl.get_fps()          # live, orchestrator-controlled
+        # deterministic eval: pin the rate so frame SELECTION doesn't depend on
+        # the async orchestrator->encoder fps back-channel (a thread-timing race).
+        interval = 1.0 / (cfg.fps if cfg.deterministic else ctrl.get_fps())
         if vt - last_emit < interval:
             continue
         last_emit = vt
@@ -67,16 +69,19 @@ def encoder_thread(cfg, backend, vis_q, ctrl, stop, prof=None):
             prof.observe("vis_tokens_per_frame", embeds.shape[1])
             prof.incr("frames_emitted")
 
-        try:
-            vis_q.put_nowait((vt, embeds))
-        except queue.Full:
+        if cfg.deterministic:
+            vis_q.put((vt, embeds))              # block: process EVERY frame -> reproducible
+        else:
             try:
-                vis_q.get_nowait()               # drop oldest (bounded latency)
-                if prof is not None:
-                    prof.incr("frames_dropped")
-            except queue.Empty:
-                pass
-            vis_q.put_nowait((vt, embeds))
+                vis_q.put_nowait((vt, embeds))
+            except queue.Full:
+                try:
+                    vis_q.get_nowait()           # drop oldest (bounded latency)
+                    if prof is not None:
+                        prof.incr("frames_dropped")
+                except queue.Empty:
+                    pass
+                vis_q.put_nowait((vt, embeds))
     container.close()
     stop.set()
     log("encoder", cfg.max_seconds, "video stream ended")

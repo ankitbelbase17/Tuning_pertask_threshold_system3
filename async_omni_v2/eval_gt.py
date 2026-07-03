@@ -116,6 +116,7 @@ class GroundTruthEvaluator:
         else:
             out.append(f"  real goals detected: 0/{len(real)}")
         if fp:
+            out.append(f"  false triggers: {len(fp)}/{len(triggers)} \n")
             out.append("  false triggers: " + ", ".join(
                 f"{vt:.0f}s(share={s:.2f})" for vt, s in fp))
         out.append("=" * 78)

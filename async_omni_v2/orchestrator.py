@@ -36,7 +36,10 @@ def orchestrator_thread(cfg, mgr, vis_q, writer_q, ctrl, stop, prof=None, evalua
         if prof is not None:
             prof.observe("visq_depth", vis_q.qsize())
 
-        # 1. ingest streaming visual tokens
+        # 1. ingest streaming visual tokens (optionally prefixed by a text
+        #    timestamp so the model has a real-time signal, not just token order)
+        if cfg.timestamp_tokens:
+            mgr.ingest(mgr.b.embed_text(cfg.timestamp_fmt.format(t=vt)))
         mgr.ingest(embeds)
 
         # 2. bounded memory
@@ -69,10 +72,15 @@ def orchestrator_thread(cfg, mgr, vis_q, writer_q, ctrl, stop, prof=None, evalua
                 log("orch", vt, f">>> GOAL suspected (yes_share={share:.2f}) -> trigger writer")
                 if evaluator is not None:
                     evaluator.record_trigger(vt, share)
-                try:
-                    writer_q.put_nowait(vt)
-                except queue.Full:
-                    pass
+                if cfg.deterministic:
+                    writer_q.put(vt)             # block: writer sees every trigger in order
+                    writer_q.join()              # AND wait for it to finish -> its snapshot
+                                                 # is taken while we're paused -> reproducible
+                else:
+                    try:
+                        writer_q.put_nowait(vt)  # drop if writer busy (stay live)
+                    except queue.Full:
+                        pass
 
     stop.set()
     log("orch", 0.0, "orchestrator stopped")

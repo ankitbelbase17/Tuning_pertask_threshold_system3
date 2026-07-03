@@ -19,7 +19,7 @@ from manager import KVCacheManager
 from vision_stream import encoder_thread
 from orchestrator import orchestrator_thread
 from writer import writer_thread
-from util import log, Profiler, EncoderControl
+from util import log, Profiler, EncoderControl, seed_everything
 from eval_gt import make_evaluator
 
 
@@ -46,25 +46,31 @@ def main():
     if not cfg.video_path:
         raise SystemExit("--video_path is required")
 
-    backend = Qwen3VLBackend(cfg)
+    seed_everything(cfg.seed, cfg.deterministic)   # before any model/RNG use
+
+    # The primary backend always serves the orchestrator (language). It only also
+    # needs the vision half if the encoder shares it (no dedicated encoder GPU).
+    has_encoder_replica = bool(cfg.encoder_device and cfg.encoder_device != cfg.device)
+    primary_role = "language" if has_encoder_replica else "full"
+    backend = Qwen3VLBackend(cfg, role=primary_role)
     prof = Profiler(enabled=cfg.profile)
     mgr = KVCacheManager(backend, kv_budget=cfg.kv_budget, prof=prof)
 
-    # Optional writer replica on a 2nd GPU; else the writer shares the primary
-    # model. The MVCC snapshot is shipped to its GPU inside the writer thread.
+    # Optional writer replica on a 2nd GPU (language-only); else share the primary.
+    # The MVCC snapshot is shipped to its GPU inside the writer thread.
     writer_backend = backend
     if cfg.writer_device and cfg.writer_device != cfg.device:
-        log("main", 0.0, f"loading writer replica on {cfg.writer_device}")
-        writer_backend = Qwen3VLBackend(dataclasses.replace(cfg, device=cfg.writer_device))
+        log("main", 0.0, f"loading writer replica (language-only) on {cfg.writer_device}")
+        writer_backend = Qwen3VLBackend(dataclasses.replace(cfg, device=cfg.writer_device), role="language")
     else:
         log("main", 0.0, f"writer shares the model on {cfg.device}")
 
-    # Optional encoder replica on a 3rd GPU; else the encoder shares the primary
-    # model. Projected tokens are moved to the orchestrator's GPU in forward().
+    # Optional encoder replica on a 3rd GPU (vision-only, ~1.2 GB); else share the
+    # primary. Projected tokens are moved to the orchestrator's GPU in forward().
     encoder_backend = backend
-    if cfg.encoder_device and cfg.encoder_device != cfg.device:
-        log("main", 0.0, f"loading encoder replica on {cfg.encoder_device}")
-        encoder_backend = Qwen3VLBackend(dataclasses.replace(cfg, device=cfg.encoder_device))
+    if has_encoder_replica:
+        log("main", 0.0, f"loading encoder replica (vision-only) on {cfg.encoder_device}")
+        encoder_backend = Qwen3VLBackend(dataclasses.replace(cfg, device=cfg.encoder_device), role="vision")
     else:
         log("main", 0.0, f"encoder shares the model on {cfg.device}")
 
