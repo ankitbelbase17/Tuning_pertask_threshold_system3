@@ -189,11 +189,11 @@ class AsyncOmniConfig:
     # only on a RISING crossing: emit once when share>=gate_high_thr (while armed),
     # then disarm; re-arm only after share drops below gate_low_thr. => one emit per
     # onset. Set gate_high_thr==goal_threshold to isolate the edge effect alone.
-    gate_hysteresis: bool = False
+    gate_hysteresis: bool = True      # DEFAULT gate = tuned hyst2 (best f1 so far)
     gate_high_thr: float = 0.5        # rising threshold to FIRE (when armed)
-    gate_low_thr: float = 0.45        # re-arm after share falls below this (narrow
+    gate_low_thr: float = 0.40        # re-arm after share falls below this (narrow
                                       # band -> re-arms on small dips -> more onsets)
-    gate_rearm_s: float = 3.0         # ALSO re-arm this many seconds after a fire even
+    gate_rearm_s: float = 5.0         # ALSO re-arm this many seconds after a fire even
                                       # if the signal stayed high (recurring events);
                                       # 0 = signal-only re-arm.
     goal_gate_every: int = 3          # run the "goal?" probe every N frames (1 fwd
