@@ -26,37 +26,50 @@ from dataclasses import dataclass, field
 # The controller appends an "Already reported" conversation history + the final
 # emit cue at runtime, so these strings END with the worked example.
 # ---------------------------------------------------------------------------
+# NOTE ON AUDIO: the OmniPro paper defines semantic_condition_alert as "audio-first",
+# but our pipeline does NOT use audio at all right now — we monitor VISUAL + semantic
+# cues only. This ICL therefore deliberately avoids any audio/speech references.
+#
+# Paper's task intent (baked into this prompt): SCA tests COMPREHENSION/JUDGMENT, not
+# perception. The model must (1) understand the user's abstract intent, (2) reason about
+# whether what's on screen actually MEETS it, (3) alert at each occurrence. Each response
+# should state WHAT happened AND WHY it satisfies the condition, in under 25 words. In the
+# eval, a temporal match only counts if the response is also content-correct (LLM-judged).
 _SEMANTIC_CONDITION_ALERT = (
     "\nYou are the CONTROLLER of a live video monitor. Your monitoring task (the CONDITION "
-    "to alert on) is in the system instruction above. Each turn, read the stream so far and "
-    "emit control command as a compact JSON object with these fields:\n"
+    "to alert on) is in the system instruction above. This condition is SEMANTIC: it needs "
+    "COMPREHENSION and REASONING, not mere object/keyword spotting. You must understand the "
+    "user's intent and JUDGE whether what is happening on screen actually MEETS it, then alert "
+    "at EACH occurrence where it is satisfied.\n"
+    "Each turn, read the stream so far and emit EXACTLY ONE control command as a compact JSON "
+    "object with these fields:\n"
     "  fps               : how densely to sample next (1-3; raise when the scene is busy)\n"
-    "  have_enough_info  : true when the monitored condition is visibly happening on screen NOW\n"
-    "  new_event         : true ONLY at the ONSET of an occurrence (the moment it BECOMES true); "
-    "false while that SAME occurrence stays on screen\n but should be true again if the same of different event occurs later\n"
-    '  answer            : if have_enough_info AND new_event -> ONE sentence describing THIS occurrence; else ""\n'
+    "  have_enough_info  : true only when the condition is genuinely satisfied on screen NOW\n"
+    "  new_event         : true ONLY at the ONSET of an occurrence (the moment it becomes true); "
+    "false while the SAME occurrence persists; true again for a LATER, separate occurrence\n"
+    '  answer            : if have_enough_info AND new_event -> ONE sentence (UNDER 25 words) '
+    'stating WHAT happened AND WHY it satisfies the condition; else ""\n'
     "  next_check_s      : seconds until the next check (1-3; keep it small — more may come)\n"
     '  question_for_next : a short check to verify on the next turn; else ""\n'
-    "HOW TO ALERT (important) — treat this as EDGE detection. The condition typically happens "
-    "MULTIPLE times in one video (about 3.333 times on average). Fire a NEW alert (new_event=true) "
-    "EACH TIME it newly starts, EVEN IF something similar was reported earlier. Set new_event=false "
-    "only while the SAME occurrence is still on screen. After you alert, keep sampling closely and "
-    "keep watching for the NEXT occurrence — do NOT go idle or stop.\n"
+    "HOW TO ALERT — treat this as EDGE detection over a REASONED condition. The condition "
+    "typically recurs (about 3 times per video on average). Fire a NEW alert each time it is "
+    "newly satisfied, EVEN IF similar to an earlier one; do NOT re-fire while the SAME occurrence "
+    "is still on screen. After you alert, keep sampling closely and watch for the NEXT one.\n"
     "The 'Already reported' list below shows PAST occurrences WITH THEIR TIMES; a fresh onset at a "
-    "LATER time is a NEW event, not a repeat of an earlier one.\n"
-    "Rules: describe ONLY what you actually see; NEVER copy the example text.\n"
-    "Worked example (a DIFFERENT video — condition: 'alert whenever the camera pans to show the crowd'):\n"
-    "At 3s, no crowd pan yet:\n"
-    '{"fps":2,"have_enough_info":false,"new_event":false,"answer":"","next_check_s":1,"question_for_next":"Is the camera panning to the crowd now?"}\n'
-    "At 6s the camera pans to the crowd (ONSET -> alert):\n"
-    '{"fps":2,"have_enough_info":true,"new_event":true,"answer":"The camera pans across the roaring home crowd.","next_check_s":1,"question_for_next":""}\n'
-    "At 7s the SAME pan is still on screen (same occurrence -> do NOT repeat):\n"
+    "LATER time is a NEW event, not a repeat.\n"
+    "Rules: base every judgment on what is actually visible; reason about the user's intent; "
+    "NEVER copy the example text.\n"
+    "Worked example (a DIFFERENT video — condition: 'alert whenever the video presents a specific "
+    "figure or statistic as evidence for a claim'):\n"
+    "At 4s, general footage, no figure-as-evidence yet:\n"
+    '{"fps":1,"have_enough_info":false,"new_event":false,"answer":"","next_check_s":1,"question_for_next":"Is a specific statistic being shown to support a claim now?"}\n'
+    "At 12s on-screen text cites a concrete figure backing a claim (ONSET -> alert; what + why):\n"
+    '{"fps":2,"have_enough_info":true,"new_event":true,"answer":"On-screen text cites 80 dead and 350 wounded, giving a concrete casualty figure as evidence.","next_check_s":1,"question_for_next":""}\n'
+    "At 13s the same figure is still shown (same occurrence -> do NOT repeat):\n"
     '{"fps":1,"have_enough_info":true,"new_event":false,"answer":"","next_check_s":2,"question_for_next":""}\n'
-    "At 18s the camera pans to the crowd AGAIN (a NEW onset -> alert again, even though similar):\n"
-    '{"fps":2,"have_enough_info":true,"new_event":true,"answer":"The camera again cuts to the crowd celebrating.","next_check_s":1,"question_for_next":""}\n'
-    "At 30s a THIRD crowd pan (NEW onset -> alert again):\n"
-    '{"fps":2,"have_enough_info":true,"new_event":true,"answer":"The camera pans over fans waving flags in the stands.","next_check_s":1,"question_for_next":""}\n'
-    "(each onset is a separate alert; ~3 per video on average; keep watching after each one)\n"
+    "At 28s a DIFFERENT statistic is presented as evidence (a NEW occurrence -> alert again):\n"
+    '{"fps":2,"have_enough_info":true,"new_event":true,"answer":"A chart shows unemployment fell to 5%, used as evidence the policy worked.","next_check_s":1,"question_for_next":""}\n'
+    "(each satisfied moment is a separate alert; ~3 per video; keep watching after each one)\n"
 )
 
 

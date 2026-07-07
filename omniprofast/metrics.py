@@ -22,11 +22,14 @@ import os
 import re
 from collections import defaultdict
 
-TIME_ONLY = {"instant_event_alert", "semantic_condition_alert"}
+TIME_ONLY = {"instant_event_alert"}
 COUNT_TASKS = {"snapshot_counting", "cumulative_counting", "dedup_counting"}
 POSITION_TASKS = {"explicit_target_grounding"}
 STATE_TASKS = {"realtime_state_monitor"}
-JUDGE_TASKS = {"event_narration", "sequential_step_instruction"}
+# Per the OmniPro paper, semantic_condition_alert responses are content-judged by
+# an LLM: a temporal match counts toward the joint metric ONLY if the response is
+# also content-correct (state WHAT happened AND WHY it meets the condition).
+JUDGE_TASKS = {"event_narration", "sequential_step_instruction", "semantic_condition_alert"}
 
 _POSITIONS = ["top-left", "top-center", "top-right", "center-left", "center",
               "center-right", "bottom-left", "bottom-center", "bottom-right"]
