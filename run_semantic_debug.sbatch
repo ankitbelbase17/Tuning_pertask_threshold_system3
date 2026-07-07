@@ -4,10 +4,12 @@
 #SBATCH --account=a168
 #SBATCH --time=00:30:00
 #SBATCH --nodes=1
-#SBATCH --gres=gpu:1
+#SBATCH --gres=gpu:4
 #SBATCH --output=/iopsstor/scratch/cscs/dbartaula/system_3/omniprofast/output_semantic/slurm_%j.log
-# Run the 11 semantic_condition_alert (audio=none) videos on a DEDICATED debug-partition
-# GPU (no shared-GPU contention). Rebuilds the conda env only if it's broken.
+# Run the 11 semantic_condition_alert (audio=none) videos on a DEDICATED debug node.
+# Uses all 4 GH200s: controller (cuda:1) + encoder (cuda:2) on their own GPUs so the
+# controller's decode doesn't time-share with frame encode/ingest (config.py devices).
+# Rebuilds the conda env only if it's broken.
 set -uo pipefail
 
 PY=/iopsstor/scratch/cscs/dbartaula/miniforge3/envs/prosync_env/bin/python

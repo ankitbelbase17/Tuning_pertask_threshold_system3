@@ -59,17 +59,19 @@ _SEMANTIC_CONDITION_ALERT = (
     "LATER time is a NEW event, not a repeat.\n"
     "Rules: base every judgment on what is actually visible; reason about the user's intent; "
     "NEVER copy the example text.\n"
-    "Worked example (a DIFFERENT video — condition: 'alert whenever the video presents a specific "
-    "figure or statistic as evidence for a claim'):\n"
-    "At 4s, general footage, no figure-as-evidence yet:\n"
-    '{"fps":1,"have_enough_info":false,"new_event":false,"answer":"","next_check_s":1,"question_for_next":"Is a specific statistic being shown to support a claim now?"}\n'
-    "At 12s on-screen text cites a concrete figure backing a claim (ONSET -> alert; what + why):\n"
-    '{"fps":2,"have_enough_info":true,"new_event":true,"answer":"On-screen text cites 80 dead and 350 wounded, giving a concrete casualty figure as evidence.","next_check_s":1,"question_for_next":""}\n'
-    "At 13s the same figure is still shown (same occurrence -> do NOT repeat):\n"
-    '{"fps":1,"have_enough_info":true,"new_event":false,"answer":"","next_check_s":2,"question_for_next":""}\n'
-    "At 28s a DIFFERENT statistic is presented as evidence (a NEW occurrence -> alert again):\n"
-    '{"fps":2,"have_enough_info":true,"new_event":true,"answer":"A chart shows unemployment fell to 5%, used as evidence the policy worked.","next_check_s":1,"question_for_next":""}\n'
-    "(each satisfied moment is a separate alert; ~3 per video; keep watching after each one)\n"
+    "Worked example (a DIFFERENT video — condition: 'alert whenever the video provides specific "
+    "logistical details for the match, such as the date, location, or ticket pricing'). The video "
+    "is a football club TV commercial: fans in body paint, the crowd roaring, then a poster with "
+    "the match date and location, then ticket pricing:\n"
+    "At 3s, none of the asked-for details shown yet -> keep probing:\n"
+    '{"fps":1.0,"have_enough_info":false,"new_event":false,"answer":"","next_check_s":1,"question_for_next":"Is the date, location or ticket price shown now?"}\n'
+    "At 16s the poster shows the date and location (ONSET -> alert):\n"
+    '{"fps":1.0,"have_enough_info":true,"new_event":true,"answer":"The match date is August 14th and the location is Dairy Farmers Stadium.","next_check_s":1,"question_for_next":"Is the ticket price shown now?"}\n'
+    "At 17s the same date/location still on screen (same occurrence -> do NOT repeat):\n"
+    '{"fps":1.0,"have_enough_info":true,"new_event":false,"answer":"","next_check_s":1,"question_for_next":"Is the ticket price shown now?"}\n'
+    "At 23s ticket pricing appears (a NEW, separate detail -> alert again):\n"
+    '{"fps":3.0,"have_enough_info":true,"new_event":true,"answer":"The video now details ticket costs for different groups and gives a purchase website and phone number.","next_check_s":3,"question_for_next":""}\n'
+    "(all asked-for details reported -> sample sparsely, keep watching in case more appear)\n"
 )
 
 
@@ -77,7 +79,14 @@ _SEMANTIC_CONDITION_ALERT = (
 class AsyncOmniConfig:
     # ---- model ----
     model_id: str = "Qwen/Qwen3-VL-8B-Instruct"
-    device: str = "cuda"
+    device: str = "cuda:0"             # primary GPU: ingester + shared KV cache
+    # Multi-GPU: put the controller (generation) and the encoder (vision) on their
+    # OWN GPUs so the controller's decode doesn't time-share the GPU with frame
+    # encode/ingest. Set "" to share the primary GPU (single-GPU box).
+    # NOTE: needs >=3 visible GPUs (e.g. the 4-GPU debug node). For a 1-GPU box,
+    # set both to "" and device="cuda".
+    writer_device: str = "cuda:1"      # controller replica GPU
+    encoder_device: str = "cuda:2"     # vision-encoder replica GPU
     dtype: str = "bfloat16"            # float16 / bfloat16 / float32
     # Cap vision tokens/frame by limiting image pixel area. One vision token covers
     # a (patch_size*merge_size)^2 = 32x32 = 1024 px region for Qwen3-VL, so

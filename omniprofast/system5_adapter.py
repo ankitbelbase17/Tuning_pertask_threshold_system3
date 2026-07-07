@@ -82,17 +82,34 @@ class System5Runner:
         self._EncoderControl = EncoderControl
         self._VideoClock = VideoClock
 
-        # Everything (model_id, dtype, device, kv_budget, fps, prompts, sampling,
+        # Everything (model_id, dtype, device(s), kv_budget, fps, prompts, sampling,
         # ...) comes from config.py — the single source of truth. The eval injects
         # only per-video data (instruction, video_path) in run_sample.
         self.base_cfg = AsyncOmniConfig()
+        cfg = self.base_cfg
 
+        import dataclasses as _dc
         import torch
         self.torch = torch
-        log(f"loading backend {self.base_cfg.model_id} ({self.base_cfg.dtype}); "
-            f"device={self.base_cfg.device} kv_budget={self.base_cfg.kv_budget}", tag="runner")
-        self.backend = Qwen3VLBackend(self.base_cfg)
-        log("backend loaded; icl_ingester_writer pipeline (3 threads, shared cache).",
+
+        # Optional multi-GPU placement (config.writer_device / encoder_device). When
+        # set, the controller's generation and/or the encoder's vision run on their
+        # OWN GPU so decode doesn't time-share with frame encode/ingest.
+        has_enc = bool(cfg.encoder_device and cfg.encoder_device != cfg.device)
+        has_ctrl = bool(cfg.writer_device and cfg.writer_device != cfg.device)
+        primary_role = "language" if has_enc else "full"   # primary needs vision only if it also encodes
+        log(f"loading backends: primary role={primary_role} on {cfg.device}"
+            f"{' | controller on '+cfg.writer_device if has_ctrl else ''}"
+            f"{' | encoder on '+cfg.encoder_device if has_enc else ''}", tag="runner")
+
+        self.backend = Qwen3VLBackend(cfg, role=primary_role)          # ingester + shared cache
+        self.encoder_backend = self.backend
+        if has_enc:
+            self.encoder_backend = Qwen3VLBackend(_dc.replace(cfg, device=cfg.encoder_device), role="vision")
+        self.controller_backend = self.backend
+        if has_ctrl:
+            self.controller_backend = Qwen3VLBackend(_dc.replace(cfg, device=cfg.writer_device), role="language")
+        log("backends loaded; icl_ingester_writer pipeline (3 threads, shared cache).",
             tag="runner")
 
     def run_sample(self, sample, *, max_seconds: float | None = None) -> dict:
@@ -124,13 +141,13 @@ class System5Runner:
 
         threads = [
             threading.Thread(target=self._encoder_thread,
-                             args=(cfg, self.backend, in_q, ctrl, stop, None),
+                             args=(cfg, self.encoder_backend, in_q, ctrl, stop, None),
                              name="encoder", daemon=True),
             threading.Thread(target=self._ingester_thread,
                              args=(cfg, mgr, in_q, ctrl, stop, None, clock),
                              name="input_ingester", daemon=True),
             threading.Thread(target=self._controller_thread,
-                             args=(cfg, mgr, ctrl, clock, stop, None, ev, self.backend),
+                             args=(cfg, mgr, ctrl, clock, stop, None, ev, self.controller_backend),
                              name="controller", daemon=True),
         ]
         for t in threads:
