@@ -133,22 +133,26 @@ def controller_thread(cfg, mgr, ctrl, clock, stop, prof=None, evaluator=None, wb
         if pending_q:
             prompt = (f"\nYou previously deferred this check: '{pending_q}'. "
                       f"Judge it from the MOST RECENT frames." + prompt)
-        logits = step(b.embed_text(prompt))
-        ids, saw_open = [], False
+        # PRIME the decoder with an open brace: Qwen3-VL is an instruct model and,
+        # spliced as raw text onto the cache (no assistant-turn markers), it would
+        # otherwise emit EOS immediately at the splice point. Starting mid-object
+        # forces it to complete the JSON. We reconstruct raw = "{" + generated.
+        logits = step(b.embed_text(prompt + "{"))
+        ids = []
         for _ in range(cfg.controller_max_tokens):
             tok_id = _sample(logits, ids, cfg, gen)
             if tok_id == b.eos_id:
                 break
             ids.append(tok_id)
-            piece = b.tok.decode([tok_id])
-            if "{" in piece:
-                saw_open = True
-            if saw_open and "}" in piece:
+            if "}" in b.tok.decode([tok_id]):     # first close -> flat object done
                 break
             logits = step(b.embed_token(tok_id))
 
-        ctl = _extract_json(b.decode(ids))
+        raw = "{" + b.decode(ids)
+        ctl = _extract_json(raw)
         gen_s = time.time() - t0
+        if not ctl:
+            log("ctrl.raw", vt, f"JSON PARSE FAILED, raw={raw[:300]!r}")
 
         # ---- apply the control config ----
         # input gate: steer encoder fps

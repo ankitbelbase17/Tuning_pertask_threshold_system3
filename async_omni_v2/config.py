@@ -65,8 +65,8 @@ class AsyncOmniConfig:
     # it can't spin (min) or stall (max); fall back to default if unparsed.
     probe_default_s: float = 3.0
     probe_min_s: float = 1.0
-    probe_max_s: float = 10.0
-    controller_max_tokens: int = 160  # cap for the control-JSON generation
+    probe_max_s: float = 3.0
+    controller_max_tokens: int = 300  # cap for the control-JSON generation
     # In-context "control language" (VISPROG-style): a compact JSON DSL the frozen
     # model emits each tick to drive its own probing. Taught via worked
     # (Situation -> Control) pairs that demonstrate the DECISIONS (stay quiet /
@@ -94,8 +94,7 @@ class AsyncOmniConfig:
         '{"fps":1,"have_enough_info":true,"new_event":false,"answer":"","question":"","next_check_s":4}\n'
         "Now emit ONLY your control JSON for the current stream:\n")
 
-    # ---- controller sampling (official Qwen3-VL-8B-Instruct *text* preset) ----
-    # These drive the control-JSON generation (writer_* naming kept for continuity).
+    # These drive the control-JSON generation
     writer_greedy: bool = False
     writer_seed: int = 3407
     writer_temperature: float = 0.7
@@ -104,10 +103,8 @@ class AsyncOmniConfig:
     writer_repetition_penalty: float = 1.0
     writer_presence_penalty: float = 1.5
 
-    # ---- prompts (THE single place to edit all prompt text) ----
-    # `system_prompt` is a template: the literal "{instruction}" is replaced with
-    # `instruction` at seed time (input_ingester). In eval the adapter sets
-    # `instruction` = the sample's task; for standalone runs the default below is used.
+    
+    # In eval the adapter sets `instruction` = the sample's task; for standalone runs the default below is used.
     instruction: str = "report the target event the instant it happens, and stay quiet otherwise"
     system_prompt: str = (
         "You are a helpful assistant watching a live video stream. "
