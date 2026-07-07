@@ -106,7 +106,7 @@ def controller_thread(cfg, mgr, ctrl, clock, stop, prof=None, evaluator=None, wb
     log("controller", 0.0, "model-scheduled proactivity ON (pure-generative control loop)")
 
     next_check_vt = cfg.probe_min_s           # skip the empty-cache tick at t=0
-    reported = []                              # conversation history: answers already emitted
+    reported = []                              # conversation history: (vt, answer) already emitted
     pending_q = ""                             # question_for_next: what to verify on the next tick
 
     while not stop.is_set():
@@ -134,9 +134,11 @@ def controller_thread(cfg, mgr, ctrl, clock, stop, prof=None, evaluator=None, wb
         if pending_q:
             prompt += (f"\nYou previously asked yourself: '{pending_q}'. "
                        f"Judge it now from the MOST RECENT frames.")
-        convo = "".join(f"assistant: {a}\n" for a in reported) or "assistant: none\n"
-        prompt += ("\n\nAlready reported so far (do NOT report any of these again; set "
-                   "new_event=false if the current situation matches one):\n" + convo)
+        # timestamped history: a LATER onset is a new event, not a repeat of these
+        convo = "".join(f"assistant @{rvt:.0f}s: {a}\n" for rvt, a in reported) or "assistant: none\n"
+        prompt += ("\n\nAlready reported so far (PAST occurrences with their times; a fresh "
+                   "onset at a later time is a NEW event — set new_event=false ONLY while the "
+                   "SAME occurrence is still on screen):\n" + convo)
         prompt += "\nNow emit ONLY your control JSON for the current stream:\n"
 
         # PRIME the decoder with an open brace: Qwen3-VL is an instruct model and,
@@ -181,9 +183,12 @@ def controller_thread(cfg, mgr, ctrl, clock, stop, prof=None, evaluator=None, wb
         log("ctrl.gate", vt, f"[{vid}] fps={fps:.1f} have_info={have} new={new} "
                              f"next={nxt:.1f}s q={pending_q!r}")
 
-        # output gate + writer in one: emit only a NEW detail not already reported
-        if have and new and answer and answer not in reported:
-            reported.append(answer)
+        # output gate + writer in one: fire on each NEW onset (edge). Trust the
+        # model's new_event flag for recurrence; only block an exact repeat of the
+        # immediately-previous answer (guards accidental double-fire, not recurrence).
+        last_ans = reported[-1][1] if reported else None
+        if have and new and answer and answer != last_ans:
+            reported.append((vt, answer))
             if evaluator is not None:
                 evaluator.record_trigger(vt, 1.0)
                 evaluator.record_write(vt, answer, gen_s)

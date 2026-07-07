@@ -27,32 +27,36 @@ from dataclasses import dataclass, field
 # emit cue at runtime, so these strings END with the worked example.
 # ---------------------------------------------------------------------------
 _SEMANTIC_CONDITION_ALERT = (
-    "\nYou are the CONTROLLER of a live video monitor. Your monitoring task is in the "
-    "system instruction above. Each turn, read the stream so far and emit EXACTLY ONE "
-    "control command as a compact JSON object with these fields:\n"
+    "\nYou are the CONTROLLER of a live video monitor. Your monitoring task (the CONDITION "
+    "to alert on) is in the system instruction above. Each turn, read the stream so far and "
+    "emit control command as a compact JSON object with these fields:\n"
     "  fps               : how densely to sample next (1-3; raise when the scene is busy)\n"
-    "  have_enough_info  : true ONLY when the asked-for detail is actually shown on screen now\n"
-    "  new_event         : true ONLY if this detail is NEW (not already under 'Already reported')\n"
-    '  answer            : if have_enough_info AND new_event -> ONE sentence stating the detail; else ""\n'
-    "  next_check_s      : seconds until the next check (1-3; small while waiting, larger once done)\n"
+    "  have_enough_info  : true when the monitored condition is visibly happening on screen NOW\n"
+    "  new_event         : true ONLY at the ONSET of an occurrence (the moment it BECOMES true); "
+    "false while that SAME occurrence stays on screen\n but should be true again if the same of different event occurs later\n"
+    '  answer            : if have_enough_info AND new_event -> ONE sentence describing THIS occurrence; else ""\n'
+    "  next_check_s      : seconds until the next check (1-3; keep it small — more may come)\n"
     '  question_for_next : a short check to verify on the next turn; else ""\n'
-    "Rules: describe ONLY what you actually see; NEVER copy the example text; NEVER re-report "
-    "a detail already listed under 'Already reported'.\n"
-    "Worked example (a DIFFERENT video — learn the DECISION pattern, never copy the text):\n"
-    "Task question: Please alert me whenever the video provides specific logistical details "
-    "for the match, such as the date, location, or ticket pricing.\n"
-    "Video: a TV commercial showing fans, then a poster with the match date and location, "
-    "then ticket pricing.\n"
-    "At 3s, nothing asked-for is shown yet:\n"
-    '{"fps":1.0,"have_enough_info":false,"new_event":false,"answer":"","next_check_s":1,"question_for_next":"Is the date, location or ticket price shown now?"}\n'
-    "(keep probing like this until the asked-for info appears)\n"
-    "At 16s the date and location appear (a NEW detail):\n"
-    '{"fps":1.0,"have_enough_info":true,"new_event":true,"answer":"The match date is August 14th and the location is Dairy Farmers Stadium.","next_check_s":1,"question_for_next":"Is the ticket price shown now?"}\n'
-    "At 17s the same date/location still on screen (already reported -> do NOT repeat):\n"
-    '{"fps":1.0,"have_enough_info":true,"new_event":false,"answer":"","next_check_s":1,"question_for_next":"Is the ticket price shown now?"}\n'
-    "At 23s ticket pricing appears (a NEW detail):\n"
-    '{"fps":3.0,"have_enough_info":true,"new_event":true,"answer":"The video is now detailing ticket costs and providing a website and phone number for purchases.","next_check_s":3,"question_for_next":""}\n'
-    "(all asked-for info reported -> sample sparsely, no more questions, keep watching)\n"
+    "HOW TO ALERT (important) — treat this as EDGE detection. The condition typically happens "
+    "MULTIPLE times in one video (about 3.333 times on average). Fire a NEW alert (new_event=true) "
+    "EACH TIME it newly starts, EVEN IF something similar was reported earlier. Set new_event=false "
+    "only while the SAME occurrence is still on screen. After you alert, keep sampling closely and "
+    "keep watching for the NEXT occurrence — do NOT go idle or stop.\n"
+    "The 'Already reported' list below shows PAST occurrences WITH THEIR TIMES; a fresh onset at a "
+    "LATER time is a NEW event, not a repeat of an earlier one.\n"
+    "Rules: describe ONLY what you actually see; NEVER copy the example text.\n"
+    "Worked example (a DIFFERENT video — condition: 'alert whenever the camera pans to show the crowd'):\n"
+    "At 3s, no crowd pan yet:\n"
+    '{"fps":2,"have_enough_info":false,"new_event":false,"answer":"","next_check_s":1,"question_for_next":"Is the camera panning to the crowd now?"}\n'
+    "At 6s the camera pans to the crowd (ONSET -> alert):\n"
+    '{"fps":2,"have_enough_info":true,"new_event":true,"answer":"The camera pans across the roaring home crowd.","next_check_s":1,"question_for_next":""}\n'
+    "At 7s the SAME pan is still on screen (same occurrence -> do NOT repeat):\n"
+    '{"fps":1,"have_enough_info":true,"new_event":false,"answer":"","next_check_s":2,"question_for_next":""}\n'
+    "At 18s the camera pans to the crowd AGAIN (a NEW onset -> alert again, even though similar):\n"
+    '{"fps":2,"have_enough_info":true,"new_event":true,"answer":"The camera again cuts to the crowd celebrating.","next_check_s":1,"question_for_next":""}\n'
+    "At 30s a THIRD crowd pan (NEW onset -> alert again):\n"
+    '{"fps":2,"have_enough_info":true,"new_event":true,"answer":"The camera pans over fans waving flags in the stands.","next_check_s":1,"question_for_next":""}\n'
+    "(each onset is a separate alert; ~3 per video on average; keep watching after each one)\n"
 )
 
 
