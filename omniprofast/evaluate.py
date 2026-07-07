@@ -84,8 +84,8 @@ def main():
     for i, s in enumerate(samples):
         if s.id in done:
             continue
-        log(f"===== [{i+1}/{len(samples)}] task={s.task} video={s.video_id} "
-            f"question={s.question!r}", tag="online")
+        log(f"===== [{i+1}/{len(samples)}] {s.id} "
+            f"gt_times={s.gt_times} question={s.question!r}", tag="online")
         t0 = time.time()
         pred = runner.run_sample(s, max_seconds=max_seconds)
         pred["wall_s"] = round(time.time() - t0, 2)
