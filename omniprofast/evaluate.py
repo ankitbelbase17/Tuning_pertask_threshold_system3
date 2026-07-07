@@ -80,14 +80,16 @@ def main():
     for i, s in enumerate(samples):
         if s.id in done:
             continue
+        log(f"===== [{i+1}/{len(samples)}] task={s.task} video={s.video_id} "
+            f"question={s.question!r}", tag="online")
         t0 = time.time()
         pred = runner.run_sample(s, max_seconds=max_seconds)
         pred["wall_s"] = round(time.time() - t0, 2)
         _append_jsonl(pred_path, [pred])
         sc = score_sample(pred, tolerance=args.tolerance, judge=judge)
-        log(f"[online] {i+1}/{len(samples)} {s.task} emits={sc['n_emits']} "
-            f"gt={sc['n_gt']} tp={sc['tp_time']} fp={sc['fp']} fn={sc['fn']} "
-            f"({pred['wall_s']}s)")
+        log(f"[online] {i+1}/{len(samples)} {s.task} video={s.video_id} "
+            f"emits={sc['n_emits']} gt={sc['n_gt']} tp={sc['tp_time']} fp={sc['fp']} "
+            f"fn={sc['fn']} ({pred['wall_s']}s)")
 
     rows = read_jsonl(pred_path)
     agg = aggregate([score_sample(r, tolerance=args.tolerance, judge=judge) for r in rows])

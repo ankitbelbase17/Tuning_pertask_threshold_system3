@@ -110,6 +110,7 @@ class System5Runner:
             self.base_cfg,
             instruction=sample.question,
             video_path=sample.video_path,
+            video_id=sample.video_id,
             max_seconds=(max_seconds if max_seconds else 10 ** 9),
             controller_prompt=controller_prompt,
         )

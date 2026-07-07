@@ -144,6 +144,7 @@ class AsyncOmniConfig:
     
     # In eval the adapter sets `instruction` = the sample's task; for standalone runs the default below is used.
     instruction: str = "report the target event the instant it happens, and stay quiet otherwise"
+    video_id: str = ""                # set per-sample in eval; shown in controller logs
     system_prompt: str = (
         "You are a helpful assistant watching a live video stream. "
         "According to the video you are watching, your task is: {instruction}")

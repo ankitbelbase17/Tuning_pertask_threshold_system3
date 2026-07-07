@@ -35,15 +35,19 @@ else
   echo "[run_fast] no GEMINI_API_KEY -> free-text tasks scored by lexical fallback"
 fi
 
-# --- 3. Run: icl_ingester_writer, online, all 9 tasks x 3 shortest -----------
+# --- 3. Run: icl_ingester_writer, online -------------------------------------
 # All model behaviour (model_id, dtype, fps, kv_budget, prompts, ...) comes from
 # async_omni_v2/config.py. Only dataset selection + scoring are passed here.
-echo "[run_fast] running icl_ingester_writer ONLINE on 27 videos"
+# Every run gets its OWN timestamped log file (no overwriting prior runs).
+mkdir -p "$OMNIPRO_OUTPUT_DIR"
+LOG="$OMNIPRO_OUTPUT_DIR/run_$(date +%Y%m%d_%H%M%S).log"
+echo "[run_fast] running icl_ingester_writer ONLINE (log: $LOG)"
 "$PY" evaluate.py \
   --tolerance "${TOLERANCE:-3.0}" \
   --out "$OMNIPRO_OUTPUT_DIR" \
-  "$@"
+  "$@" 2>&1 | tee "$LOG"
 
 echo
+echo "== log file =="; echo "$LOG"
 echo "== online_metrics.json =="
 find "$OMNIPRO_OUTPUT_DIR" -name online_metrics.json -print

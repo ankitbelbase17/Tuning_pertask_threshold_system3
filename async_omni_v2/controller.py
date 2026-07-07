@@ -176,8 +176,9 @@ def controller_thread(cfg, mgr, ctrl, clock, stop, prof=None, evaluator=None, wb
         pending_q = (ctl.get("question_for_next") or ctl.get("question") or "").strip()
 
         # log EVERY tick's raw JSON so all responses are inspectable in the log file
-        log("ctrl.raw", vt, raw.strip()[:240] if ctl else f"PARSE FAILED raw={raw[:240]!r}")
-        log("ctrl.gate", vt, f"fps={fps:.1f} have_info={have} new={new} "
+        vid = cfg.video_id or "?"
+        log("ctrl.raw", vt, f"[{vid}] " + (raw.strip()[:240] if ctl else f"PARSE FAILED raw={raw[:240]!r}"))
+        log("ctrl.gate", vt, f"[{vid}] fps={fps:.1f} have_info={have} new={new} "
                              f"next={nxt:.1f}s q={pending_q!r}")
 
         # output gate + writer in one: emit only a NEW detail not already reported
@@ -186,7 +187,7 @@ def controller_thread(cfg, mgr, ctrl, clock, stop, prof=None, evaluator=None, wb
             if evaluator is not None:
                 evaluator.record_trigger(vt, 1.0)
                 evaluator.record_write(vt, answer, gen_s)
-            log("CONTROLLER", vt, f"\U0001F4E2  {answer!r}")
+            log("CONTROLLER", vt, f"[{vid}] \U0001F4E2  {answer!r}")
         if prof is not None:
             prof.observe("controller_gen_s", gen_s)
             prof.observe("controller_tokens", len(ids))
