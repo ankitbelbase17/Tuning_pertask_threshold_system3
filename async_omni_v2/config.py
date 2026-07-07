@@ -7,6 +7,10 @@ KV cache -> the controller reads that cache each tick and emits ONE control JSON
 (fps / have_enough_info / new_event / answer / question / next_check_s), which is
 both the output gate and the writer. There are no fixed yes/no gates here.
 
+This is also the SINGLE place to edit all prompt text: `system_prompt` (the
+role/task template, {instruction} filled per-run) and `controller_prompt` (the
+control-JSON DSL taught to the model). The eval harness carries no prompt text.
+
 (The fixed-gate ablations, multi-GPU replicas, and VisionZip pruning live on the
 `main` branch.)
 """
@@ -100,7 +104,11 @@ class AsyncOmniConfig:
     writer_repetition_penalty: float = 1.0
     writer_presence_penalty: float = 1.5
 
-    # ---- prompt (biggest behaviour lever; overridden per-sample in eval) ----
+    # ---- prompts (THE single place to edit all prompt text) ----
+    # `system_prompt` is a template: the literal "{instruction}" is replaced with
+    # `instruction` at seed time (input_ingester). In eval the adapter sets
+    # `instruction` = the sample's task; for standalone runs the default below is used.
+    instruction: str = "report the target event the instant it happens, and stay quiet otherwise"
     system_prompt: str = (
-        "You are watching a video frame by frame. Your task: report the target "
-        "event the instant it happens, and stay quiet otherwise.")
+        "You are a helpful assistant watching a live video stream. "
+        "According to the video you are watching, your task is: {instruction}")

@@ -19,7 +19,8 @@ from util import log
 
 
 def input_ingester_thread(cfg, mgr, vis_q, ctrl, stop, prof=None, clock=None):
-    sink = mgr.seed(cfg.system_prompt)
+    system_prompt = cfg.system_prompt.replace("{instruction}", cfg.instruction)
+    sink = mgr.seed(system_prompt)
     log("ingester", 0.0, f"seeded cache, sink={sink} tokens, budget={cfg.kv_budget}")
 
     while not stop.is_set() or not vis_q.empty():

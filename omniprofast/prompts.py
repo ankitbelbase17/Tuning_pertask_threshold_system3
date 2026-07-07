@@ -1,15 +1,10 @@
 """
-prompts.py — the single prompt for the icl_ingester_writer eval.
+prompts.py — variant glue ONLY. Contains NO prompt text.
 
-The pipeline is generic: the task reaches the model only through the system
-prompt, templated per-sample from the OmniPro fields:
-  {instruction} = sample["question"]  (e.g. "Tell me when the video asks us to sing along")
-
-The controller drives everything else via its own control-JSON DSL (see
-async_omni_v2/config.py:controller_prompt), so there is no yes/no probe or
-separate writer prompt here.
-
-(The 10-variant prompt sweep + probe-mode helpers live on the `main` branch.)
+All editable prompt text (system_prompt template + controller_prompt DSL) lives
+in ONE place: async_omni_v2/config.py. Here we just carry the eval "variant"
+identity (key/desc) and pass each sample's task instruction through to the
+adapter, which fills config.py's system_prompt template with it.
 """
 from __future__ import annotations
 
@@ -20,20 +15,17 @@ from dataclasses import dataclass
 class PromptVariant:
     key: str
     desc: str
-    system_prompt: str        # uses {instruction}
-    goal_threshold: float = 0.5   # kept for eval-harness compatibility (unused by controller)
+    goal_threshold: float = 0.5   # kept for eval-harness compatibility (unused)
 
     def fill(self, instruction: str, event: str) -> dict:
-        return {"system_prompt": self.system_prompt.format(instruction=instruction)}
+        # No prompt text here — just hand the task instruction to the adapter,
+        # which fills config.py's system_prompt template.
+        return {"instruction": instruction}
 
 
 VARIANTS: list[PromptVariant] = [
-    PromptVariant(
-        key="v01_baseline_direct",
-        desc="Minimal direct framing; the controller drives detection via its JSON DSL.",
-        system_prompt=("You are a helpful assistant watching a live video stream. "
-                       "According to the video you are watching, your task is: {instruction}"),
-    ),
+    PromptVariant(key="v01_baseline_direct",
+                  desc="icl_ingester_writer; prompts defined in async_omni_v2/config.py."),
 ]
 
 VARIANTS_BY_KEY = {v.key: v for v in VARIANTS}

@@ -117,10 +117,12 @@ class System5Runner:
     def run_sample(self, sample, prompt_fields: dict, *, max_seconds: float | None,
                    realtime: bool = False, fps: float | None = None) -> dict:
         """Run the real async pipeline on one video; return captured emissions.
-        The controller is self-paced in VIDEO time, so it always runs realtime."""
+        The controller is self-paced in VIDEO time, so it always runs realtime.
+        All prompt TEXT lives in config.py; here we only inject this sample's task
+        `instruction`, which config.py's system_prompt template is filled with."""
         cfg = dataclasses.replace(
             self.base_cfg,
-            system_prompt=prompt_fields["system_prompt"],
+            instruction=prompt_fields["instruction"],
             video_path=sample.video_path,
             max_seconds=(max_seconds if max_seconds else 10 ** 9),
             realtime=True,
