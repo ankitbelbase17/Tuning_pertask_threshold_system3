@@ -9,7 +9,7 @@ Each cycle:
   1. wait until video time reaches the self-scheduled next-check point;
   2. snapshot the shared cache and generate ONE control JSON, e.g.
        {"fps": 3, "have_enough_info": true, "new_event": true,
-        "answer": "A goal was scored.", "next_check_s": 5}
+        "answer": "The target event just occurred.", "next_check_s": 5}
   3. apply it: steer encoder fps (input gate); if have_enough_info AND new_event
      (and not a repeat of the last answer), emit the answer to the user (output
      gate + writer in one); schedule the next check at vt + next_check_s.

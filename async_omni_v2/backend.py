@@ -47,7 +47,7 @@ class ModelBackend(ABC):
 
 
 def _word_ids(tok, words):
-    """Token ids for single-token surface forms (probe scores compare these)."""
+    """Token ids for single-token surface forms (e.g. the newline stop token)."""
     out = []
     for w in words:
         ids = tok.encode(w, add_special_tokens=False)

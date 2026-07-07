@@ -36,16 +36,12 @@ else
 fi
 
 # --- 3. Run: icl_ingester_writer, online, all 9 tasks x 3 shortest -----------
-VARIANT="${VARIANT:-v01_baseline_direct}"
-echo "[run_fast] running icl_ingester_writer ONLINE on 27 videos (variant=$VARIANT)"
+# All model behaviour (model_id, dtype, fps, kv_budget, prompts, ...) comes from
+# async_omni_v2/config.py. Only dataset selection + scoring are passed here.
+echo "[run_fast] running icl_ingester_writer ONLINE on 27 videos"
 "$PY" evaluate.py \
-  --mode online \
-  --system system5 \
-  --variants "$VARIANT" \
-  --fps "${FPS:-1.0}" \
   --tolerance "${TOLERANCE:-3.0}" \
   --out "$OMNIPRO_OUTPUT_DIR" \
-  --no_wandb \
   "$@"
 
 echo

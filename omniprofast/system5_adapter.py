@@ -19,7 +19,6 @@ Emissions are captured via the evaluator hook the controller already invokes
 from __future__ import annotations
 
 import dataclasses
-import os
 import queue
 import sys
 import threading
@@ -28,20 +27,6 @@ from utils import SYSTEM5_DIR, log
 
 if SYSTEM5_DIR not in sys.path:
     sys.path.insert(0, SYSTEM5_DIR)
-
-
-def _env_overrides() -> dict:
-    """Per-run switches, toggled without touching config.py. Each maps an
-    OMNIPRO_* env var (1/0/true/false) onto the matching AsyncOmniConfig field;
-    unset vars fall through to the dataclass default."""
-    def flag(name):
-        v = os.environ.get(name)
-        return None if v is None else v.strip().lower() in ("1", "true", "yes", "on")
-    over = {
-        "timestamp_tokens": flag("OMNIPRO_TIMESTAMP_TOKENS"),
-        "deterministic": flag("OMNIPRO_DETERMINISTIC"),
-    }
-    return {k: v for k, v in over.items() if v is not None}
 
 
 class CaptureEvaluator:
@@ -81,8 +66,7 @@ class CaptureEvaluator:
 
 
 class System5Runner:
-    def __init__(self, *, model_id: str | None = None, dtype: str = "bfloat16",
-                 device: str = "cuda", kv_budget: int | None = None):
+    def __init__(self):
         from config import AsyncOmniConfig
         from backend import Qwen3VLBackend
         from manager import KVCacheManager
@@ -91,7 +75,6 @@ class System5Runner:
         from controller import controller_thread
         from util import EncoderControl, VideoClock
 
-        self._AsyncOmniConfig = AsyncOmniConfig
         self._KVCacheManager = KVCacheManager
         self._encoder_thread = encoder_thread
         self._ingester_thread = input_ingester_thread
@@ -99,35 +82,31 @@ class System5Runner:
         self._EncoderControl = EncoderControl
         self._VideoClock = VideoClock
 
-        base_kwargs = dict(dtype=dtype, device=device, profile=False)
-        if model_id:
-            base_kwargs["model_id"] = model_id
-        if kv_budget:
-            base_kwargs["kv_budget"] = kv_budget
-        self.base_cfg = AsyncOmniConfig(**base_kwargs)
+        # Everything (model_id, dtype, device, kv_budget, fps, prompts, sampling,
+        # ...) comes from config.py — the single source of truth. The eval injects
+        # only per-video data (instruction, video_path) in run_sample.
+        self.base_cfg = AsyncOmniConfig()
 
         import torch
         self.torch = torch
-        log(f"loading backend {self.base_cfg.model_id} ({dtype}); "
-            f"kv_budget={self.base_cfg.kv_budget}", tag="runner")
+        log(f"loading backend {self.base_cfg.model_id} ({self.base_cfg.dtype}); "
+            f"device={self.base_cfg.device} kv_budget={self.base_cfg.kv_budget}", tag="runner")
         self.backend = Qwen3VLBackend(self.base_cfg)
         log("backend loaded; icl_ingester_writer pipeline (3 threads, shared cache).",
             tag="runner")
 
-    def run_sample(self, sample, prompt_fields: dict, *, max_seconds: float | None,
-                   realtime: bool = False, fps: float | None = None) -> dict:
+    def run_sample(self, sample, *, max_seconds: float | None = None) -> dict:
         """Run the real async pipeline on one video; return captured emissions.
-        The controller is self-paced in VIDEO time, so it always runs realtime.
-        All prompt TEXT lives in config.py; here we only inject this sample's task
-        `instruction`, which config.py's system_prompt template is filled with."""
+
+        The eval injects ONLY per-video DATA — the task `instruction` and the
+        `video_path` (plus how much of the clip to run). EVERYTHING behavioural
+        (prompts, fps, realtime, sampling, kv_budget, timestamps) comes from
+        async_omni_v2/config.py, which is the single source of truth."""
         cfg = dataclasses.replace(
             self.base_cfg,
-            instruction=prompt_fields["instruction"],
+            instruction=sample.question,
             video_path=sample.video_path,
             max_seconds=(max_seconds if max_seconds else 10 ** 9),
-            realtime=True,
-            **({"fps": fps} if fps else {}),
-            **_env_overrides(),
         )
 
         mgr = self._KVCacheManager(self.backend, kv_budget=cfg.kv_budget, prof=None)
@@ -165,5 +144,5 @@ class System5Runner:
             "predictions": emits,
             "n_triggers": len(ev.triggers), "n_writes": len(ev.writes),
             "n_gates": len(ev.gates),
-            "eval_mode": "online", "realtime": realtime,
+            "eval_mode": "online", "realtime": cfg.realtime,
         }
