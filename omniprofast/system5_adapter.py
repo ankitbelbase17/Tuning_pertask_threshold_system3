@@ -102,11 +102,16 @@ class System5Runner:
         `video_path` (plus how much of the clip to run). EVERYTHING behavioural
         (prompts, fps, realtime, sampling, kv_budget, timestamps) comes from
         async_omni_v2/config.py, which is the single source of truth."""
+        # pick the task-specific controller ICL prompt if we have one for this task,
+        # else fall back to the generic controller_prompt (both live in config.py)
+        controller_prompt = self.base_cfg.task_controller_prompts.get(
+            sample.task, self.base_cfg.controller_prompt)
         cfg = dataclasses.replace(
             self.base_cfg,
             instruction=sample.question,
             video_path=sample.video_path,
             max_seconds=(max_seconds if max_seconds else 10 ** 9),
+            controller_prompt=controller_prompt,
         )
 
         mgr = self._KVCacheManager(self.backend, kv_budget=cfg.kv_budget, prof=None)

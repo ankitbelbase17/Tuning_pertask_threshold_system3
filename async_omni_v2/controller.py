@@ -105,9 +105,9 @@ def controller_thread(cfg, mgr, ctrl, clock, stop, prof=None, evaluator=None, wb
     gen = torch.Generator().manual_seed(int(cfg.writer_seed))
     log("controller", 0.0, "model-scheduled proactivity ON (pure-generative control loop)")
 
-    next_check_vt = 0.0
-    last_answer = None
-    pending_q = ""                             # deferred-verification question to re-check
+    next_check_vt = cfg.probe_min_s           # skip the empty-cache tick at t=0
+    reported = []                              # conversation history: answers already emitted
+    pending_q = ""                             # question_for_next: what to verify on the next tick
 
     while not stop.is_set():
         vt = clock.get()
@@ -127,12 +127,18 @@ def controller_thread(cfg, mgr, ctrl, clock, stop, prof=None, evaluator=None, wb
             phys += embeds.shape[1]
             return logits
 
-        # generate the control JSON; if we deferred a check last time, focus on it
-        # (this is the "ask me again in Ns: did X happen?" verification loop).
-        prompt = cfg.controller_prompt
+        # Build the controller prompt: task ICL + (optional) deferred check +
+        # CONVERSATION HISTORY of what has already been reported, so the model can
+        # set new_event=false for repeats and only fire on genuinely new details.
+        prompt = cfg.controller_prompt.rstrip()
         if pending_q:
-            prompt = (f"\nYou previously deferred this check: '{pending_q}'. "
-                      f"Judge it from the MOST RECENT frames." + prompt)
+            prompt += (f"\nYou previously asked yourself: '{pending_q}'. "
+                       f"Judge it now from the MOST RECENT frames.")
+        convo = "".join(f"assistant: {a}\n" for a in reported) or "assistant: none\n"
+        prompt += ("\n\nAlready reported so far (do NOT report any of these again; set "
+                   "new_event=false if the current situation matches one):\n" + convo)
+        prompt += "\nNow emit ONLY your control JSON for the current stream:\n"
+
         # PRIME the decoder with an open brace: Qwen3-VL is an instruct model and,
         # spliced as raw text onto the cache (no assistant-turn markers), it would
         # otherwise emit EOS immediately at the splice point. Starting mid-object
@@ -151,15 +157,11 @@ def controller_thread(cfg, mgr, ctrl, clock, stop, prof=None, evaluator=None, wb
         raw = "{" + b.decode(ids)
         ctl = _extract_json(raw)
         gen_s = time.time() - t0
-        if not ctl:
-            log("ctrl.raw", vt, f"JSON PARSE FAILED, raw={raw[:300]!r}")
 
         # ---- apply the control config ----
-        # input gate: steer encoder fps
         fps = _clamp(ctl.get("fps"), cfg.encoder_idle_fps, cfg.encoder_focus_fps,
                      cfg.encoder_idle_fps)
         ctrl.set_fps(fps)
-        # schedule next check (self-paced), clamped so it can't spin or stall
         nxt = _clamp(ctl.get("next_check_s"), cfg.probe_min_s, cfg.probe_max_s,
                      cfg.probe_default_s)
         next_check_vt = vt + nxt
@@ -167,14 +169,18 @@ def controller_thread(cfg, mgr, ctrl, clock, stop, prof=None, evaluator=None, wb
         have = bool(ctl.get("have_enough_info"))
         new = bool(ctl.get("new_event"))
         answer = (ctl.get("answer") or "").strip()
-        pending_q = (ctl.get("question") or "").strip()   # carry forward what to re-check
+        # accept either key; question_for_next is carried forward (NOT cleared on
+        # emit — e.g. after reporting the date it may still ask about ticket price)
+        pending_q = (ctl.get("question_for_next") or ctl.get("question") or "").strip()
+
+        # log EVERY tick's raw JSON so all responses are inspectable in the log file
+        log("ctrl.raw", vt, raw.strip()[:240] if ctl else f"PARSE FAILED raw={raw[:240]!r}")
         log("ctrl.gate", vt, f"fps={fps:.1f} have_info={have} new={new} "
                              f"next={nxt:.1f}s q={pending_q!r}")
 
-        # output gate + writer in one: emit only on a NEW, non-repeat event
-        if have and new and answer and answer != last_answer:
-            last_answer = answer
-            pending_q = ""                       # event resolved -> drop the deferred check
+        # output gate + writer in one: emit only a NEW detail not already reported
+        if have and new and answer and answer not in reported:
+            reported.append(answer)
             if evaluator is not None:
                 evaluator.record_trigger(vt, 1.0)
                 evaluator.record_write(vt, answer, gen_s)
