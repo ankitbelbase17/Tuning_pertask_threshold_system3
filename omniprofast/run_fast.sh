@@ -44,7 +44,7 @@ fi
 OUT_DIR="$OMNIPRO_OUTPUT_DIR"
 _prev=""; for a in "$@"; do [ "$_prev" = "--out" ] && OUT_DIR="$a"; _prev="$a"; done
 mkdir -p "$OUT_DIR"
-LOG="$OUT_DIR/run_$(date +%Y%m%d_%H%M%S).log"
+LOG="$OUT_DIR/run_$(date +%Y%m%d_%H%M%S).log"   # one file per run; latest = newest datetime
 echo "[run_fast] running icl_ingester_writer ONLINE (log: $LOG)"
 "$PY" evaluate.py \
   --tolerance "${TOLERANCE:-3.0}" \

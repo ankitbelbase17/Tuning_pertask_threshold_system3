@@ -181,7 +181,7 @@ def controller_thread(cfg, mgr, ctrl, clock, stop, prof=None, evaluator=None, wb
         vid = cfg.video_id or "?"
         log("ctrl.raw", vt, f"[{vid}] " + (raw.strip()[:240] if ctl else f"PARSE FAILED raw={raw[:240]!r}"))
         log("ctrl.gate", vt, f"[{vid}] fps={fps:.1f} have_info={have} new={new} "
-                             f"next={nxt:.1f}s q={pending_q!r}")
+                             f"next={nxt:.1f}s gen={gen_s:.1f}s ntok={len(ids)} q={pending_q!r}")
 
         # output gate + writer in one: fire on each NEW onset (edge). Trust the
         # model's new_event flag for recurrence; only block an exact repeat of the
