@@ -1,20 +1,3 @@
-"""
-prompts.py — the prompt / meta-prompt SWEEP.
-
-system_5 was hard-coded as a football goal commentator. Here we make it GENERIC:
-every prompt is a template filled per-sample from OmniPro fields
-  {instruction} = sample["question"]  (e.g. "Tell me when the video asks us to sing along")
-  {event}       = sample["event"]     (e.g. "the video asks us to sing along")
-
-We define 10 PromptVariants. Each varies three behaviour levers:
-  - system_prompt : the role / standing instruction seeded into the KV cache
-  - probe_question: the yes/no META-PROBE the proactivity gate reads each tick
-  - writer_prompt : the instruction used to verbalise an emission (content tasks)
-
-The sweep tests a concrete hypothesis: *which framing of the standing role and,
-more importantly, which phrasing of the yes/no probe yields the best
-proactive-trigger quality (timeliness F1) and content accuracy on OmniPro.*
-"""
 from __future__ import annotations
 
 from dataclasses import dataclass, field

@@ -23,7 +23,7 @@ fi
 # --- 2. Hardcoded machine paths (dataset, python, model pipeline, HF cache) --
 # These live on this system, so the dir is drop-in from any repo on this box.
 export SCRATCH="${SCRATCH:-/iopsstor/scratch/cscs/dbartaula}"
-export PY="/iopsstor/scratch/cscs/dbartaula/miniforge3/envs/async_omni/bin/python"
+export PY="/iopsstor/scratch/cscs/dbartaula/miniforge3/envs/prosync_env/bin/python"
 export PROSYNC_DIR="/iopsstor/scratch/cscs/dbartaula/system_3/async_omni_v2"   # this repo's system_5 pipeline (Qwen3-VL)
 export OMNIPRO_DATASET_DIR="/iopsstor/scratch/cscs/dbartaula/omni_pro/dataset"  # raw_videos/*.mp4
 export HF_HOME="/iopsstor/scratch/cscs/dbartaula/hf_cache"       # Qwen3-VL weights (system_5)

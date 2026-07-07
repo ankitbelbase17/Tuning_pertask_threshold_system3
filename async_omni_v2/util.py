@@ -52,6 +52,24 @@ def log(tag, vid_t, msg):
         print(f"[{time.time()-_T0:6.1f}s | vid {vid_t:6.1f}s] {tag:<12} {msg}", flush=True)
 
 
+class VideoClock:
+    """Thread-safe latest-ingested video time. The input ingester publishes the vt
+    of each frame it ingests; the model-scheduler controller reads it to self-pace
+    ('check again in next_check_s of video time')."""
+
+    def __init__(self):
+        self._lock = threading.Lock()
+        self._vt = 0.0
+
+    def set(self, vt):
+        with self._lock:
+            self._vt = float(vt)
+
+    def get(self):
+        with self._lock:
+            return self._vt
+
+
 class EncoderControl:
     """Orchestrator -> encoder back-channel: the proactive INPUT gate.
 

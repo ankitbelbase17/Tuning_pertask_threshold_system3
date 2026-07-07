@@ -22,7 +22,11 @@ import queue
 from util import log
 
 
-def input_ingester_thread(cfg, mgr, vis_q, writer_q, ctrl, stop, prof=None, evaluator=None):
+def input_ingester_thread(cfg, mgr, vis_q, writer_q, ctrl, stop, prof=None, evaluator=None, clock=None):
+    # clock: optional VideoClock; when the model scheduler is on, we publish each
+    # frame's vt so the controller can self-pace. In "model" mode the fixed
+    # input/output gates below are skipped entirely (the controller drives them).
+    model_mode = getattr(cfg, "probe_scheduler", "fixed") == "model"
     sink = mgr.seed(cfg.system_prompt)
     log("ingester", 0.0, f"seeded cache, sink={sink} tokens, budget={cfg.kv_budget} "
                          f"(input_gate={cfg.input_gate}, output_gate={cfg.output_gate})")
@@ -36,6 +40,8 @@ def input_ingester_thread(cfg, mgr, vis_q, writer_q, ctrl, stop, prof=None, eval
         except queue.Empty:
             continue
         n_frames += 1
+        if clock is not None:
+            clock.set(vt)                    # publish latest video time for the controller
         if prof is not None:
             prof.observe("visq_depth", vis_q.qsize())
 
@@ -49,6 +55,11 @@ def input_ingester_thread(cfg, mgr, vis_q, writer_q, ctrl, stop, prof=None, eval
         dropped = mgr.evict()
         if dropped:
             log("ingester.evict", vt, f"evicted {dropped} KV tokens (budget={cfg.kv_budget})")
+
+        # In model-scheduler mode the ingester is PURE prefill: the controller
+        # (writer) owns all probing/scheduling, so skip the fixed gates here.
+        if model_mode:
+            continue
 
         # 3. INPUT gate -> steer the encoder's frame rate. Skipped entirely when
         #    cfg.input_gate is False; the encoder then feeds all frames at cfg.fps.

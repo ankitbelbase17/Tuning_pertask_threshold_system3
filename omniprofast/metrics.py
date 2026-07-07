@@ -17,6 +17,7 @@ flags `judge="lexical"` so the result is never silently mislabelled.
 """
 from __future__ import annotations
 
+import json
 import os
 import re
 from collections import defaultdict
@@ -86,19 +87,61 @@ def _lexical_sim(a: str, b: str) -> float:
     return len(ta & tb) / len(ta | tb)
 
 
+_GENAI_JUDGE_PROMPT = (
+    "You are evaluating whether a model's response correctly describes an event in a "
+    "video, compared to the ground-truth answer.\n\n"
+    "Question/Instruction: {question}\n"
+    "Ground-truth answer: {gt}\n"
+    "Model response: {pred}\n\n"
+    "Score 1-5:\n"
+    "- 5: Perfect - same event/information, accurate\n"
+    "- 4: Good - mostly correct, minor differences\n"
+    "- 3: Acceptable - right event, notable inaccuracies\n"
+    "- 2: Poor - partially relevant but significantly wrong/vague\n"
+    "- 1: Wrong - irrelevant or wrong event\n\n"
+    'Respond with ONLY a JSON object: {{"score": <int 1-5>, "explanation": "<brief>"}}')
+
+
+def _parse_judge_score(text: str):
+    m = re.search(r"\{.*\}", text or "", re.DOTALL)
+    if not m:
+        return None
+    try:
+        return int(json.loads(m.group()).get("score", 0))
+    except Exception:
+        m2 = re.search(r'"?score"?\s*[:=]\s*(\d)', text)
+        return int(m2.group(1)) if m2 else None
+
+
 class ContentJudge:
-    """LLM judge if a key is present, else lexical fallback."""
+    """LLM-as-judge for free-text content. Priority: (1) google-genai SDK (works
+    with a bare GEMINI_API_KEY, no base URL needed); (2) the OmniPro REST llm_judge
+    (needs GEMINI_API_BASE); (3) lexical fallback. Correct if score >= 4."""
 
     def __init__(self):
         self.mode = "lexical"
         self._judge = None
-        if os.environ.get("OPENAI_API_KEY") or os.environ.get("GEMINI_API_KEY"):
+        self._genai = None
+        self._model = None
+        key = os.environ.get("GEMINI_API_KEY")
+
+        # (1) preferred: google-genai SDK with the key passed explicitly
+        if key:
             try:
-                # Load OmniPro's llm_judge.py DIRECTLY by file path. We cannot do
-                # `from metrics.llm_judge import ...` because THIS file is also
-                # imported as the top-level module `metrics`, so the repo's
-                # `metrics` package is shadowed in sys.modules and the import
-                # silently fails into lexical. importlib by path sidesteps that.
+                from google import genai
+                self._genai = genai.Client(api_key=key)
+                self._model = os.environ.get("GEMINI_MODEL", "gemini-3.5-flash")
+                self.mode = "genai"
+                print(f"[judge] google-genai judge active: model={self._model}", flush=True)
+                return
+            except Exception as e:
+                print(f"[judge] genai SDK unavailable ({type(e).__name__}: {e}); "
+                      f"trying REST judge", flush=True)
+
+        # (2) fallback: OmniPro's REST llm_judge (loaded by path to avoid the
+        # metrics-package shadowing; needs GEMINI_API_BASE/OPENAI_API_BASE set).
+        if os.environ.get("OPENAI_API_KEY") or key:
+            try:
                 import importlib.util
                 from utils import SCRATCH
                 judge_path = os.environ.get(
@@ -107,17 +150,26 @@ class ContentJudge:
                 spec = importlib.util.spec_from_file_location("omnipro_llm_judge", judge_path)
                 mod = importlib.util.module_from_spec(spec)
                 spec.loader.exec_module(mod)
-                self._judge = mod.LLMJudge()      # auto-detects gemini from GEMINI_API_KEY
+                self._judge = mod.LLMJudge()
                 self.mode = "llm"
-                print(f"[judge] LLM judge active: provider={self._judge.provider} "
+                print(f"[judge] REST LLM judge active: provider={self._judge.provider} "
                       f"model={self._judge.model} base={self._judge.api_base}", flush=True)
             except Exception as e:
-                self.mode = "lexical"
-                print(f"[judge] LLM judge unavailable ({type(e).__name__}: {e}); "
+                print(f"[judge] REST judge unavailable ({type(e).__name__}: {e}); "
                       f"using lexical fallback", flush=True)
 
     def score(self, question: str, gt: str, pred: str) -> float:
-        """Return correctness in [0,1]."""
+        """Return correctness in [0,1] (1.0 if judged score >= 4)."""
+        if self.mode == "genai" and self._genai is not None:
+            try:
+                prompt = _GENAI_JUDGE_PROMPT.format(question=question, gt=gt, pred=pred)
+                r = self._genai.models.generate_content(model=self._model, contents=prompt)
+                sc = _parse_judge_score(getattr(r, "text", "") or "")
+                if sc is not None:
+                    return 1.0 if sc >= 4 else 0.0
+            except Exception:
+                pass
+            return 1.0 if _lexical_sim(gt, pred) >= 0.3 else 0.0
         if self.mode == "llm" and self._judge is not None:
             try:
                 r = self._judge.judge(question, gt, pred)

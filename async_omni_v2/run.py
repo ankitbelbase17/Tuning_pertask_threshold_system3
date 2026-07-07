@@ -19,7 +19,8 @@ from manager import KVCacheManager
 from vision_stream import encoder_thread
 from input_ingester import input_ingester_thread
 from writer import writer_thread
-from util import log, Profiler, EncoderControl, seed_everything
+from controller import controller_thread
+from util import log, Profiler, EncoderControl, VideoClock, seed_everything
 from eval_gt import make_evaluator
 
 
@@ -74,7 +75,7 @@ def main():
     else:
         log("main", 0.0, f"encoder shares the model on {cfg.device}")
 
-    vis_q = queue.Queue(maxsize=cfg.frame_q_size)   # encoder -> orchestrator
+    vis_q = queue.Queue(maxsize=cfg.frame_q_size)   # encoder -> ingester
     writer_q = queue.Queue(maxsize=1)
     stop = threading.Event()
     ctrl = EncoderControl(cfg.fps, cfg.encoder_idle_fps, cfg.encoder_focus_fps)
@@ -82,15 +83,25 @@ def main():
     if evaluator is not None:
         log("main", 0.0, "ground-truth eval ON (France 3-1 Senegal highlight)")
 
+    # probe_scheduler="model": ingester is pure prefill (publishes vt via clock) and
+    # the controller replaces the writer as the agentic orchestrator. "fixed"=current.
+    model_mode = cfg.probe_scheduler == "model"
+    clock = VideoClock() if model_mode else None
+    if model_mode:
+        driver = threading.Thread(target=controller_thread,
+                                  args=(cfg, mgr, ctrl, clock, stop, prof, evaluator, writer_backend),
+                                  name="controller", daemon=True)
+    else:
+        driver = threading.Thread(target=writer_thread,
+                                  args=(cfg, mgr, writer_q, stop, prof, evaluator, writer_backend),
+                                  name="writer", daemon=True)
     threads = [
         threading.Thread(target=encoder_thread, args=(cfg, encoder_backend, vis_q, ctrl, stop, prof),
                          name="encoder", daemon=True),
         threading.Thread(target=input_ingester_thread,
-                         args=(cfg, mgr, vis_q, writer_q, ctrl, stop, prof, evaluator),
+                         args=(cfg, mgr, vis_q, writer_q, ctrl, stop, prof, evaluator, clock),
                          name="input_ingester", daemon=True),
-        threading.Thread(target=writer_thread,
-                         args=(cfg, mgr, writer_q, stop, prof, evaluator, writer_backend),
-                         name="writer", daemon=True),
+        driver,
     ]
     log("main", 0.0, f"start: model={cfg.model_id} fps={cfg.fps} "
                      f"max={cfg.max_seconds}s budget={cfg.kv_budget} "

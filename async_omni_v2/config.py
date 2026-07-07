@@ -201,6 +201,46 @@ class AsyncOmniConfig:
     vision_gate_every: int = 8        # run the "important?" probe every N frames
     log_gate_every: int = -1           # log the goal probe every N probes
 
+    # ---- proactivity scheduler ----
+    # "fixed": input/output gates probe on a fixed cadence (ALL current behavior).
+    # "model": PURE-GENERATIVE agentic loop. The controller (writer) reads the shared
+    #   KV cache and emits ONE control JSON per cycle carrying fps (input gate),
+    #   have_enough_info (output gate), new_event (dedup vs already-answered), answer,
+    #   and next_check_s (self-paced cadence). On a NEW triggered event it emits the
+    #   user answer, then resumes reading + emitting config. Over-firing is minimized
+    #   by the new_event dedup + model-chosen cadence rather than fixed probing.
+    probe_scheduler: str = "fixed"
+    probe_default_s: float = 3.0      # fallback cadence if next_check_s is missing/unparsed
+    probe_min_s: float = 1.0          # clamp next_check_s floor (anti-spin)
+    probe_max_s: float = 10.0         # clamp next_check_s ceiling (anti-stall)
+    controller_max_tokens: int = 160  # cap for the control-JSON generation
+    # In-context "control language" (VISPROG-style): a compact JSON DSL the frozen
+    # model emits each tick to drive its own probing. Taught via worked
+    # (Situation -> Control) pairs that demonstrate the DECISIONS (stay quiet /
+    # defer-with-question / fire-once / suppress-repeat), not just the syntax.
+    controller_prompt: str = (
+        "\nYou are the CONTROLLER of a live video monitor for the target event in your "
+        "task. Each turn you read the stream so far (above) and emit exactly ONE control "
+        "command as a compact JSON object with these fields:\n"
+        "  fps              : how densely to sample next (1-3; raise when the scene is busy)\n"
+        "  have_enough_info : true ONLY when you are confident the target event has occurred\n"
+        "  new_event        : true ONLY if this occurrence is NEW (not already reported)\n" #TODO: SHOULD keep memory of what's reported
+        '  answer           : if have_enough_info AND new_event -> ONE sentence describing the REAL event; else ""\n' #TODO: may be say what the target task asks
+        '  question         : if unsure but something may be developing -> a short yes/no check to verify next time; this is optional you may keep it empty if there is no important question at this time; else ""\n'
+        "  next_check_s     : seconds until the next check (small when unsure or busy, larger when idle)\n"
+        "Rules: describe only what you actually see; NEVER copy the example text; NEVER "
+        "re-report an event you already reported; when unsure, DEFER with a question and a "
+        "short next_check_s, then confirm on the next turn before answering.\n" # TODO: how many seconds is good?
+        "Worked examples (Situation -> Control):\n"
+        "# nothing relevant on screen yet -> stay quiet, sample slowly\n"
+        "# something may be starting but you are not sure -> sample densely and DEFER a targeted check\n"
+        '{"fps":3,"have_enough_info":false,"new_event":false,"answer":"","question":"has the target event just started?","next_check_s":2}\n'
+        "# the deferred check is now clearly confirmed -> report it ONCE\n"
+        '{"fps":2,"have_enough_info":true,"new_event":true,"answer":"<one sentence describing the real event>","question":"","next_check_s":5}\n'
+        "# the event is still on screen but you ALREADY reported it -> stay silent (dedup)\n"
+        '{"fps":1,"have_enough_info":true,"new_event":false,"answer":"","question":"","next_check_s":4}\n'
+        "Now emit ONLY your control JSON for the current stream:\n")
+
     # ---- benchmark matrix (ablation switches; toggle these per experiment) ----
     # input_gate: run the INPUT proactivity probe ("is this important?") to steer
     #   the encoder fps (focus/idle). False => NO input probe: the encoder feeds

@@ -114,14 +114,17 @@ class System5Runner:
         from vision_stream import encoder_thread
         from input_ingester import input_ingester_thread
         from writer import writer_thread
-        from util import EncoderControl
+        from controller import controller_thread
+        from util import EncoderControl, VideoClock
 
         self._AsyncOmniConfig = AsyncOmniConfig
         self._KVCacheManager = KVCacheManager
         self._encoder_thread = encoder_thread
         self._ingester_thread = input_ingester_thread
         self._writer_thread = writer_thread
+        self._controller_thread = controller_thread
         self._EncoderControl = EncoderControl
+        self._VideoClock = VideoClock
 
         base_kwargs = dict(dtype=dtype, device=device, profile=False)
         if model_id:
@@ -145,6 +148,11 @@ class System5Runner:
         # system_5 uses goal_question/goal_threshold (not event_*), always uses its
         # prompts verbatim + a fixed threshold, and has no `mode`/prompt_mode/gate_mode.
         # Ablation-matrix switches are overridable per run via OMNIPRO_* env vars.
+        # probe_scheduler: "fixed" (gates) or "model" (pure-generative controller).
+        # Model mode is self-paced in VIDEO time, so it MUST run realtime (batch
+        # fast-forwards the whole clip before the controller can walk it).
+        sched = os.environ.get("OMNIPRO_PROBE_SCHEDULER", self.base_cfg.probe_scheduler)
+        model_mode = (sched == "model")
         cfg = dataclasses.replace(
             self.base_cfg,
             system_prompt=prompt_fields["system_prompt"],
@@ -153,7 +161,8 @@ class System5Runner:
             goal_threshold=prompt_fields["goal_threshold"],
             video_path=sample.video_path,
             max_seconds=(max_seconds if max_seconds else 10 ** 9),
-            realtime=realtime,
+            realtime=(True if model_mode else realtime),
+            probe_scheduler=sched,
             groundtruth=False,                # disable the football-only GT hook
             **({"fps": fps} if fps else {}),
             **_env_overrides(),               # OMNIPRO_INPUT_GATE / OUTPUT_GATE / ...
@@ -164,18 +173,25 @@ class System5Runner:
         writer_q = queue.Queue(maxsize=4)
         stop = threading.Event()   # system_5 coordinates all 3 threads on ONE event
         ctrl = self._EncoderControl(cfg.fps, cfg.encoder_idle_fps, cfg.encoder_focus_fps)
+        clock = self._VideoClock() if model_mode else None
         ev = CaptureEvaluator()
 
+        if model_mode:
+            driver = threading.Thread(target=self._controller_thread,
+                                      args=(cfg, mgr, ctrl, clock, stop, None, ev, self.backend),
+                                      name="controller", daemon=True)
+        else:
+            driver = threading.Thread(target=self._writer_thread,
+                                      args=(cfg, mgr, writer_q, stop, None, ev, self.backend),
+                                      name="writer", daemon=True)
         threads = [
             threading.Thread(target=self._encoder_thread,
                              args=(cfg, self.backend, in_q, ctrl, stop, None),
                              name="encoder", daemon=True),
             threading.Thread(target=self._ingester_thread,
-                             args=(cfg, mgr, in_q, writer_q, ctrl, stop, None, ev),
+                             args=(cfg, mgr, in_q, writer_q, ctrl, stop, None, ev, clock),
                              name="input_ingester", daemon=True),
-            threading.Thread(target=self._writer_thread,
-                             args=(cfg, mgr, writer_q, stop, None, ev, self.backend),
-                             name="writer", daemon=True),
+            driver,
         ]
         for t in threads:
             t.start()
