@@ -5,8 +5,7 @@ Everything else in this project is model-agnostic. To support a different
 VLM you write a new ModelBackend subclass; nothing else changes.
 
 A backend must provide:
-  * tokenizer handles: `eos_id`, `newline_ids`, `yes_ids`, `no_ids`, plus
-    `decode(ids)`.
+  * tokenizer handles: `eos_id`, `newline_ids`, plus `decode(ids)`.
   * `embed_text(text)  -> [1, L, H]`   text -> input embeddings
   * `embed_frame(pil)  -> [1, N, H]`   one image -> N vision-token embeddings
   * `forward(embeds, cache, pos_start, phys_start) -> (logits[V], cache)`
@@ -35,8 +34,6 @@ import torch
 class ModelBackend(ABC):
     eos_id: int
     newline_ids: set
-    yes_ids: list
-    no_ids: list
     hidden_size: int
 
     @abstractmethod
@@ -60,18 +57,12 @@ def _word_ids(tok, words):
 
 
 class Qwen3VLBackend(ModelBackend):
-    def __init__(self, cfg, role="full"):
-        # role decides which half of the model to KEEP resident:
-        #   "full"     -> vision + language (a shared backend that does everything)
-        #   "vision"   -> only the ViT/merger (an encoder-only replica)
-        #   "language" -> only the decoder + lm_head (orchestrator/writer replica)
-        # The unused half is dropped after load to save GPU memory; results are
-        # identical because each role never calls the half it drops.
+    def __init__(self, cfg):
         from transformers import AutoProcessor
         dtype = {"float16": torch.float16, "bfloat16": torch.bfloat16,
                  "float32": torch.float32}[cfg.dtype]
-        self.device, self.dtype, self.cfg, self.role = cfg.device, dtype, cfg, role
-        print(f"[backend] loading {cfg.model_id} ({cfg.dtype}, role={role}) ...", flush=True)
+        self.device, self.dtype, self.cfg = cfg.device, dtype, cfg
+        print(f"[backend] loading {cfg.model_id} ({cfg.dtype}) ...", flush=True)
 
         # Qwen3-VL needs a recent transformers; class name may be
         # Qwen3VLForConditionalGeneration. Fall back to the generic loader.
@@ -79,16 +70,9 @@ class Qwen3VLBackend(ModelBackend):
             from transformers import Qwen3VLForConditionalGeneration as VLM
         except Exception:
             from transformers import AutoModelForImageTextToText as VLM
-        # Selective load to keep GPU PEAK at the kept half (not the full 17.5 GB):
-        #   full     -> load straight to the GPU (does everything).
-        #   vision   -> load to CPU, drop the decoder, move ONLY the ViT to GPU.
-        #   language -> load to CPU, drop the ViT, move ONLY the decoder to GPU.
-        # The full model materializes on CPU RAM transiently (handles buffers +
-        # tied weights correctly), then only the kept half ever touches the GPU.
         self.model = VLM.from_pretrained(
             cfg.model_id, torch_dtype=dtype,
-            device_map=(cfg.device if role == "full" else None),
-            low_cpu_mem_usage=True).eval()
+            device_map=cfg.device, low_cpu_mem_usage=True).eval()
         self.processor = AutoProcessor.from_pretrained(cfg.model_id)
         self.tok = self.processor.tokenizer
         self._cap_image_resolution(cfg.max_pixels)
@@ -97,55 +81,8 @@ class Qwen3VLBackend(ModelBackend):
         self.hidden_size = self.model.config.get_text_config().hidden_size \
             if hasattr(self.model.config, "get_text_config") else self.model.config.hidden_size
 
-        # VisionZip token pruning: patch the last vision block to expose its
-        # attention, so embed_frame can drop low-info tokens before ingest.
-        # Only meaningful on a backend that actually encodes (keeps the vision half).
-        self._prune = bool(getattr(cfg, "prune_img_tokens", False)) and role in ("full", "vision")
-        if self._prune:
-            from visionzip import enable_capture
-            self.merge_unit = getattr(self.visual, "spatial_merge_unit",
-                                      self.model.config.vision_config.spatial_merge_size ** 2)
-            self._vz_attn_mod = enable_capture(self.visual)
-            print(f"[backend] VisionZip ON: keep ~{cfg.prune_dominant_frac + cfg.prune_contextual_frac:.0%} "
-                  f"of vision tokens (dominant={cfg.prune_dominant_frac}, "
-                  f"contextual={cfg.prune_contextual_frac}, merge_unit={self.merge_unit})", flush=True)
-
         self.eos_id = self.tok.eos_token_id
         self.newline_ids = set(_word_ids(self.tok, ["\n"]))
-        self.yes_ids = _word_ids(self.tok, cfg.yes_words)
-        self.no_ids = _word_ids(self.tok, cfg.no_words)
-        if not self.yes_ids or not self.no_ids:
-            raise RuntimeError("could not map yes/no to single tokens for this tokenizer")
-
-        self._apply_role(role)         # drop the unused half + free its GPU memory
-
-    # -- keep only the half this role needs; free the rest; move kept half to GPU --
-    def _apply_role(self, role):
-        import gc
-        if role == "full":
-            return                      # already loaded straight to the GPU
-        m = self.model
-        inner = m.model if hasattr(m, "model") else m   # Qwen3VLModel (.visual/.language_model)
-        if role == "vision":            # encoder-only: drop decoder + lm_head
-            self.language_model = self.lm_head = self.embed_tokens = None
-            if hasattr(m, "lm_head"):
-                m.lm_head = None
-            if hasattr(inner, "language_model"):
-                inner.language_model = None
-            gc.collect()
-            inner.visual.to(self.device)                # move ONLY the ViT to GPU
-        elif role == "language":        # decoder-only: drop the vision tower
-            self.visual = self.get_image_features = None
-            if hasattr(inner, "visual"):
-                inner.visual = None
-            gc.collect()
-            inner.language_model.to(self.device)        # move ONLY the decoder to GPU
-            if getattr(m, "lm_head", None) is not None:
-                m.lm_head.to(self.device)
-        gc.collect()
-        if torch.cuda.is_available():
-            with torch.cuda.device(self.device):
-                torch.cuda.empty_cache()
 
     # -- cap vision tokens/frame by limiting image pixels (perf + KV memory) --
     def _cap_image_resolution(self, max_pixels):
@@ -228,12 +165,7 @@ class Qwen3VLBackend(ModelBackend):
             out = out.pooler_output
         embeds = out[0] if isinstance(out, (list, tuple)) else out
         embeds = embeds.reshape(1, -1, self.hidden_size)               # [1, N, H]
-        if self._prune:                                                # drop low-info tokens
-            from visionzip import prune_tokens
-            embeds = prune_tokens(embeds, self._vz_attn_mod._vz_attn,
-                                  self._vz_attn_mod._vz_key, self.merge_unit,
-                                  self.cfg.prune_dominant_frac, self.cfg.prune_contextual_frac)
-        return embeds.to(self.dtype)                                   # [1, N', H]
+        return embeds.to(self.dtype)
 
     # -------------------------------------------------------------- forward
     @torch.no_grad()

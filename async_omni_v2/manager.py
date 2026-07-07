@@ -39,8 +39,6 @@ import time
 import torch
 from transformers import DynamicCache
 
-from proactivity import yes_share
-
 
 class KVCacheManager:
     def __init__(self, backend, kv_budget, prof=None, sync=True):
@@ -69,15 +67,6 @@ class KVCacheManager:
             embeds, self.cache, pos_start=self.next_pos, phys_start=self._len())
         self.next_pos += embeds.shape[1]
         return logits
-
-    def _truncate(self, phys_len):
-        if hasattr(self.cache, "crop"):
-            self.cache.crop(phys_len)
-        else:
-            for i in range(len(self.cache.key_cache)):
-                self.cache.key_cache[i] = self.cache.key_cache[i][:, :, :phys_len, :]
-                self.cache.value_cache[i] = self.cache.value_cache[i][:, :, :phys_len, :]
-            self.cache._seen_tokens = phys_len
 
     def _evict_locked(self):
         n = self._len()
@@ -135,22 +124,6 @@ class KVCacheManager:
             t2 = time.time()
         self._rec("evict", t2 - t1, t1 - t0)
         return dropped
-
-    def probe(self, question, label):
-        """Yes/no proactivity probe on the PRIMARY cache that self-erases."""
-        t0 = time.time()
-        with self._lock:
-            t1 = time.time()
-            phys0, pos0 = self._len(), self.next_pos
-            logits = self._forward_primary(self.b.embed_text(question))
-            share = yes_share(logits, self.b.yes_ids, self.b.no_ids)
-            self._truncate(phys0)
-            self.next_pos = pos0
-            if self._sync:
-                torch.cuda.synchronize()
-            t2 = time.time()
-        self._rec(label, t2 - t1, t1 - t0)
-        return share
 
     def snapshot_clone(self):
         """MVCC read snapshot: return an INDEPENDENT clone of the primary cache

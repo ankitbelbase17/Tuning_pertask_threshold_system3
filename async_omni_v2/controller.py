@@ -1,5 +1,5 @@
 """
-controller.py — the PURE-GENERATIVE proactivity controller (probe_scheduler="model").
+controller.py — the PURE-GENERATIVE proactivity controller (icl_ingester_writer).
 
 Replaces the fixed-cadence input/output gates with a single agentic loop. The
 controller IS the writer: because it reads the shared KV cache (via an MVCC
@@ -26,7 +26,59 @@ import time
 import torch
 
 from util import log
-from writer import _sample, _cache_to
+
+
+def _sample(logits, prev_ids, cfg, gen=None):
+    """Sample one token id using the controller preset: repetition_penalty +
+    presence_penalty over already-generated tokens, then temperature / top-k /
+    top-p. cfg.writer_greedy -> pure argmax. `gen` is a seeded torch.Generator
+    for reproducible sampling (cfg.writer_seed)."""
+    logits = logits.clone()
+
+    if prev_ids and (cfg.writer_repetition_penalty != 1.0 or cfg.writer_presence_penalty != 0.0):
+        for t in set(prev_ids):
+            if cfg.writer_repetition_penalty != 1.0:
+                logits[t] = (logits[t] / cfg.writer_repetition_penalty
+                             if logits[t] > 0 else logits[t] * cfg.writer_repetition_penalty)
+            logits[t] = logits[t] - cfg.writer_presence_penalty
+
+    if cfg.writer_greedy or not cfg.writer_temperature or cfg.writer_temperature <= 0:
+        return int(torch.argmax(logits).item())
+
+    logits = logits / cfg.writer_temperature
+
+    if cfg.writer_top_k and cfg.writer_top_k > 0:
+        k = min(cfg.writer_top_k, logits.numel())
+        kth = torch.topk(logits, k).values[-1]
+        logits[logits < kth] = float("-inf")
+
+    probs = torch.softmax(logits, dim=-1)
+
+    if cfg.writer_top_p and 0 < cfg.writer_top_p < 1.0:
+        sp, si = torch.sort(probs, descending=True)
+        cum = torch.cumsum(sp, dim=-1)
+        drop = (cum - sp) > cfg.writer_top_p
+        sp[drop] = 0.0
+        probs = torch.zeros_like(probs).scatter_(0, si, sp)
+        probs = probs / probs.sum()
+
+    return int(torch.multinomial(probs, 1, generator=gen).item())
+
+
+def _cache_to(cache, device):
+    """Move a cloned cache's K/V tensors onto `device` (the controller's GPU).
+    Handles transformers 5.x (`.layers`) and 4.x (`.key_cache`) layouts."""
+    if hasattr(cache, "layers"):
+        for layer in cache.layers:
+            if getattr(layer, "keys", None) is None:
+                continue
+            layer.keys = layer.keys.to(device, non_blocking=True)
+            layer.values = layer.values.to(device, non_blocking=True)
+    else:
+        for i in range(len(cache.key_cache)):
+            cache.key_cache[i] = cache.key_cache[i].to(device, non_blocking=True)
+            cache.value_cache[i] = cache.value_cache[i].to(device, non_blocking=True)
+    return cache
 
 
 def _extract_json(text):

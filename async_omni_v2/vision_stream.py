@@ -39,11 +39,10 @@ def encoder_thread(cfg, backend, vis_q, ctrl, stop, prof=None):
         vt = float(frame.pts * vstream.time_base)
         if vt > cfg.max_seconds:
             break
-        # Fixed base fps when the INPUT gate is off (all frames fed at cfg.fps) or
-        # in deterministic eval (avoids the async ingester->encoder fps-steering
-        # race). Otherwise follow the live orchestrator-controlled focus/idle rate.
-        use_fixed_fps = cfg.deterministic or not cfg.input_gate
-        interval = 1.0 / (cfg.fps if use_fixed_fps else ctrl.get_fps())
+        # Follow the live controller-steered fps (focus/idle). In deterministic
+        # eval use the fixed base fps instead (avoids the async controller->encoder
+        # fps-steering race).
+        interval = 1.0 / (cfg.fps if cfg.deterministic else ctrl.get_fps())
         if vt - last_emit < interval:
             continue
         last_emit = vt
