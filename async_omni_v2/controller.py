@@ -146,9 +146,11 @@ def controller_thread(cfg, mgr, ctrl, clock, stop, prof=None, evaluator=None, wb
         logits = step(b.embed_text(prompt + "{"))
         ids = []
         for _ in range(cfg.controller_max_tokens):
+            # MASK EOS: as an instruct model spliced raw onto the cache, Qwen often
+            # samples the end token as the very first token (-> empty output). We
+            # stop on the closing "}" ourselves, so EOS is never wanted here.
+            logits[b.eos_id] = float("-inf")
             tok_id = _sample(logits, ids, cfg, gen)
-            if tok_id == b.eos_id:
-                break
             ids.append(tok_id)
             if "}" in b.tok.decode([tok_id]):     # first close -> flat object done
                 break
