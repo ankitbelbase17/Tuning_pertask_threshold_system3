@@ -74,6 +74,10 @@ def main():
 
     os.makedirs(args.out, exist_ok=True)
     pred_path = os.path.join(args.out, "online_pred.jsonl")
+    # --no_resume => fresh run: truncate stale predictions so the aggregate isn't
+    # polluted by earlier runs (the file is APPENDED to per sample).
+    if not args.resume and os.path.exists(pred_path):
+        os.remove(pred_path)
     done = _done_ids(pred_path) if args.resume else set()
     log(f"{len(done)} done, {len(samples)} samples", tag="online")
 

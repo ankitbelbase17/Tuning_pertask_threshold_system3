@@ -39,8 +39,12 @@ fi
 # All model behaviour (model_id, dtype, fps, kv_budget, prompts, ...) comes from
 # async_omni_v2/config.py. Only dataset selection + scoring are passed here.
 # Every run gets its OWN timestamped log file (no overwriting prior runs).
-mkdir -p "$OMNIPRO_OUTPUT_DIR"
-LOG="$OMNIPRO_OUTPUT_DIR/run_$(date +%Y%m%d_%H%M%S).log"
+# Log lands in the SAME dir the results go to. If the caller passed --out, honor
+# it (so log + metrics + preds for a run stay together); else use the default.
+OUT_DIR="$OMNIPRO_OUTPUT_DIR"
+_prev=""; for a in "$@"; do [ "$_prev" = "--out" ] && OUT_DIR="$a"; _prev="$a"; done
+mkdir -p "$OUT_DIR"
+LOG="$OUT_DIR/run_$(date +%Y%m%d_%H%M%S).log"
 echo "[run_fast] running icl_ingester_writer ONLINE (log: $LOG)"
 "$PY" evaluate.py \
   --tolerance "${TOLERANCE:-3.0}" \
