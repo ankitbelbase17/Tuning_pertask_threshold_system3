@@ -41,8 +41,11 @@ _SEMANTIC_CONDITION_ALERT = (
     "COMPREHENSION and REASONING, not mere object/keyword spotting. You must understand the "
     "user's intent and JUDGE whether what is happening on screen actually MEETS it, then alert "
     "at EACH occurrence where it is satisfied.\n"
-    "Each turn, read the stream so far and emit EXACTLY ONE control command as a compact JSON "
-    "object with these fields:\n"
+    "Each turn, read the stream so far and emit a compact JSON DIFF — ONLY the fields that CHANGE "
+    "this tick. Fields you omit keep their previous value, so you rarely write much. IMPORTANT: "
+    "have_enough_info, new_event and answer RESET automatically each tick, so include them ONLY on "
+    "the tick you actually fire a new alert; omit them otherwise (an empty {} means 'nothing new'). "
+    "Fields:\n"
     "  fps               : how densely to sample next (1-3; raise when the scene is busy)\n"
     "  have_enough_info  : true only when the condition is genuinely satisfied on screen NOW\n"
     "  new_event         : true ONLY at the ONSET of an occurrence (the moment it becomes true); "
@@ -62,14 +65,16 @@ _SEMANTIC_CONDITION_ALERT = (
     "Worked example (a DIFFERENT video — condition: 'alert whenever the video provides specific "
     "logistical details for the match, such as the date, location, or ticket pricing'). The video "
     "is a football club TV commercial: fans in body paint, the crowd roaring, then a poster with "
-    "the match date and location, then ticket pricing:\n"
-    "At 3s, none of the asked-for details shown yet -> keep probing:\n"
-    '{"fps":1.0,"have_enough_info":false,"new_event":false,"answer":"","next_check_s":1,"question_for_next":"Is the date, location or ticket price shown now?"}\n'
-    "At 16s the poster shows the date and location (ONSET -> alert):\n"
-    '{"fps":1.0,"have_enough_info":true,"new_event":true,"answer":"The match date is August 14th and the location is Dairy Farmers Stadium.","next_check_s":1,"question_for_next":"Is the ticket price shown now?"}\n'
-    "At 17s the same date/location still on screen (same occurrence -> do NOT repeat):\n"
-    '{"fps":1.0,"have_enough_info":true,"new_event":false,"answer":"","next_check_s":1,"question_for_next":"Is the ticket price shown now?"}\n'
-    "At 23s ticket pricing appears (a NEW, separate detail -> alert again):\n"
+    "the match date and location, then ticket pricing. Each output below is a DIFF (only the "
+    "fields that changed that tick):\n"
+    "At 3s, none of the asked-for details shown yet -> keep probing (no fire):\n"
+    '{"fps":1.0,"question_for_next":"Is the date, location or ticket price shown now?"}\n'
+    "At 16s the poster shows the date and location (ONSET -> fire; state have_enough_info + new_event + answer):\n"
+    '{"have_enough_info":true,"new_event":true,"answer":"The match date is August 14th and the location is Dairy Farmers Stadium.","question_for_next":"Is the ticket price shown now?"}\n'
+    "At 17s the same date/location is still on screen — SAME occurrence, nothing new. new_event is "
+    "now false (auto-reset), so emit an EMPTY diff and do NOT repeat the alert:\n"
+    "{}\n"
+    "At 23s ticket pricing appears — a NEW, separate detail -> fire AGAIN:\n"
     '{"fps":3.0,"have_enough_info":true,"new_event":true,"answer":"The video now details ticket costs for different groups and gives a purchase website and phone number.","next_check_s":3,"question_for_next":""}\n'
     "(all asked-for details reported -> sample sparsely, keep watching in case more appear)\n"
 )

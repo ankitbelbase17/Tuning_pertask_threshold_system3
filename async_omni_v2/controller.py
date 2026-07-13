@@ -108,6 +108,13 @@ def controller_thread(cfg, mgr, ctrl, clock, stop, prof=None, evaluator=None, wb
     next_check_vt = cfg.probe_min_s           # skip the empty-cache tick at t=0
     reported = []                              # conversation history: (vt, answer) already emitted
     pending_q = ""                             # question_for_next: what to verify on the next tick
+    # DIFF-MERGE: keep a persistent control config; the model emits only the fields
+    # that CHANGE each tick (a compact JSON diff), so it rarely decodes the string
+    # fields -> much less latency. Edge fields (have_enough_info/new_event/answer)
+    # RESET to default every tick, so a fire must be re-asserted (this is what lets
+    # us trust the model's new_event for dedup instead of comparing answer strings).
+    state = {"fps": cfg.encoder_idle_fps, "next_check_s": cfg.probe_default_s,
+             "have_enough_info": False, "new_event": False, "answer": "", "question_for_next": ""}
 
     while not stop.is_set():
         vt = clock.get()
@@ -159,35 +166,43 @@ def controller_thread(cfg, mgr, ctrl, clock, stop, prof=None, evaluator=None, wb
             logits = step(b.embed_token(tok_id))
 
         raw = "{" + b.decode(ids)
-        ctl = _extract_json(raw)
+        diff = _extract_json(raw)                 # the model's DIFF (partial dict); {} = no change
         gen_s = time.time() - t0
 
-        # ---- apply the control config ----
-        fps = _clamp(ctl.get("fps"), cfg.encoder_idle_fps, cfg.encoder_focus_fps,
+        # ---- apply the DIFF onto the persistent config ----
+        # reset the edge fields first (they only hold this tick), then merge whatever
+        # the model re-stated; persistent fields (fps/next_check_s/question) survive.
+        state["have_enough_info"] = False
+        state["new_event"] = False
+        state["answer"] = ""
+        for k, v in diff.items():
+            key = "question_for_next" if k == "question" else k   # accept legacy key
+            if key in state:
+                state[key] = v
+
+        fps = _clamp(state["fps"], cfg.encoder_idle_fps, cfg.encoder_focus_fps,
                      cfg.encoder_idle_fps)
         ctrl.set_fps(fps)
-        nxt = _clamp(ctl.get("next_check_s"), cfg.probe_min_s, cfg.probe_max_s,
+        nxt = _clamp(state["next_check_s"], cfg.probe_min_s, cfg.probe_max_s,
                      cfg.probe_default_s)
         next_check_vt = vt + nxt
 
-        have = bool(ctl.get("have_enough_info"))
-        new = bool(ctl.get("new_event"))
-        answer = (ctl.get("answer") or "").strip()
-        # accept either key; question_for_next is carried forward (NOT cleared on
-        # emit — e.g. after reporting the date it may still ask about ticket price)
-        pending_q = (ctl.get("question_for_next") or ctl.get("question") or "").strip()
+        have = bool(state["have_enough_info"])
+        new = bool(state["new_event"])
+        answer = (state["answer"] or "").strip()
+        pending_q = (state.get("question_for_next") or "").strip()
 
-        # log EVERY tick's raw JSON so all responses are inspectable in the log file
+        # log EVERY tick's raw diff so all responses are inspectable in the log file
         vid = cfg.video_id or "?"
-        log("ctrl.raw", vt, f"[{vid}] " + (raw.strip()[:240] if ctl else f"PARSE FAILED raw={raw[:240]!r}"))
+        log("ctrl.raw", vt, f"[{vid}] " + (raw.strip()[:240] if diff else f"NO-DIFF raw={raw[:120]!r}"))
         log("ctrl.gate", vt, f"[{vid}] fps={fps:.1f} have_info={have} new={new} "
                              f"next={nxt:.1f}s gen={gen_s:.1f}s ntok={len(ids)} q={pending_q!r}")
 
-        # output gate + writer in one: fire on each NEW onset (edge). Trust the
-        # model's new_event flag for recurrence; only block an exact repeat of the
-        # immediately-previous answer (guards accidental double-fire, not recurrence).
-        last_ans = reported[-1][1] if reported else None
-        if have and new and answer and answer != last_ans:
+        # output gate + writer in one: fire on each NEW onset (edge). We TRUST the
+        # model's new_event (reset each tick, informed by the timestamped history) —
+        # no answer-string dedup, so genuine recurrences fire and same-occurrence
+        # ticks (new_event=false) don't.
+        if have and new and answer:
             reported.append((vt, answer))
             if evaluator is not None:
                 evaluator.record_trigger(vt, 1.0)
