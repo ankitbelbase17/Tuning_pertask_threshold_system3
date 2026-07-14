@@ -41,16 +41,19 @@ _SEMANTIC_CONDITION_ALERT = (
     "COMPREHENSION and REASONING, not mere object/keyword spotting. You must understand the "
     "user's intent and JUDGE whether what is happening on screen actually MEETS it, then alert "
     "at EACH occurrence where it is satisfied.\n"
-    "Each turn, read the stream so far and emit a compact JSON control update. ALWAYS include "
-    "have_enough_info — it is short and FORCES you to judge the condition every tick. Whenever "
-    "have_enough_info is true, ALSO include answer. Include fps, next_check_s, or "
+    "Each turn, read the stream so far and emit a compact JSON control update. ALWAYS start with "
+    "seen, then have_enough_info — looking BEFORE judging, every tick. Whenever have_enough_info "
+    "is true, ALSO include event_time_s and answer. Include fps, next_check_s, or "
     "question_for_next ONLY when they change from their current value (otherwise omit them to stay "
     "short). Fields:\n"
-    "  fps               : how densely to sample next (1-3; raise when the scene is busy)\n"
+    '  seen              : ALWAYS FIRST — 3-8 words: what is on screen now that is relevant to the condition\n'
     "  have_enough_info  : true when the condition is satisfied on screen NOW; keep reporting true "
     "for as long as it remains satisfied; back to false when it no longer is\n"
+    "  event_time_s      : when have_enough_info is true -> the video time in seconds when THIS "
+    "occurrence appeared (read it off the 'time Xs' markers in the stream)\n"
     '  answer            : REQUIRED whenever have_enough_info is true -> ONE sentence (UNDER 25 '
     'words) stating WHAT is happening AND WHY it satisfies the condition; else ""\n'
+    "  fps               : how densely to sample next (1-3; raise when the scene is busy)\n"
     "  next_check_s      : seconds until the next check (1-3; keep it small — more may come)\n"
     '  question_for_next : a short check to verify on the next turn; else ""\n'
     "YOU DO NOT DECIDE WHEN TO ALERT — the system does. It alerts the user only when "
@@ -65,21 +68,21 @@ _SEMANTIC_CONDITION_ALERT = (
     "Worked example (a DIFFERENT video — condition: 'alert whenever the video provides specific "
     "logistical details for the match, such as the date, location, or ticket pricing'). The video "
     "is a football club TV commercial: fans in body paint, the crowd roaring, then a poster with "
-    "the match date and location, then ticket pricing. Every output states have_enough_info; "
-    "other fields appear only when they change:\n"
+    "the match date and location, then ticket pricing. Every output starts with seen + "
+    "have_enough_info; other fields appear only when they change:\n"
     "At 3s, none of the asked-for details shown yet -> condition NOT satisfied:\n"
-    '{"have_enough_info":false,"fps":1.0,"question_for_next":"Is the date, location or ticket price shown now?"}\n'
+    '{"seen":"fans buying green body paint","have_enough_info":false,"fps":1.0,"question_for_next":"Is the date, location or ticket price shown now?"}\n'
     "At 6s still nothing (question unchanged -> omit it):\n"
-    '{"have_enough_info":false}\n'
-    "At 16s the poster shows the date and location -> satisfied; describe it:\n"
-    '{"have_enough_info":true,"answer":"The match date is August 14th and the location is Dairy Farmers Stadium.","question_for_next":"Is the ticket price shown now?"}\n'
+    '{"seen":"crowd roaring in the stadium","have_enough_info":false}\n'
+    "At 16s the poster shows the date and location -> satisfied; describe it and read its time:\n"
+    '{"seen":"poster with match date and venue","have_enough_info":true,"event_time_s":16,"answer":"The match date is August 14th and the location is Dairy Farmers Stadium.","question_for_next":"Is the ticket price shown now?"}\n'
     "At 17s the same poster is still on screen -> STILL satisfied; keep reporting it (the system "
     "will not double-alert):\n"
-    '{"have_enough_info":true,"answer":"The match date is August 14th and the location is Dairy Farmers Stadium."}\n'
+    '{"seen":"same date and venue poster","have_enough_info":true,"event_time_s":16,"answer":"The match date is August 14th and the location is Dairy Farmers Stadium."}\n'
     "At 20s the poster is gone, players celebrating -> no longer satisfied:\n"
-    '{"have_enough_info":false}\n'
+    '{"seen":"players celebrating on the pitch","have_enough_info":false}\n'
     "At 23s ticket pricing appears -> satisfied AGAIN by a new detail:\n"
-    '{"have_enough_info":true,"answer":"The video now details ticket costs for different groups and gives a purchase website and phone number.","fps":3.0,"next_check_s":3}\n'
+    '{"seen":"ticket prices and purchase info on screen","have_enough_info":true,"event_time_s":23,"answer":"The video now details ticket costs for different groups and gives a purchase website and phone number.","fps":3.0,"next_check_s":3}\n'
     "(all asked-for details reported -> sample sparsely, keep watching in case more appear)\n"
 )
 
