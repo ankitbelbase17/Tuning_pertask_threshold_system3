@@ -21,7 +21,8 @@ fi
 # --- 2. Hardcoded machine paths (dataset, python, model pipeline, HF cache) --
 export SCRATCH="${SCRATCH:-/iopsstor/scratch/cscs/dbartaula}"
 export PY="/iopsstor/scratch/cscs/dbartaula/miniforge3/envs/prosync_env/bin/python"
-export PROSYNC_DIR="/iopsstor/scratch/cscs/dbartaula/system_3/async_omni_v2"
+# pipeline code lives in THIS checkout (worktree-safe); override via env if needed
+export PROSYNC_DIR="${PROSYNC_DIR:-$(cd "$HERE/../async_omni_v2" && pwd)}"
 export OMNIPRO_DATASET_DIR="/iopsstor/scratch/cscs/dbartaula/omni_pro/dataset"
 export HF_HOME="/iopsstor/scratch/cscs/dbartaula/hf_cache"
 export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1
