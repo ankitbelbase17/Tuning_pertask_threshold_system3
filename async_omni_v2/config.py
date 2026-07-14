@@ -91,14 +91,12 @@ _SEMANTIC_CONDITION_ALERT = (
 class AsyncOmniConfig:
     # ---- model ----
     model_id: str = "Qwen/Qwen3-VL-8B-Instruct"
-    device: str = "cuda:0"             # primary GPU: ingester + shared KV cache
-    # Multi-GPU: put the controller (generation) and the encoder (vision) on their
-    # OWN GPUs so the controller's decode doesn't time-share the GPU with frame
-    # encode/ingest. Set "" to share the primary GPU (single-GPU box).
-    # NOTE: needs >=3 visible GPUs (e.g. the 4-GPU debug node). For a 1-GPU box,
-    # set both to "" and device="cuda".
-    writer_device: str = "cuda:1"      # controller replica GPU
-    encoder_device: str = "cuda:2"     # vision-encoder replica GPU
+    device: str = "cuda"               # primary GPU: ingester + shared KV cache
+    # Multi-GPU replicas measured NO decode speedup (the ~5-7s/tick is inherent
+    # decode cost, not contention) -> default back to single-GPU. Set these to
+    # e.g. "cuda:1"/"cuda:2" (with >=3 visible GPUs) to re-enable the split.
+    writer_device: str = ""            # controller replica GPU ("" = share primary)
+    encoder_device: str = ""           # vision-encoder replica GPU ("" = share primary)
     dtype: str = "bfloat16"            # float16 / bfloat16 / float32
     # Cap vision tokens/frame by limiting image pixel area. One vision token covers
     # a (patch_size*merge_size)^2 = 32x32 = 1024 px region for Qwen3-VL, so
