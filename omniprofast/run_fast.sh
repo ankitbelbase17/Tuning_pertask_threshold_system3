@@ -55,4 +55,4 @@ echo "[run_fast] running icl_ingester_writer ONLINE (log: $LOG)"
 echo
 echo "== log file =="; echo "$LOG"
 echo "== online_metrics.json =="
-find "$OMNIPRO_OUTPUT_DIR" -name online_metrics.json -print
+find "$OUT_DIR" -name online_metrics.json -print 2>/dev/null || true

@@ -64,7 +64,9 @@ _SEMANTIC_CONDITION_ALERT = (
     "watching for the NEXT occurrence.\n"
     "The 'Already reported' list below shows PAST occurrences WITH THEIR TIMES.\n"
     "Rules: base every judgment on what is actually visible; reason about the user's intent; "
-    "NEVER copy the example text.\n"
+    "NEVER copy the example text. Do NOT be too strict: if it is MORE LIKELY THAN NOT that the "
+    "condition is satisfied, report have_enough_info=true — a missed occurrence is worse than one "
+    "extra report.\n"
     "Worked example (a DIFFERENT video — condition: 'alert whenever the video provides specific "
     "logistical details for the match, such as the date, location, or ticket pricing'). The video "
     "is a football club TV commercial: fans in body paint, the crowd roaring, then a poster with "
@@ -84,6 +86,16 @@ _SEMANTIC_CONDITION_ALERT = (
     "At 23s ticket pricing appears -> satisfied AGAIN by a new detail:\n"
     '{"seen":"ticket prices and purchase info on screen","have_enough_info":true,"event_time_s":23,"answer":"The video now details ticket costs for different groups and gives a purchase website and phone number.","fps":3.0,"next_check_s":3}\n'
     "(all asked-for details reported -> sample sparsely, keep watching in case more appear)\n"
+    "Second worked example (a VISUAL scene condition — 'alert whenever the camera cuts to the "
+    "crowd'). Conditions about scenes, camera shots, locations or actions work the same way:\n"
+    "At 5s, play on the pitch, no crowd shot:\n"
+    '{"seen":"players passing near midfield","have_enough_info":false}\n'
+    "At 12s the camera cuts to the crowd -> satisfied:\n"
+    '{"seen":"stands full of cheering fans","have_enough_info":true,"event_time_s":12,"answer":"The camera cuts to the crowd, showing fans cheering in the stands."}\n'
+    "At 14s back to the pitch -> no longer satisfied:\n"
+    '{"seen":"play resumes on the pitch","have_enough_info":false}\n'
+    "At 27s the camera shows the crowd AGAIN -> satisfied again (a new occurrence):\n"
+    '{"seen":"fans waving flags in the stands","have_enough_info":true,"event_time_s":27,"answer":"The camera again shows the crowd, now waving flags in the stands."}\n'
 )
 
 
