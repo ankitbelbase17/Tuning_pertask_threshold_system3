@@ -141,7 +141,7 @@ class AsyncOmniConfig:
 
     # ---- encoder fps bounds (the controller steers fps within these) ----
     encoder_focus_fps: float = 3.0    # fps ceiling when the controller says "focus"
-    encoder_idle_fps: float = 0.5     # fps floor when the action is boring
+    encoder_idle_fps: float = 1.0     # fps floor (1-3 fps range; was 0.5)
 
     # ---- memory (shared linear KV cache) ----
     kv_budget: int = 262144           # 256K-token context (StreamingLLM eviction
@@ -150,9 +150,9 @@ class AsyncOmniConfig:
     # ---- the CONTROLLER (icl_ingester_writer) ----
     # Self-paced cadence: the controller picks next_check_s each tick; clamp it so
     # it can't spin (min) or stall (max); fall back to default if unparsed.
-    probe_default_s: float = 3.0
-    probe_min_s: float = 1.0
-    probe_max_s: float = 3.0
+    probe_default_s: float = 1.0
+    probe_min_s: float = 0.2      # finer check grid (was 1.0) so vt lands closer to onsets
+    probe_max_s: float = 1.5      # finer check grid (was 3.0)
     controller_max_tokens: int = 300  # cap for the control-JSON generation
     # In-context "control language" (VISPROG-style): a compact JSON DSL the frozen
     # model emits each tick to drive its own probing. Taught via worked

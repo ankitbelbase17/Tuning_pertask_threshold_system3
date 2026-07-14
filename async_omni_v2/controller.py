@@ -180,8 +180,11 @@ def controller_thread(cfg, mgr, ctrl, clock, stop, prof=None, evaluator=None, wb
         # spliced as raw text onto the cache (no assistant-turn markers), it would
         # otherwise emit EOS immediately at the splice point. Starting mid-object
         # forces it to complete the JSON. We reconstruct raw = "{" + generated.
+        t_prefill0 = time.time()
         logits = step(b.embed_text(prompt + "{"))
+        prefill_s = time.time() - t_prefill0      # ICL+convo prefill cost this tick
         ids = []
+        t_dec0 = time.time()
         for _ in range(cfg.controller_max_tokens):
             # MASK EOS: as an instruct model spliced raw onto the cache, Qwen often
             # samples the end token as the very first token (-> empty output). We
@@ -192,6 +195,12 @@ def controller_thread(cfg, mgr, ctrl, clock, stop, prof=None, evaluator=None, wb
             if "}" in b.tok.decode([tok_id]):     # first close -> flat object done
                 break
             logits = step(b.embed_token(tok_id))
+        decode_s = time.time() - t_dec0
+        if prof is not None:
+            prof.observe("ctrl_prefill_s", prefill_s)
+            prof.observe("ctrl_decode_s", decode_s)
+            if ids:
+                prof.observe("ctrl_decode_ms_per_tok", 1000 * decode_s / len(ids))
 
         raw = "{" + b.decode(ids)
         diff = _extract_json(raw)                 # the model's DIFF (partial dict); {} = no change
