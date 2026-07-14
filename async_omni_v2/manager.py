@@ -63,10 +63,13 @@ class KVCacheManager:
         return self.cache.get_seq_length()
 
     def _forward_primary(self, embeds):
-        logits, self.cache = self.b.forward(
-            embeds, self.cache, pos_start=self.next_pos, phys_start=self._len())
+        # ingest/seed only build the KV cache; they never read logits -> skip the
+        # lm_head (want_logits=False) so every frame prefill is a bit cheaper.
+        _, self.cache = self.b.forward(
+            embeds, self.cache, pos_start=self.next_pos, phys_start=self._len(),
+            want_logits=False)
         self.next_pos += embeds.shape[1]
-        return logits
+        return None
 
     def _evict_locked(self):
         n = self._len()
