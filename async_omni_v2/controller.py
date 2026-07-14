@@ -35,15 +35,19 @@ def _sample(logits, prev_ids, cfg, gen=None):
     for reproducible sampling (cfg.writer_seed)."""
     logits = logits.clone()
 
+    # penalties over already-generated tokens — VECTORIZED (a few kernels) instead
+    # of a Python loop of per-index scalar writes, so it stays cheap on the GPU.
     if prev_ids and (cfg.writer_repetition_penalty != 1.0 or cfg.writer_presence_penalty != 0.0):
-        for t in set(prev_ids):
-            if cfg.writer_repetition_penalty != 1.0:
-                logits[t] = (logits[t] / cfg.writer_repetition_penalty
-                             if logits[t] > 0 else logits[t] * cfg.writer_repetition_penalty)
-            logits[t] = logits[t] - cfg.writer_presence_penalty
+        idx = torch.tensor(sorted(set(prev_ids)), device=logits.device, dtype=torch.long)
+        if cfg.writer_repetition_penalty != 1.0:
+            v = logits[idx]
+            logits[idx] = torch.where(v > 0, v / cfg.writer_repetition_penalty,
+                                      v * cfg.writer_repetition_penalty)
+        if cfg.writer_presence_penalty != 0.0:
+            logits[idx] -= cfg.writer_presence_penalty
 
     if cfg.writer_greedy or not cfg.writer_temperature or cfg.writer_temperature <= 0:
-        return int(torch.argmax(logits).item())
+        return int(torch.argmax(logits).item())     # GPU argmax; only the id crosses
 
     logits = logits / cfg.writer_temperature
 
@@ -113,7 +117,12 @@ def _word_sim(a, b):
 def controller_thread(cfg, mgr, ctrl, clock, stop, prof=None, evaluator=None, wb=None):
     b = wb if wb is not None else mgr.b
     cross_gpu = b.device != mgr.b.device
-    gen = torch.Generator().manual_seed(int(cfg.writer_seed))
+    # generator on the backend's device: logits now stay on GPU, so multinomial
+    # sampling (non-greedy path) needs a matching-device generator.
+    try:
+        gen = torch.Generator(device=b.device).manual_seed(int(cfg.writer_seed))
+    except (RuntimeError, TypeError):
+        gen = torch.Generator().manual_seed(int(cfg.writer_seed))
     log("controller", 0.0, "model-scheduled proactivity ON (pure-generative control loop)")
 
     next_check_vt = cfg.probe_min_s           # skip the empty-cache tick at t=0

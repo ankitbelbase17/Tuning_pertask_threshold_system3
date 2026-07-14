@@ -208,7 +208,17 @@ class Qwen3VLBackend(ModelBackend):
 
     # -------------------------------------------------------------- forward
     @torch.no_grad()
-    def forward(self, embeds, cache, pos_start, phys_start):
+    def forward(self, embeds, cache, pos_start, phys_start, want_logits=True):
+        """Run the decoder over `embeds`, append to `cache`, return (logits, cache).
+
+        want_logits=False skips the lm_head entirely (the 151k-vocab projection):
+        the INGESTER only prefills frames into the cache and never reads logits, so
+        this saves a large matmul on every ingested chunk.
+
+        When want_logits=True the returned logits stay ON THE GPU (float, last
+        position only). The old code shipped the full 151k-vocab vector to CPU
+        every token (~35-45 ms/tok of pure D2H sync); the caller now samples on GPU
+        and only the chosen token id crosses the bus."""
         L = embeds.shape[1]
         cache_position = torch.arange(phys_start, phys_start + L, device=self.device)
         # linear positions, shaped [3, 1, L] for the 3D mRoPE rotary (all axes
@@ -223,8 +233,10 @@ class Qwen3VLBackend(ModelBackend):
             use_cache=True,
             return_dict=True,
         )
+        if not want_logits:
+            return None, out.past_key_values
         logits = self.lm_head(out.last_hidden_state[:, -1, :])
-        return logits[0].float().cpu(), out.past_key_values
+        return logits[0].float(), out.past_key_values                  # GPU (was .cpu())
 
     def decode(self, ids):
         return self.tok.decode(ids).strip()
