@@ -103,6 +103,17 @@ def _clamp(x, lo, hi, default):
         return default
 
 
+def _word_sim(a, b):
+    """Jaccard word overlap in [0,1]; rewordings of the SAME occurrence score high
+    ('reports 80 dead' vs 'now reports 80 dead'), different occurrences score low
+    ('match date August 14th' vs 'ticket costs and purchase website')."""
+    wa = set(re.findall(r"[a-z0-9]+", a.lower()))
+    wb = set(re.findall(r"[a-z0-9]+", b.lower()))
+    if not wa or not wb:
+        return 0.0
+    return len(wa & wb) / len(wa | wb)
+
+
 def controller_thread(cfg, mgr, ctrl, clock, stop, prof=None, evaluator=None, wb=None):
     b = wb if wb is not None else mgr.b
     cross_gpu = b.device != mgr.b.device
@@ -119,11 +130,19 @@ def controller_thread(cfg, mgr, ctrl, clock, stop, prof=None, evaluator=None, wb
     pending_q = ""                             # question_for_next: what to verify on the next tick
     # DIFF-MERGE: keep a persistent control config; the model emits only the fields
     # that CHANGE each tick (a compact JSON diff), so it rarely decodes the string
-    # fields -> much less latency. Edge fields (have_enough_info/new_event/answer)
-    # RESET to default every tick, so a fire must be re-asserted (this is what lets
-    # us trust the model's new_event for dedup instead of comparing answer strings).
+    # fields -> much less latency. Transient fields (have_enough_info/answer/seen/
+    # event_time_s) RESET to default every tick and must be re-asserted.
     state = {"fps": cfg.encoder_idle_fps, "next_check_s": cfg.probe_default_s,
-             "have_enough_info": False, "new_event": False, "answer": "", "question_for_next": ""}
+             "have_enough_info": False, "new_event": False, "answer": "",
+             "question_for_next": "", "seen": "", "event_time_s": None}
+    # LEVEL -> EDGE in CODE (semantic Schmitt gate): the model reports whether the
+    # condition is satisfied NOW (a LEVEL it can judge from the cache snapshot);
+    # firing happens only on the RISING edge (false -> true across ticks), so a
+    # condition that stays on screen cannot re-fire. Within a true stretch, a fire
+    # is also allowed when the answer describes a clearly DIFFERENT occurrence
+    # (low word overlap with the last fired answer) — e.g. date poster then ticket
+    # prices with no gap in between.
+    prev_level = False
 
     while not stop.is_set():
         vt = clock.get()
@@ -161,8 +180,11 @@ def controller_thread(cfg, mgr, ctrl, clock, stop, prof=None, evaluator=None, wb
         # spliced as raw text onto the cache (no assistant-turn markers), it would
         # otherwise emit EOS immediately at the splice point. Starting mid-object
         # forces it to complete the JSON. We reconstruct raw = "{" + generated.
+        t_prefill0 = time.time()
         logits = step(b.embed_text(prompt + "{"))
+        prefill_s = time.time() - t_prefill0      # ICL+convo prefill cost this tick
         ids = []
+        t_dec0 = time.time()
         for _ in range(cfg.controller_max_tokens):
             # MASK EOS: as an instruct model spliced raw onto the cache, Qwen often
             # samples the end token as the very first token (-> empty output). We
@@ -173,17 +195,25 @@ def controller_thread(cfg, mgr, ctrl, clock, stop, prof=None, evaluator=None, wb
             if "}" in b.tok.decode([tok_id]):     # first close -> flat object done
                 break
             logits = step(b.embed_token(tok_id))
+        decode_s = time.time() - t_dec0
+        if prof is not None:
+            prof.observe("ctrl_prefill_s", prefill_s)
+            prof.observe("ctrl_decode_s", decode_s)
+            if ids:
+                prof.observe("ctrl_decode_ms_per_tok", 1000 * decode_s / len(ids))
 
         raw = "{" + b.decode(ids)
         diff = _extract_json(raw)                 # the model's DIFF (partial dict); {} = no change
         gen_s = time.time() - t0
 
         # ---- apply the DIFF onto the persistent config ----
-        # reset the edge fields first (they only hold this tick), then merge whatever
-        # the model re-stated; persistent fields (fps/next_check_s/question) survive.
+        # reset the transient fields first (they only hold this tick), then merge
+        # whatever the model re-stated; persistent fields (fps/next_check_s/question)
+        # survive.
         state["have_enough_info"] = False
-        state["new_event"] = False
         state["answer"] = ""
+        state["seen"] = ""
+        state["event_time_s"] = None
         for k, v in diff.items():
             key = "question_for_next" if k == "question" else k   # accept legacy key
             if key in state:
@@ -196,27 +226,47 @@ def controller_thread(cfg, mgr, ctrl, clock, stop, prof=None, evaluator=None, wb
                      cfg.probe_default_s)
         next_check_vt = vt + nxt
 
-        have = bool(state["have_enough_info"])
-        new = bool(state["new_event"])
+        level = bool(state["have_enough_info"])   # "condition satisfied NOW"
         answer = (state["answer"] or "").strip()
         pending_q = (state.get("question_for_next") or "").strip()
+
+        # fire decision: rising edge of the level signal; OR, within a true
+        # stretch, an answer that is clearly a DIFFERENT occurrence than the last
+        # fired one (low word overlap) — back-to-back distinct events, no gap.
+        rising = level and not prev_level
+        distinct = (level and prev_level and answer and reported
+                    and _word_sim(answer, reported[-1][1]) < 0.5)
+        fire = bool(answer) and (rising or distinct)
 
         # log EVERY tick's raw diff so all responses are inspectable in the log file
         vid = cfg.video_id or "?"
         log("ctrl.raw", vt, f"[{vid}] " + (raw.strip()[:240] if diff else f"NO-DIFF raw={raw[:120]!r}"))
-        log("ctrl.gate", vt, f"[{vid}] fps={fps:.1f} have_info={have} new={new} "
-                             f"next={nxt:.1f}s gen={gen_s:.1f}s ntok={len(ids)} q={pending_q!r}")
+        log("ctrl.gate", vt, f"[{vid}] fps={fps:.1f} level={level} rise={rising} "
+                             f"new_occ={distinct} fire={fire} next={nxt:.1f}s "
+                             f"gen={gen_s:.1f}s ntok={len(ids)} q={pending_q!r}")
 
-        # output gate + writer in one: fire on each NEW onset (edge). We TRUST the
-        # model's new_event (reset each tick, informed by the timestamped history) —
-        # no answer-string dedup, so genuine recurrences fire and same-occurrence
-        # ticks (new_event=false) don't.
-        if have and new and answer:
-            reported.append((vt, answer))
+        if fire:
+            # the onset may predate this tick; if the model read the event time off
+            # the in-context "time Xs" markers, record that (clamped to recent past)
+            t_rec = vt
+            try:
+                ev = state.get("event_time_s")
+                if ev is not None:
+                    t_rec = min(vt, max(vt - 10.0, float(ev)))
+            except (TypeError, ValueError):
+                pass
+            reported.append((t_rec, answer))
             if evaluator is not None:
-                evaluator.record_trigger(vt, 1.0)
-                evaluator.record_write(vt, answer, gen_s)
-            log("CONTROLLER", vt, f"[{vid}] \U0001F4E2  {answer!r}")
+                evaluator.record_trigger(t_rec, 1.0)
+                evaluator.record_write(t_rec, answer, gen_s)
+            log("CONTROLLER", vt, f"[{vid}] \U0001F4E2 @{t_rec:.1f}s  {answer!r}")
+
+        # latch the level ONLY when backed by an answer: a bare true (no answer)
+        # must not swallow the edge — the next answered tick can still fire.
+        if not level:
+            prev_level = False
+        elif answer:
+            prev_level = True
         if prof is not None:
             prof.observe("controller_gen_s", gen_s)
             prof.observe("controller_tokens", len(ids))

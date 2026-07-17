@@ -132,7 +132,13 @@ class System5Runner:
             controller_prompt=controller_prompt,
         )
 
-        mgr = self._KVCacheManager(self.backend, kv_budget=cfg.kv_budget, prof=None)
+        # TELEMETRY: a Profiler collects per-run counts + timings (encoder frames
+        # emitted/dropped, ingester frames ingested, per-op GPU times, controller
+        # gen time + tokens). Passed to the manager + all three threads; summary
+        # printed below into the run log.
+        from util import Profiler
+        prof = Profiler(enabled=True)
+        mgr = self._KVCacheManager(self.backend, kv_budget=cfg.kv_budget, prof=prof)
         in_q = queue.Queue(maxsize=max(256, cfg.frame_q_size))
         stop = threading.Event()
         ctrl = self._EncoderControl(cfg.fps, cfg.encoder_idle_fps, cfg.encoder_focus_fps)
@@ -141,13 +147,13 @@ class System5Runner:
 
         threads = [
             threading.Thread(target=self._encoder_thread,
-                             args=(cfg, self.encoder_backend, in_q, ctrl, stop, None),
+                             args=(cfg, self.encoder_backend, in_q, ctrl, stop, prof),
                              name="encoder", daemon=True),
             threading.Thread(target=self._ingester_thread,
-                             args=(cfg, mgr, in_q, ctrl, stop, None, clock),
+                             args=(cfg, mgr, in_q, ctrl, stop, prof, clock),
                              name="input_ingester", daemon=True),
             threading.Thread(target=self._controller_thread,
-                             args=(cfg, mgr, ctrl, clock, stop, None, ev, self.controller_backend),
+                             args=(cfg, mgr, ctrl, clock, stop, prof, ev, self.controller_backend),
                              name="controller", daemon=True),
         ]
         for t in threads:
@@ -157,6 +163,9 @@ class System5Runner:
 
         if self.torch.cuda.is_available():
             self.torch.cuda.empty_cache()
+
+        # dump the telemetry for THIS video into the run log
+        log(f"TELEMETRY {sample.video_id}\n{prof.summary()}", tag="prof")
 
         emits = ev.emissions()
         return {

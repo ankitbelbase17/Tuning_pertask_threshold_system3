@@ -169,14 +169,14 @@ class ContentJudge:
                 r = self._genai.models.generate_content(model=self._model, contents=prompt)
                 sc = _parse_judge_score(getattr(r, "text", "") or "")
                 if sc is not None:
-                    return 1.0 if sc >= 4 else 0.0
+                    return 1.0 if sc >= 3 else 0.0   # paper: score>=3 is correct
             except Exception:
                 pass
             return 1.0 if _lexical_sim(gt, pred) >= 0.3 else 0.0
         if self.mode == "llm" and self._judge is not None:
             try:
                 r = self._judge.judge(question, gt, pred)
-                return 1.0 if int(r.get("score", 0)) >= 4 else 0.0
+                return 1.0 if int(r.get("score", 0)) >= 3 else 0.0   # paper: >=3
             except Exception:
                 pass
         return 1.0 if _lexical_sim(gt, pred) >= 0.3 else 0.0

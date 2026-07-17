@@ -32,6 +32,7 @@ def input_ingester_thread(cfg, mgr, vis_q, ctrl, stop, prof=None, clock=None):
             clock.set(vt)                    # publish latest video time for the controller
         if prof is not None:
             prof.observe("visq_depth", vis_q.qsize())
+            prof.incr("frames_ingested")         # frames the ingester actually wrote to cache
 
         # ingest streaming visual tokens (optionally prefixed by a text timestamp
         # so the model has a real-time signal, not just token order)
