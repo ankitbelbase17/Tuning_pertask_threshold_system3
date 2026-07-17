@@ -26,6 +26,8 @@ export PROSYNC_DIR="${PROSYNC_DIR:-$(cd "$HERE/../async_omni_v2" && pwd)}"
 export OMNIPRO_DATASET_DIR="/iopsstor/scratch/cscs/dbartaula/omni_pro/dataset"
 export HF_HOME="/iopsstor/scratch/cscs/dbartaula/hf_cache"
 export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1
+# deterministic cuBLAS needs this BEFORE the first cuBLAS handle is created
+export CUBLAS_WORKSPACE_CONFIG=":4096:8"
 
 export OMNIPRO_BENCHMARK_JSON="$HERE/benchmark_mini.json"
 export OMNIPRO_OUTPUT_DIR="$HERE/output"

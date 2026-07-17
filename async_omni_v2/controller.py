@@ -114,7 +114,8 @@ def _word_sim(a, b):
     return len(wa & wb) / len(wa | wb)
 
 
-def controller_thread(cfg, mgr, ctrl, clock, stop, prof=None, evaluator=None, wb=None):
+def controller_thread(cfg, mgr, ctrl, clock, stop, prof=None, evaluator=None, wb=None,
+                      feed_done=None):
     b = wb if wb is not None else mgr.b
     cross_gpu = b.device != mgr.b.device
     # generator on the backend's device: logits now stay on GPU, so multinomial
@@ -143,11 +144,20 @@ def controller_thread(cfg, mgr, ctrl, clock, stop, prof=None, evaluator=None, wb
     # (low word overlap with the last fired answer) — e.g. date poster then ticket
     # prices with no gap in between.
     prev_level = False
+    clock.set_next_check(next_check_vt)        # LOCKSTEP: tell the ingester when the
+                                               # first tick is due (it waits on this)
 
-    while not stop.is_set():
+    while True:
         vt = clock.get()
-        if vt < next_check_vt:                 # not time to check yet — keep reading
-            time.sleep(0.05)
+        due = vt >= next_check_vt
+        # Exit: stop requested AND nothing due. In lockstep the ingester holds the
+        # stream while a tick is due, so we must keep servicing ticks during the
+        # drain and only leave once the feed is fully done (feed_done set by the
+        # ingester). Without feed_done (standalone/async), plain stop suffices.
+        if stop.is_set() and not due and (feed_done is None or feed_done.is_set()):
+            break
+        if not due:                            # not time to check yet — keep reading
+            time.sleep(0.005 if cfg.deterministic else 0.05)
             continue
 
         t0 = time.time()
@@ -270,5 +280,8 @@ def controller_thread(cfg, mgr, ctrl, clock, stop, prof=None, evaluator=None, wb
         if prof is not None:
             prof.observe("controller_gen_s", gen_s)
             prof.observe("controller_tokens", len(ids))
+        # LOCKSTEP: publish only now, after the fire + history update completed —
+        # the waiting ingester may feed the next frame from this instant on.
+        clock.set_next_check(next_check_vt)
 
     log("controller", 0.0, "controller stopped")

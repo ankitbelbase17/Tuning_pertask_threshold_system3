@@ -51,6 +51,7 @@ def main():
 
     vis_q = queue.Queue(maxsize=cfg.frame_q_size)   # encoder -> ingester
     stop = threading.Event()
+    feed_done = threading.Event()                   # ingester -> controller: stream drained
     ctrl = EncoderControl(cfg.fps, cfg.encoder_idle_fps, cfg.encoder_focus_fps)
     clock = VideoClock()                            # ingester publishes vt; controller reads it
 
@@ -58,10 +59,10 @@ def main():
         threading.Thread(target=encoder_thread, args=(cfg, backend, vis_q, ctrl, stop, prof),
                          name="encoder", daemon=True),
         threading.Thread(target=input_ingester_thread,
-                         args=(cfg, mgr, vis_q, ctrl, stop, prof, clock),
+                         args=(cfg, mgr, vis_q, ctrl, stop, prof, clock, feed_done),
                          name="input_ingester", daemon=True),
         threading.Thread(target=controller_thread,
-                         args=(cfg, mgr, ctrl, clock, stop, prof, None, None),
+                         args=(cfg, mgr, ctrl, clock, stop, prof, None, None, feed_done),
                          name="controller", daemon=True),
     ]
     log("main", 0.0, f"start: model={cfg.model_id} fps={cfg.fps} "

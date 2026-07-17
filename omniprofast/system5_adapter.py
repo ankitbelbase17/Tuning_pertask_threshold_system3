@@ -130,7 +130,16 @@ class System5Runner:
             video_id=sample.video_id,
             max_seconds=(max_seconds if max_seconds else 10 ** 9),
             controller_prompt=controller_prompt,
+            # deterministic => frame-indexed lockstep walk: no wall-clock pacing
+            # (batch), blocking queues, ingester waits on each due tick. This is
+            # what makes runs bit-reproducible (the async snapshot race is gone).
+            realtime=(self.base_cfg.realtime and not self.base_cfg.deterministic),
         )
+
+        # re-seed per sample so every video starts from the same RNG state and
+        # (deterministic=True) CUDA kernels are deterministic
+        from util import seed_everything
+        seed_everything(cfg.seed, cfg.deterministic)
 
         # TELEMETRY: a Profiler collects per-run counts + timings (encoder frames
         # emitted/dropped, ingester frames ingested, per-op GPU times, controller
@@ -141,6 +150,7 @@ class System5Runner:
         mgr = self._KVCacheManager(self.backend, kv_budget=cfg.kv_budget, prof=prof)
         in_q = queue.Queue(maxsize=max(256, cfg.frame_q_size))
         stop = threading.Event()
+        feed_done = threading.Event()   # ingester -> controller: stream fully drained
         ctrl = self._EncoderControl(cfg.fps, cfg.encoder_idle_fps, cfg.encoder_focus_fps)
         clock = self._VideoClock()
         ev = CaptureEvaluator()
@@ -150,10 +160,11 @@ class System5Runner:
                              args=(cfg, self.encoder_backend, in_q, ctrl, stop, prof),
                              name="encoder", daemon=True),
             threading.Thread(target=self._ingester_thread,
-                             args=(cfg, mgr, in_q, ctrl, stop, prof, clock),
+                             args=(cfg, mgr, in_q, ctrl, stop, prof, clock, feed_done),
                              name="input_ingester", daemon=True),
             threading.Thread(target=self._controller_thread,
-                             args=(cfg, mgr, ctrl, clock, stop, prof, ev, self.controller_backend),
+                             args=(cfg, mgr, ctrl, clock, stop, prof, ev,
+                                   self.controller_backend, feed_done),
                              name="controller", daemon=True),
         ]
         for t in threads:

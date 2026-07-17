@@ -55,11 +55,20 @@ def log(tag, vid_t, msg):
 class VideoClock:
     """Thread-safe latest-ingested video time. The input ingester publishes the vt
     of each frame it ingests; the model-scheduler controller reads it to self-pace
-    ('check again in next_check_s of video time')."""
+    ('check again in next_check_s of video time').
+
+    For the DETERMINISTIC lockstep walk it also carries the controller's
+    next-check time: the controller publishes when its next tick is due, and the
+    ingester waits after each frame until every tick due at <= vt has COMPLETED
+    (next_check > vt) before feeding the next frame. This removes the async
+    snapshot race (which frames a tick sees no longer depends on thread timing).
+    _next_check starts at 0.0 = "controller not ready yet", so the ingester also
+    waits for the controller's initial publish before feeding past frame 0."""
 
     def __init__(self):
         self._lock = threading.Lock()
         self._vt = 0.0
+        self._next_check = 0.0
 
     def set(self, vt):
         with self._lock:
@@ -68,6 +77,14 @@ class VideoClock:
     def get(self):
         with self._lock:
             return self._vt
+
+    def set_next_check(self, vt):
+        with self._lock:
+            self._next_check = float(vt)
+
+    def get_next_check(self):
+        with self._lock:
+            return self._next_check
 
 
 class EncoderControl:

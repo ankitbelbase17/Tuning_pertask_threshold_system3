@@ -107,9 +107,15 @@ class AsyncOmniConfig:
 
     # ---- reproducibility ----
     seed: int = 0                     # seeds python/numpy/torch (+cuda) RNGs
-    deterministic: bool = False       # force deterministic CUDA kernels AND make the
-                                      # encoder block instead of dropping frames
-                                      # -> bit-reproducible eval (use batch mode).
+    deterministic: bool = True        # DETERMINISTIC LOCKSTEP WALK (default for eval):
+                                      # fixed-fps frames, blocking queues (no drops),
+                                      # clock published only after a frame is in the
+                                      # cache, and the ingester WAITS for every due
+                                      # controller tick to complete before the next
+                                      # frame + deterministic CUDA kernels + greedy
+                                      # decode => bit-reproducible runs (kills the
+                                      # async snapshot race that made F1 noise).
+                                      # Set False for the realtime/async demo.
 
     # ---- absolute time signal ----
     # Prepend a short text timestamp before each frame's tokens so the model can
