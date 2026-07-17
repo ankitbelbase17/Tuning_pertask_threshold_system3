@@ -235,7 +235,7 @@ def controller_thread(cfg, mgr, ctrl, clock, stop, prof=None, evaluator=None, wb
         # fired one (low word overlap) — back-to-back distinct events, no gap.
         rising = level and not prev_level
         distinct = (level and prev_level and answer and reported
-                    and _word_sim(answer, reported[-1][1]) < 0.35)
+                    and _word_sim(answer, reported[-1][1]) < 0.5)
         fire = bool(answer) and (rising or distinct)
 
         # log EVERY tick's raw diff so all responses are inspectable in the log file
