@@ -135,6 +135,8 @@ class System5Runner:
             video_id=sample.video_id,
             max_seconds=(max_seconds if max_seconds else 10 ** 9),
             controller_prompt=controller_prompt,
+            writer_prompt=self.base_cfg.task_writer_prompts.get(
+                sample.task, self.base_cfg.writer_prompt),
             gate_mode=gate_mode,
             # deterministic => frame-indexed lockstep walk: no wall-clock pacing
             # (batch), blocking queues, ingester waits on each due tick. This is

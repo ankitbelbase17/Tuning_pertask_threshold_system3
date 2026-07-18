@@ -87,6 +87,64 @@ _SEMANTIC_CONDITION_ALERT = (
 )
 
 
+# NOTE ON AUDIO: the paper defines ETG "audio-first" (prefer audio triggers); we run the
+# audio_dependency=none subset only, so this ICL is purely VISUAL — no audio references.
+#
+# Paper's task intent: the question names a TRIGGER moment and a TARGET object. When the
+# trigger fires (instantaneous, frame-precise), locate the target on a 3x3 grid. Scoring
+# is EXACT-MATCH on the grid cell extracted from the answer text (no LLM judge), plus the
+# usual ±3s temporal match — so the answer MUST contain exactly one of the nine cell
+# names, and firing time must be sharp. Usually ONE trigger per video (max 4).
+_EXPLICIT_TARGET_GROUNDING = (
+    "\nYou are the CONTROLLER of a live video monitor. Your task (in the system "
+    "instruction above) names a TRIGGER moment and a TARGET object: the moment the "
+    "trigger happens, report WHERE the target is on screen using EXACTLY ONE of these "
+    "nine grid cells (imagine the frame divided 3x3):\n"
+    "  top-left | top-center | top-right | center-left | center | center-right | "
+    "bottom-left | bottom-center | bottom-right\n"
+    "Each turn, read the stream so far and emit a compact JSON control update. ALWAYS "
+    "start with seen, then have_enough_info — looking BEFORE judging, every tick. "
+    "Whenever have_enough_info is true, ALSO include event_time_s and answer. Include "
+    "fps, next_check_s, or question_for_next ONLY when they change. Fields:\n"
+    '  seen              : ALWAYS FIRST — 3-8 words: what is on screen now, relevant to the trigger/target\n'
+    "  have_enough_info  : true when the TRIGGER is happening on screen NOW and the "
+    "target is visible; back to false once it is over\n"
+    "  event_time_s      : when true -> the video time when the trigger occurred (read "
+    "the 'time Xs' markers in the stream)\n"
+    '  answer            : REQUIRED when true -> ONE sentence UNDER 20 words naming the '
+    'trigger AND the target\'s grid cell; it MUST contain exactly one cell name; else ""\n'
+    "  fps               : how densely to sample next (1-3; raise when the trigger feels close)\n"
+    "  next_check_s      : seconds until the next check (small — the trigger is a precise instant)\n"
+    '  question_for_next : a short check to verify on the next turn; else ""\n'
+    "YOU DO NOT DECIDE WHEN TO ALERT — the system does (it alerts only when "
+    "have_enough_info goes false -> true). The trigger usually happens ONCE; after "
+    "reporting, return to false when it is over and keep watching in case it recurs.\n"
+    "The 'Already reported' list below shows PAST reports with their times.\n"
+    "Rules: report only what is actually visible; the answer must contain exactly ONE "
+    "grid-cell name; NEVER copy the example text.\n"
+    "Worked example (a DIFFERENT video — a fast-paced montage of short sports clips: "
+    "cycling, tennis, cardio, big crowds. Task: 'When the drummer first appears playing "
+    "his drums, tell me where his red cap is in the frame.'):\n"
+    "At 5s, cyclists racing, no drummer yet:\n"
+    '{"seen":"cyclists racing past a crowd","have_enough_info":false,"fps":1.0,"question_for_next":"Has the drummer appeared playing his drums?"}\n'
+    "At 12s, tennis rally, still no drummer:\n"
+    '{"seen":"tennis player mid-rally","have_enough_info":false}\n'
+    "At 19s the drummer appears playing, red cap visible in the upper middle -> TRIGGER; "
+    "locate the cap and read the time:\n"
+    '{"seen":"drummer playing, red cap upper middle","have_enough_info":true,"event_time_s":19,"answer":"The drummer is now playing - his red cap is in the top-center of the frame."}\n'
+    "At 21s the montage cut away, drummer gone -> trigger over:\n"
+    '{"seen":"crowd cheering, drummer gone","have_enough_info":false}\n'
+)
+
+# Probe-gate arm needs an ETG-specific WRITER prompt too (its generic writer says
+# "what+why", which would never contain a grid cell -> auto-wrong on exact match).
+_ETG_WRITER_PROMPT = (
+    "\nThe trigger just occurred on screen. In ONE sentence UNDER 20 words, state the "
+    "trigger and WHERE the target is, using exactly one of: top-left, top-center, "
+    "top-right, center-left, center, center-right, bottom-left, bottom-center, "
+    "bottom-right. Output only that sentence.")
+
+
 @dataclass
 class AsyncOmniConfig:
     # ---- model ----
@@ -225,4 +283,10 @@ class AsyncOmniConfig:
     # the adapter selects by task). We fill these in one category at a time.
     task_controller_prompts: dict = field(default_factory=lambda: {
         "semantic_condition_alert": _SEMANTIC_CONDITION_ALERT,
+        "explicit_target_grounding": _EXPLICIT_TARGET_GROUNDING,
+    })
+    # Per-task writer prompts for the PROBE-GATE arm (same idea: the answer format
+    # is task knowledge both systems get; the architecture is what differs).
+    task_writer_prompts: dict = field(default_factory=lambda: {
+        "explicit_target_grounding": _ETG_WRITER_PROMPT,
     })
