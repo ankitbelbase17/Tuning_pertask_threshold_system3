@@ -27,11 +27,18 @@ from util import log
 
 
 def input_ingester_thread(cfg, mgr, vis_q, ctrl, stop, prof=None, clock=None,
-                          feed_done=None):
+                          feed_done=None, writer_q=None, evaluator=None):
     system_prompt = cfg.system_prompt.replace("{instruction}", cfg.instruction)
     sink = mgr.seed(system_prompt)
     log("ingester", 0.0, f"seeded cache, sink={sink} tokens, budget={cfg.kv_budget} "
-                         f"(deterministic={cfg.deterministic})")
+                         f"(deterministic={cfg.deterministic}, gate_mode={cfg.gate_mode})")
+
+    # PROBE-GATE (gate_mode="probe"): yes/no logit probe + hysteresis, fires writer_q.
+    probe_mode = cfg.gate_mode == "probe" and writer_q is not None
+    gate_q = cfg.goal_question.replace("{event}", cfg.event or cfg.instruction)
+    n_frames = 0
+    armed = True
+    last_trigger_vt = -1e9
 
     try:
         while not stop.is_set() or not vis_q.empty():
@@ -39,6 +46,7 @@ def input_ingester_thread(cfg, mgr, vis_q, ctrl, stop, prof=None, clock=None,
                 vt, embeds = vis_q.get(timeout=0.5)
             except queue.Empty:
                 continue
+            n_frames += 1
             if prof is not None:
                 prof.observe("visq_depth", vis_q.qsize())
                 prof.incr("frames_ingested")     # frames the ingester actually wrote to cache
@@ -52,6 +60,36 @@ def input_ingester_thread(cfg, mgr, vis_q, ctrl, stop, prof=None, clock=None,
             dropped = mgr.evict()                # bounded memory
             if dropped:
                 log("ingester.evict", vt, f"evicted {dropped} KV tokens (budget={cfg.kv_budget})")
+
+            # ---- PROBE-GATE: one forward pass, Schmitt/hysteresis edge, fire writer
+            if probe_mode and n_frames % cfg.goal_gate_every == 0:
+                share = mgr.probe(gate_q, "probe.goal")
+                if cfg.gate_hysteresis:
+                    if not armed and (share < cfg.gate_low_thr or
+                                      (cfg.gate_rearm_s > 0
+                                       and (vt - last_trigger_vt) >= cfg.gate_rearm_s)):
+                        armed = True
+                    fire = (armed and share >= cfg.gate_high_thr
+                            and (vt - last_trigger_vt) > cfg.debounce_s)
+                    if fire:
+                        armed = False
+                else:
+                    fire = (share >= cfg.goal_threshold
+                            and (vt - last_trigger_vt) > cfg.debounce_s)
+                log("ingester.gate", vt, f"[{cfg.video_id or '?'}] share={share:.2f} "
+                                         f"armed={armed} fire={fire}")
+                if fire:
+                    last_trigger_vt = vt
+                    if evaluator is not None:
+                        evaluator.record_trigger(vt, share)
+                    if cfg.deterministic:
+                        writer_q.put(vt)         # block, then WAIT for the write to
+                        writer_q.join()          # finish -> snapshot is frame-indexed
+                    else:
+                        try:
+                            writer_q.put_nowait(vt)
+                        except queue.Full:
+                            pass
 
             # publish vt only now: a controller tick at vt is guaranteed to see
             # every frame up to and including vt in the cache.

@@ -123,13 +123,19 @@ class System5Runner:
         # else fall back to the generic controller_prompt (both live in config.py)
         controller_prompt = self.base_cfg.task_controller_prompts.get(
             sample.task, self.base_cfg.controller_prompt)
+        # A/B switch for the head-to-head (EXPERIENCE.md): OMNIPRO_GATE_MODE
+        # overrides config.gate_mode so both systems run from one checkout.
+        import os
+        gate_mode = os.environ.get("OMNIPRO_GATE_MODE", self.base_cfg.gate_mode)
         cfg = dataclasses.replace(
             self.base_cfg,
             instruction=sample.question,
+            event=(sample.event or sample.question),
             video_path=sample.video_path,
             video_id=sample.video_id,
             max_seconds=(max_seconds if max_seconds else 10 ** 9),
             controller_prompt=controller_prompt,
+            gate_mode=gate_mode,
             # deterministic => frame-indexed lockstep walk: no wall-clock pacing
             # (batch), blocking queues, ingester waits on each due tick. This is
             # what makes runs bit-reproducible (the async snapshot race is gone).
@@ -155,18 +161,38 @@ class System5Runner:
         clock = self._VideoClock()
         ev = CaptureEvaluator()
 
-        threads = [
-            threading.Thread(target=self._encoder_thread,
-                             args=(cfg, self.encoder_backend, in_q, ctrl, stop, prof),
-                             name="encoder", daemon=True),
-            threading.Thread(target=self._ingester_thread,
-                             args=(cfg, mgr, in_q, ctrl, stop, prof, clock, feed_done),
-                             name="input_ingester", daemon=True),
-            threading.Thread(target=self._controller_thread,
-                             args=(cfg, mgr, ctrl, clock, stop, prof, ev,
-                                   self.controller_backend, feed_done),
-                             name="controller", daemon=True),
-        ]
+        if cfg.gate_mode == "probe":
+            # PROBE-GATE head-to-head arm: yes/no logit gate inside the ingester
+            # fires a separate writer. No controller/clock; in deterministic mode
+            # the ingester blocks on writer_q.join() -> frame-indexed, reproducible.
+            from writer import writer_thread
+            writer_q = queue.Queue(maxsize=4)
+            threads = [
+                threading.Thread(target=self._encoder_thread,
+                                 args=(cfg, self.encoder_backend, in_q, ctrl, stop, prof),
+                                 name="encoder", daemon=True),
+                threading.Thread(target=self._ingester_thread,
+                                 args=(cfg, mgr, in_q, ctrl, stop, prof, None, None,
+                                       writer_q, ev),
+                                 name="input_ingester", daemon=True),
+                threading.Thread(target=writer_thread,
+                                 args=(cfg, mgr, writer_q, stop, prof, ev,
+                                       self.controller_backend),
+                                 name="writer", daemon=True),
+            ]
+        else:
+            threads = [
+                threading.Thread(target=self._encoder_thread,
+                                 args=(cfg, self.encoder_backend, in_q, ctrl, stop, prof),
+                                 name="encoder", daemon=True),
+                threading.Thread(target=self._ingester_thread,
+                                 args=(cfg, mgr, in_q, ctrl, stop, prof, clock, feed_done),
+                                 name="input_ingester", daemon=True),
+                threading.Thread(target=self._controller_thread,
+                                 args=(cfg, mgr, ctrl, clock, stop, prof, ev,
+                                       self.controller_backend, feed_done),
+                                 name="controller", daemon=True),
+            ]
         for t in threads:
             t.start()
         for t in threads:

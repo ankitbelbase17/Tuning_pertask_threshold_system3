@@ -189,7 +189,34 @@ class AsyncOmniConfig:
     
     # In eval the adapter sets `instruction` = the sample's task; for standalone runs the default below is used.
     instruction: str = "report the target event the instant it happens, and stay quiet otherwise"
+    event: str = ""                   # the monitored condition (adapter: sample.event)
     video_id: str = ""                # set per-sample in eval; shown in controller logs
+
+    # ---- PROBE-GATE system (gate_mode="probe"): the main-branch baseline --------
+    # Fixed-cadence yes/no LOGIT gate + separate writer, restored for the
+    # probe-vs-controller head-to-head (see EXPERIENCE.md). One forward pass per
+    # probe reads yes_share = P(yes)/(P(yes)+P(no)); a Schmitt/hysteresis gate
+    # (tuned "hyst2b") fires the writer, which snapshots the cache and answers.
+    gate_mode: str = "controller"     # "controller" (icl DSL, default) | "probe"
+    goal_question: str = (
+        "\nQuestion: Based on the most recent frames, has this happened: {event}? "
+        "Answer yes or no: ")
+    writer_prompt: str = (
+        "\nThe monitored event just occurred on screen. In ONE sentence UNDER 25 "
+        "words state WHAT happened AND WHY it satisfies the condition: {event}. "
+        "Output only that sentence.")
+    writer_cue: str = "\nALERT: "
+    writer_max_tokens: int = 60
+    writer_repeat_window: int = 8     # anti-loop guard for the free-running writer
+    goal_threshold: float = 0.5       # non-hysteresis fallback threshold
+    gate_hysteresis: bool = True      # hyst2b (best tuned gate on the 27-video eval)
+    gate_high_thr: float = 0.5        # fire on a rising crossing (while armed)
+    gate_low_thr: float = 0.40        # re-arm when the share falls below this...
+    gate_rearm_s: float = 5.0         # ...OR this many seconds after a fire
+    goal_gate_every: int = 1          # probe every frame (@1fps ~= controller's grid)
+    debounce_s: float = 2.0           # min video-seconds between fires
+    yes_words: list = field(default_factory=lambda: ["yes", "Yes", " yes", " Yes"])
+    no_words: list = field(default_factory=lambda: ["no", "No", " no", " No"])
     system_prompt: str = (
         "You are a helpful assistant watching a live video stream. "
         "According to the video you are watching, your task is: {instruction}")

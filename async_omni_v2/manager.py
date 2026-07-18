@@ -71,6 +71,15 @@ class KVCacheManager:
         self.next_pos += embeds.shape[1]
         return None
 
+    def _truncate(self, phys_len):
+        if hasattr(self.cache, "crop"):
+            self.cache.crop(phys_len)
+        else:
+            for i in range(len(self.cache.key_cache)):
+                self.cache.key_cache[i] = self.cache.key_cache[i][:, :, :phys_len, :]
+                self.cache.value_cache[i] = self.cache.value_cache[i][:, :, :phys_len, :]
+            self.cache._seen_tokens = phys_len
+
     def _evict_locked(self):
         n = self._len()
         if n <= self.kv_budget:
@@ -127,6 +136,27 @@ class KVCacheManager:
             t2 = time.time()
         self._rec("evict", t2 - t1, t1 - t0)
         return dropped
+
+    def probe(self, question, label):
+        """PROBE-GATE (gate_mode='probe'): splice a yes/no question onto the PRIMARY
+        cache, read one forward pass of logits, compute the yes-share, then ERASE
+        the probe (truncate + restore the logical clock) so it leaves no trace."""
+        from proactivity import yes_share
+        t0 = time.time()
+        with self._lock:
+            t1 = time.time()
+            phys0, pos0 = self._len(), self.next_pos
+            logits, self.cache = self.b.forward(
+                self.b.embed_text(question), self.cache,
+                pos_start=pos0, phys_start=phys0, want_logits=True)
+            share = yes_share(logits, self.b.yes_ids, self.b.no_ids)
+            self._truncate(phys0)
+            self.next_pos = pos0
+            if self._sync:
+                torch.cuda.synchronize()
+            t2 = time.time()
+        self._rec(label, t2 - t1, t1 - t0)
+        return share
 
     def snapshot_clone(self):
         """MVCC read snapshot: return an INDEPENDENT clone of the primary cache

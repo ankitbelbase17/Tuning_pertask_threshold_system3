@@ -92,6 +92,9 @@ class Qwen3VLBackend(ModelBackend):
 
         self.eos_id = self.tok.eos_token_id
         self.newline_ids = set(_word_ids(self.tok, ["\n"]))
+        # yes/no single-token ids for the PROBE-GATE (gate_mode="probe") yes-share
+        self.yes_ids = _word_ids(self.tok, getattr(cfg, "yes_words", ["yes", "Yes", " yes", " Yes"]))
+        self.no_ids = _word_ids(self.tok, getattr(cfg, "no_words", ["no", "No", " no", " No"]))
 
         self._apply_role(role)         # drop the unused half + free its GPU memory
 
