@@ -119,13 +119,28 @@ def _parse_judge_score(text: str):
 class ContentJudge:
     """LLM-as-judge for free-text content. Priority: (1) google-genai SDK (works
     with a bare GEMINI_API_KEY, no base URL needed); (2) the OmniPro REST llm_judge
-    (needs GEMINI_API_BASE); (3) lexical fallback. Correct if score >= 4."""
+    (needs GEMINI_API_BASE); (3) lexical fallback. Correct if score >= 3 (paper).
+
+    REPRODUCIBLE: the Gemini call is pinned with a fixed `seed`, and every verdict
+    is persisted to a JSON cache keyed by (question, gt, pred) — re-scoring the
+    same predictions always returns the same joint-F1 and costs zero API calls."""
+
+    CACHE_PATH = os.environ.get(
+        "OMNIPRO_JUDGE_CACHE",
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), "judge_cache.json"))
 
     def __init__(self):
         self.mode = "lexical"
         self._judge = None
         self._genai = None
         self._model = None
+        self._seed = int(os.environ.get("OMNIPRO_JUDGE_SEED", "1234"))
+        self._cache = {}
+        try:
+            with open(self.CACHE_PATH) as f:
+                self._cache = json.load(f)
+        except Exception:
+            self._cache = {}
         key = os.environ.get("GEMINI_API_KEY")
 
         # (1) preferred: google-genai SDK with the key passed explicitly
@@ -161,22 +176,50 @@ class ContentJudge:
                 print(f"[judge] REST judge unavailable ({type(e).__name__}: {e}); "
                       f"using lexical fallback", flush=True)
 
+    def _cache_key(self, question: str, gt: str, pred: str) -> str:
+        import hashlib
+        return hashlib.sha256(f"{question}\x1f{gt}\x1f{pred}".encode()).hexdigest()[:24]
+
+    def _cache_put(self, key: str, score: float):
+        self._cache[key] = score
+        try:
+            with open(self.CACHE_PATH, "w") as f:
+                json.dump(self._cache, f)
+        except Exception:
+            pass
+
     def score(self, question: str, gt: str, pred: str) -> float:
-        """Return correctness in [0,1] (1.0 if judged score >= 4)."""
+        """Return correctness in [0,1] (1.0 if judged score >= 3, per the paper)."""
+        k = self._cache_key(question, gt, pred)
+        if k in self._cache:                        # persisted verdict -> stable re-scores
+            return float(self._cache[k])
         if self.mode == "genai" and self._genai is not None:
             try:
                 prompt = _GENAI_JUDGE_PROMPT.format(question=question, gt=gt, pred=pred)
-                r = self._genai.models.generate_content(model=self._model, contents=prompt)
+                # pin `seed` so the judge itself is reproducible (per-user choice:
+                # seed rather than temperature=0)
+                try:
+                    from google.genai import types
+                    gcfg = types.GenerateContentConfig(seed=self._seed)
+                except Exception:
+                    gcfg = None
+                r = self._genai.models.generate_content(
+                    model=self._model, contents=prompt,
+                    **({"config": gcfg} if gcfg is not None else {}))
                 sc = _parse_judge_score(getattr(r, "text", "") or "")
                 if sc is not None:
-                    return 1.0 if sc >= 3 else 0.0   # paper: score>=3 is correct
+                    out = 1.0 if sc >= 3 else 0.0   # paper: score>=3 is correct
+                    self._cache_put(k, out)
+                    return out
             except Exception:
                 pass
             return 1.0 if _lexical_sim(gt, pred) >= 0.3 else 0.0
         if self.mode == "llm" and self._judge is not None:
             try:
                 r = self._judge.judge(question, gt, pred)
-                return 1.0 if int(r.get("score", 0)) >= 3 else 0.0   # paper: >=3
+                out = 1.0 if int(r.get("score", 0)) >= 3 else 0.0   # paper: >=3
+                self._cache_put(k, out)
+                return out
             except Exception:
                 pass
         return 1.0 if _lexical_sim(gt, pred) >= 0.3 else 0.0
