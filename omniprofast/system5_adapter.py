@@ -174,12 +174,12 @@ class System5Runner:
                                  args=(cfg, self.encoder_backend, in_q, ctrl, stop, prof),
                                  name="encoder", daemon=True),
                 threading.Thread(target=self._ingester_thread,
-                                 args=(cfg, mgr, in_q, ctrl, stop, prof, None, None,
+                                 args=(cfg, mgr, in_q, ctrl, stop, prof, None, feed_done,
                                        writer_q, ev),
                                  name="input_ingester", daemon=True),
                 threading.Thread(target=writer_thread,
                                  args=(cfg, mgr, writer_q, stop, prof, ev,
-                                       self.controller_backend),
+                                       self.controller_backend, feed_done),
                                  name="writer", daemon=True),
             ]
         else:
