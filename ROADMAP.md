@@ -5,6 +5,50 @@ See `MISSION.md` for the vision, `ICL_DIFF_CONTROLLER.md` for mechanism design.
 
 ---
 
+## STATUS BOARD — updated 2026-07-30
+
+Legend: ✅ done · 🟡 partial · ⬜ not started
+
+### Phase 1 — measurement rig
+| | item | status | evidence |
+|---|---|---|---|
+| 1.1 | Schema-walk decoder | ✅ | `db38d06` · mock test 4/4 · **gate PASSED: 157/157 agreement, argmax always boolean** |
+| 1.1b | `count` / `phase` persisted in state | ✅ | `db38d06` — were being silently discarded |
+| 1.1c | `notes` append-only memory ring | 🟡 | `db38d06` — **plumbed but unused: no ICL block emits `note` yet** |
+| 1.2 | Strip format half from ICL prompts | ⬜ | sections are fenced and ready to strip |
+| 1.3 | One-pass multi-variant sweep (`sweep.py`) | ⬜ | |
+| 1.4 | Dense AUC metric | ⬜ | **the biggest remaining gap** — see below |
+| 1.5 | RoPE position re-basing | 🟡 | `bef52fe` — **loud guard only, not fixed.** Deliberate: no-op on short videos, and a real fix must re-rotate cached keys |
+| — | `compliance.py` (not originally planned) | ✅ | `26a8c83` — 2,821 ticks measured |
+| — | ICL for all 9 tasks + wiring | ✅ | `48cde1f` + `2556716` |
+| — | `OMNIPRO_DECODE_MODE` A/B switch | ✅ | `e72a8d6` |
+
+### Phase 2 — history + core claim
+| | item | status |
+|---|---|---|
+| 2.1 | Re-run V2 / V3 / v2best on the rig | ⬜ blocked on 1.3+1.4 |
+| 2.2 | Ablate V2 one variable at a time | ⬜ |
+| 2.3 | **Split trigger from writer** | 🟡 **mechanism done, architecture not** — see below |
+| 2.4 | Reframe head-to-head as ablation | ⬜ |
+
+### Phase 3–7
+⬜ All. Phase 5 omni decision is **made** (`OMNI_EXTENSION.md`, `bef52fe`) but unexecuted.
+
+### Measured results so far
+| | free decode | schema decode |
+|---|---|---|
+| conditional-rule compliance | 2.1% | **100%** |
+| `fps` emitted | 140/157 ticks | **0** |
+| valid JSON (historical, 2,821 ticks) | 85.8% | 100% by construction |
+| median gen time | 3.60 s | **1.30 s** |
+| median tokens/tick | 38 | **11** |
+| time_f1 (n=3 videos — NOISE) | 0.2353 | 0.1333 |
+
+**Open finding:** `ctrl_p_hit` mean **0.02**, max **0.03**, against `hit_threshold=0.5`.
+The model's confidence never approaches the gate. First Phase-3 experiment.
+
+---
+
 ## The organising principle
 
 > **The current idea is half-baked. That is the reason to build the measurement rig
