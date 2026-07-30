@@ -61,16 +61,72 @@ def parse_scores(paths):
     return out
 
 
-def load_gt(benchmark_json, dataset_dir=None):
-    """-> {video_id: [gt_time_sec, ...]} using the harness's own normaliser."""
-    from utils import parse_ground_truth
+def simulate_gate(ticks, thr):
+    """Replay controller.py's firing rule offline: RISING EDGE of (p_hit >= thr).
+
+    Sweeping per-tick labels is misleading — on dense-event tasks most ticks sit
+    inside some +-tol window, so "always fire" scores well. What we actually care
+    about is the emit TIMES the real gate would have produced."""
+    emits, prev = [], False
+    for vt, p in sorted(ticks):
+        cur = p >= thr
+        if cur and not prev:
+            emits.append(vt)
+        prev = cur
+    return emits
+
+
+def greedy_match(emits, gts, tol):
+    """OmniPro's scoring: each ground-truth event can be claimed by at most one
+    emit, nearest first, within +-tol."""
+    used, tp = set(), 0
+    for e in sorted(emits):
+        best, bd = None, None
+        for i, g in enumerate(gts):
+            if i in used:
+                continue
+            d = abs(e - g)
+            if d <= tol and (bd is None or d < bd):
+                bd, best = d, i
+        if best is not None:
+            used.add(best)
+            tp += 1
+    return tp, len(emits) - tp, len(gts) - tp
+
+
+def load_gt(benchmark_json, task=None, dataset_dir=None):
+    """-> {video_id: [trigger_time_sec, ...]}.
+
+    Read straight off the benchmark entries rather than via utils.parse_ground_truth,
+    which raises on these records ("dictionary update sequence element #0 has length
+    1; 2 is required" — it expects a different shape). The field we need is plain:
+    ground_truth is a list of dicts each carrying trigger_time_sec, with
+    trigger_time ("MM:SS") as the fallback."""
     gt = defaultdict(list)
     for e in json.load(open(benchmark_json)):
-        try:
-            for g in parse_ground_truth(e):
-                gt[e["video_id"]].append(float(g["t_sec"]))
-        except Exception:
+        # CRITICAL: one video appears under SEVERAL tasks with DIFFERENT ground
+        # truth (e.g. 6rho9EbHtyc has 1 event as snapshot_counting, 5 as
+        # realtime_state_monitor, 4 as event_narration). Merging them inflates the
+        # positive rate and makes every number meaningless.
+        if task and e.get("task") != task:
             continue
+        for g in e.get("ground_truth") or []:
+            if not isinstance(g, dict):
+                continue
+            t = g.get("trigger_time_sec")
+            if t is None:
+                raw = str(g.get("trigger_time") or "")
+                if ":" in raw:
+                    try:
+                        m, s = raw.split(":")[-2:]
+                        t = int(m) * 60 + float(s)
+                    except (TypeError, ValueError):
+                        t = None
+            if t is not None:
+                try:
+                    gt[e["video_id"]].append(float(t))
+                except (TypeError, ValueError):
+                    pass
     return gt
 
 
@@ -149,6 +205,7 @@ def main():
         "OMNIPRO_BENCHMARK_JSON",
         "/iopsstor/scratch/cscs/dbartaula/omnipro_data/benchmark.json"))
     ap.add_argument("--tolerance", type=float, default=3.0)
+    ap.add_argument("--task", default=None, help="override task inferred from dir name")
     args = ap.parse_args()
 
     dirs = args.dirs or (sorted(d for d in glob.glob(os.path.join(here, "output_*"))
@@ -156,11 +213,17 @@ def main():
     if not dirs:
         ap.error("give one or more run dirs, or --all")
 
-    gt = load_gt(args.benchmark)
     for d in dirs:
         paths = sorted(glob.glob(os.path.join(d, "**", "run_*.log"), recursive=True))
         if not paths:
             continue
+        # the run dir is named after the task; use it to select the right GT
+        task = args.task or os.path.basename(d.rstrip("/"))
+        gt = load_gt(args.benchmark, task=task)
+        if not gt:
+            gt = load_gt(args.benchmark, task=None)
+            print(f"  (no GT for task {task!r}; falling back to ALL tasks — "
+                  f"numbers will be inflated)")
         scores = parse_scores(paths)
         if not scores:
             print(f"\n=== {os.path.basename(d.rstrip('/'))} ===")
@@ -183,15 +246,32 @@ def main():
         if hi < 0.5:
             print("  *** every p_hit is BELOW the default hit_threshold=0.5 -> the "
                   "gate can never fire. Threshold is mis-calibrated, not the model. ***")
-        print("   thr      tp     fp     fn   prec    rec     F1")
+        # ---- threshold sweep on the REAL gate (rising edge + greedy match) ----
+        # This predicts time_f1 directly, and costs milliseconds instead of one
+        # full GPU re-run per threshold value.
         cand = sorted({round(x, 4) for x in
-                       [0.01, 0.02, 0.05, 0.1, 0.2, 0.3, 0.5, 0.7, 0.9]
+                       [0.001, 0.01, 0.02, 0.05, 0.1, 0.2, 0.3, 0.5, 0.7, 0.9]
                        + [lo + (hi - lo) * k / 8 for k in range(1, 8)]})
-        for t, tp, fp, fn, pr, rc, f1 in sweep(y, p, cand):
-            print(f"  {t:6.4f} {tp:6d} {fp:6d} {fn:6d}  {pr:5.3f}  {rc:5.3f}  {f1:5.3f}")
-        best = max(sweep(y, p, cand), key=lambda r: r[-1])
-        print(f"  BEST offline threshold {best[0]:.4f} -> F1 {best[-1]:.3f} "
-              f"(current hit_threshold=0.5)")
+        print("   thr    emits     tp     fp     fn   prec    rec  time_f1")
+        rows = []
+        for t in cand:
+            TP = FP = FN = NE = 0
+            for vid, ticks in scores.items():
+                g = gt.get(vid)
+                if not g:
+                    continue
+                em = simulate_gate(ticks, t)
+                a, b, c = greedy_match(em, g, args.tolerance)
+                TP += a; FP += b; FN += c; NE += len(em)
+            pr = TP / (TP + FP) if TP + FP else 0.0
+            rc = TP / (TP + FN) if TP + FN else 0.0
+            f1 = 2 * pr * rc / (pr + rc) if pr + rc else 0.0
+            rows.append((t, NE, TP, FP, FN, pr, rc, f1))
+            print(f"  {t:6.4f} {NE:6d} {TP:6d} {FP:6d} {FN:6d}  {pr:5.3f}  {rc:5.3f}   {f1:5.3f}")
+        best = max(rows, key=lambda r: r[-1])
+        cur = [r for r in rows if abs(r[0] - 0.5) < 1e-9]
+        print(f"  BEST threshold {best[0]:.4f} -> time_f1 {best[-1]:.3f}"
+              + (f"   (current 0.5 gives {cur[0][-1]:.3f})" if cur else ""))
 
 
 if __name__ == "__main__":
