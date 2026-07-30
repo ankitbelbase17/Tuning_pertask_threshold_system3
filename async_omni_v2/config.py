@@ -101,6 +101,16 @@ class AsyncOmniConfig:
     # "off" would make the always-on trigger affordable; `seen` is also the single
     # biggest accuracy lever we have (F1 0.0 -> 0.255), so this must be measured.
     seen_mode: str = "before"
+    # ---- FROZEN-PERCEPTION ablations (measured 2026-07-30) -------------------
+    # 20/58 videos emitted ONE byte-identical `seen` for the entire video; 31/58
+    # emitted <=2 distinct descriptions ever. 81.6% of GT triggers were perception
+    # failures, and a timestamp-only null model beat p_hit on 3 of 4 tasks.
+    # Suspected cause: feeding the `seen` trace back into the prompt puts the
+    # model's own last description a few tokens before the slot it must refill, so
+    # greedy decode copies it. Two independent candidate fixes, BOTH DEFAULT OFF so
+    # each is tested as one variable:
+    seen_trace_in_prompt: bool = False  # was on; the suspected cause
+    now_anchor: bool = False            # "it is now Ns; describe the LATEST frame"
     schema_max_seen_tokens: int = 12    # cap on the `seen` value slot
     schema_max_answer_tokens: int = 32  # cap on the `answer` value slot (hot ticks only)
     schema_max_int_tokens: int = 4      # cap on `event_time_s`

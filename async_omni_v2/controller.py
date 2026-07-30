@@ -357,12 +357,27 @@ def controller_thread(cfg, mgr, ctrl, clock, stop, prof=None, evaluator=None, wb
         #                  already answered and dedup would silently fail open.
         # Both are bounded rings -> per-tick prompt cost is O(1), not O(stream).
         # This is what makes dedup and accumulation possible at all.
-        if seen_trace:
-            trace = "".join(f"  @{svt:.0f}s {s}\n" for svt, s in seen_trace)
-        else:
-            trace = "  (nothing yet)\n"
-        prompt += ("\n\nWHAT YOU HAVE SEEN so far (your own observations, newest last; "
-                   "repeats collapsed):\n" + trace)
+        # ⚠️ FROZEN-PERCEPTION BUG (measured 2026-07-30). Feeding the `seen` trace
+        # back here froze the perception channel: 20 of 58 videos emitted exactly ONE
+        # byte-identical scene description for the WHOLE video (578 ticks, 100%), and
+        # 31 of 58 emitted <=2 distinct descriptions ever. Failure-mode breakdown over
+        # 87 GT triggers: PERCEPTION 81.6%, JUDGMENT 3.4%. A null model using only the
+        # timestamp — no pixels at all — BEAT p_hit on 3 of 4 tasks.
+        #
+        # Mechanism: the last `seen` line sits a few tokens before the `{"seen":"` slot
+        # the model must now fill. Under greedy decode with a 12-token cap, copying the
+        # adjacent line is the cheapest continuation — and once copied, "repeats
+        # collapsed" makes the trace shorter and the copy even more attractive. A
+        # self-reinforcing induction loop. The memory feature caused it.
+        #
+        # Default OFF while we re-measure. ONE VARIABLE: leave `now_anchor` off too.
+        if cfg.seen_trace_in_prompt:
+            if seen_trace:
+                trace = "".join(f"  @{svt:.0f}s {s}\n" for svt, s in seen_trace)
+            else:
+                trace = "  (nothing yet)\n"
+            prompt += ("\n\nWHAT YOU HAVE SEEN so far (your own observations, newest last; "
+                       "repeats collapsed):\n" + trace)
         convo = "".join(f"  @{rvt:.0f}s {a}\n" for rvt, a in reported) or "  (nothing yet)\n"
         prompt += ("\nWHAT YOU HAVE ALREADY TOLD THE USER (past occurrences with their "
                    "times; a fresh onset at a later time is a NEW event — it is only a "
@@ -370,6 +385,13 @@ def controller_thread(cfg, mgr, ctrl, clock, stop, prof=None, evaluator=None, wb
         if notes:
             prompt += ("\nNOTES YOU KEPT:\n"
                        + "".join(f"  @{nvt:.0f}s {n}\n" for nvt, n in notes))
+        # Optional PRESENT anchor — the second candidate cause of frozen perception:
+        # nothing in the prompt says what time it is NOW or that `seen` must describe
+        # the LATEST frame rather than any frame in the cache. Kept OFF by default so
+        # it is tested as its own variable, not confounded with seen_trace_in_prompt.
+        if cfg.now_anchor:
+            prompt += (f"\n\nIt is now {vt:.0f}s. Describe ONLY what is on screen in the "
+                       f"MOST RECENT frame, not what you saw earlier.")
         prompt += "\nNow emit ONLY your control JSON for the current stream:\n"
 
         # PRIME the decoder with an open brace: Qwen3-VL is an instruct model and,

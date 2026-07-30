@@ -31,8 +31,15 @@ STATE_TASKS = {"realtime_state_monitor"}
 # also content-correct (state WHAT happened AND WHY it meets the condition).
 JUDGE_TASKS = {"event_narration", "sequential_step_instruction", "semantic_condition_alert"}
 
-_POSITIONS = ["top-left", "top-center", "top-right", "center-left", "center",
-              "center-right", "bottom-left", "bottom-center", "bottom-right"]
+# ORDER MATTERS: _extract_position returns the FIRST substring hit, so every
+# compound name must be tested before the bare "center" it contains. With the old
+# alphabetical-ish order, "center-right" and "bottom-center" both matched "center"
+# first and scored as the wrong cell -> 2 of the 9 cells were unwinnable, and both
+# occur in the saved ETG ground truth. Sorted longest-first so this cannot regress.
+_POSITIONS = sorted(
+    ["top-left", "top-center", "top-right", "center-left", "center",
+     "center-right", "bottom-left", "bottom-center", "bottom-right"],
+    key=len, reverse=True)
 
 
 # ---------------------------------------------------------------------------
