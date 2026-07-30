@@ -143,6 +143,11 @@ class System5Runner:
             self.base_cfg,
             decode_mode=decode_mode,
             hit_threshold=hit_threshold,
+            # signal-quality sweep knobs (all change the forward pass, so none can
+            # be screened offline the way gate strategies can)
+            seen_mode=os.environ.get("OMNIPRO_SEEN_MODE", self.base_cfg.seen_mode),
+            schema_max_seen_tokens=int(os.environ.get(
+                "OMNIPRO_SEEN_TOKENS", self.base_cfg.schema_max_seen_tokens)),
             instruction=sample.question,
             event=(sample.event or sample.question),
             video_path=sample.video_path,

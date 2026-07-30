@@ -171,14 +171,23 @@ def _schema_tick(b, cfg, gen, step, prompt, ids_bool):
     n_dec = 0
 
     # ---- seen: forced key, sampled value (look BEFORE judging, every tick) ----
-    logits = step(b.embed_text(prompt + '{"seen":"'))
-    seen, sids, logits = _decode_until(step, b, logits, cfg, gen,
-                                       '"', cfg.schema_max_seen_tokens)
-    n_dec += len(sids)
-    diff["seen"] = seen.strip()
-
-    # ---- have_enough_info: forced key, LOGIT READ (no decode at all) ----------
-    logits = step(b.embed_text('","have_enough_info":'))
+    # SEEN_MODE is the Priority-1 experiment (ROADMAP): does the hit read actually
+    # NEED `seen` decoded first, or does only the ANSWER need it?
+    #   "before" -- current: describe the scene, THEN read the level (~1.3s/tick)
+    #   "off"    -- read the level immediately, no decode at all (~0.15s/tick)
+    #   "after"  -- read the level FIRST, then describe. Separates "does the
+    #               perception step help?" from "does its ORDER matter?"
+    # `seen` took F1 from 0.0 to 0.255 when it was introduced, so this is not a
+    # refactor to be assumed safe — it is measured.
+    if cfg.seen_mode == "before":
+        logits = step(b.embed_text(prompt + '{"seen":"'))
+        seen, sids, logits = _decode_until(step, b, logits, cfg, gen,
+                                           '"', cfg.schema_max_seen_tokens)
+        n_dec += len(sids)
+        diff["seen"] = seen.strip()
+        logits = step(b.embed_text('","have_enough_info":'))
+    else:
+        logits = step(b.embed_text(prompt + '{"have_enough_info":'))
     p_hit = _read_bool(logits, true_id, false_id)
     hit = p_hit >= cfg.hit_threshold
     diff["have_enough_info"] = hit
@@ -194,6 +203,17 @@ def _schema_tick(b, cfg, gen, step, prompt, ids_bool):
         meta["argmax_agrees"] = (top == (true_id if hit else false_id))
 
     lit = "true" if hit else "false"
+
+    # seen_mode="after": the level is already read; NOW describe the scene. If
+    # this scores like "before", the perception step helps by existing; if it
+    # scores like "off", the ORDER is what mattered.
+    if cfg.seen_mode == "after":
+        logits = step(b.embed_text(lit + ',"seen":"'))
+        seen, sids, logits = _decode_until(step, b, logits, cfg, gen,
+                                           '"', cfg.schema_max_seen_tokens)
+        n_dec += len(sids)
+        diff["seen"] = seen.strip()
+        lit = '"'                       # we are mid-string; close it, not a bool
 
     # ---- hot path only: onset time + answer -----------------------------------
     if hit:

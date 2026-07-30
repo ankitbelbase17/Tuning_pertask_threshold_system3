@@ -1,8 +1,8 @@
 #!/bin/bash
 #SBATCH --job-name=omnipro_all
-#SBATCH --partition=normal
+#SBATCH --partition=debug
 #SBATCH --account=a168
-#SBATCH --time=11:30:00
+#SBATCH --time=01:30:00
 #SBATCH --nodes=1
 #SBATCH --gres=gpu:4
 #SBATCH --array=0-3
@@ -65,3 +65,8 @@ for k in 0 1 2 3; do
   echo "[job]   $G: $([ -f "$m" ] && echo present || echo MISSING)"
 done
 echo "[job] DONE array task $A"
+
+# Persist per-tick p_hit so ANY threshold / gate strategy can be re-derived later
+# offline, with no GPU. This is what makes the firing threshold a free decision.
+/iopsstor/scratch/cscs/dbartaula/miniforge3/envs/prosync_env/bin/python \
+  dump_scores.py "$OUT" 2>&1 | tail -20

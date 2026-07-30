@@ -93,6 +93,14 @@ class AsyncOmniConfig:
     #           not a prompt instruction.
     # "free":   the legacy open-brace generate loop (kept for A/B).
     decode_mode: str = "schema"
+    # PRIORITY-1 EXPERIMENT (ROADMAP): does the hit read need `seen` first?
+    #   "before" -- describe the scene, then read the level (~1.3s/tick, current)
+    #   "off"    -- read the level immediately, zero decodes (~0.15s/tick)
+    #   "after"  -- read the level first, then describe (separates the effect of
+    #               the perception step from the effect of its ORDER)
+    # "off" would make the always-on trigger affordable; `seen` is also the single
+    # biggest accuracy lever we have (F1 0.0 -> 0.255), so this must be measured.
+    seen_mode: str = "before"
     schema_max_seen_tokens: int = 12    # cap on the `seen` value slot
     schema_max_answer_tokens: int = 32  # cap on the `answer` value slot (hot ticks only)
     schema_max_int_tokens: int = 4      # cap on `event_time_s`
