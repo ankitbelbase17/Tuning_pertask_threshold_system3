@@ -5,6 +5,49 @@ See `MISSION.md` for the vision, `ICL_DIFF_CONTROLLER.md` for mechanism design.
 
 ---
 
+## ⭐ PRIORITY 1 — the continuously-thinking controller
+
+**Decided 2026-07-30 (user):** triggered-time operation is good enough *for now*, but the
+continuously-thinking controller is the **top priority** item on this roadmap.
+
+**What exists today:** the controller does not think continuously. It is a polling loop
+(`controller.py:150-161`) — wait until `vt >= next_check_vt`, snapshot, emit one JSON,
+schedule the next check 0.2–1.5 s later, idle in between. Discrete ticks, not a mind.
+
+**What "continuously thinking" means:** an always-on process that checks *every frame*
+whether anything worth saying is happening, without ever running the slow autoregressive
+loop. Target < 150 ms per decision. The expensive generative controller then runs **only**
+when that process fires.
+
+**Half of it is already built.** The `hit` logit read (`_read_bool`) answers "is the
+condition satisfied now?" in **zero decode steps** and returns a continuous confidence —
+verified 157/157 against what a free decode would produce. What is missing is the
+*architecture*: that read currently sits inside the tick, behind the ~0.7 s `seen` decode.
+
+**Blocking question (an experiment, not a design choice):** does the `hit` read need `seen`
+decoded first, or only the answer does?
+- if not → trigger drops 1.30 s → **~0.15 s**, and the always-on process becomes affordable
+- if yes → keep them fused; 1.30 s already meets ±3 s on quiet ticks
+
+Cannot be judged honestly until the dense AUC metric (1.4) exists — with 3 videos and 13
+events the difference is unmeasurable.
+
+**Extend the same idea to every control decision** (user's proposal, adopted): the model
+cannot reliably decide *whether to emit a field*, but it can answer a *yes/no question*.
+So make cadence and sampling probes too, not generated fields:
+
+```
+force  ,"look_closer":  -> read P(true) -> high?  fps = focus
+force  ,"check_soon":   -> read P(true) -> high?  next_check_s = min
+```
+
+Two forward passes, **zero decodes**. This also fixes a live defect: the model has
+**never once** changed `fps` or `next_check_s` — in free mode it retyped the same constants
+every tick (~16 wasted tokens), in schema mode it never emits them at all. Self-pacing has
+been inert the whole time; probes would make it real.
+
+---
+
 ## STATUS BOARD — updated 2026-07-30
 
 Legend: ✅ done · 🟡 partial · ⬜ not started
