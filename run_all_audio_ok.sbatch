@@ -39,13 +39,21 @@ SPLIT=$REPO/omniprofast/splits_all
 # OUT_NAME lets a config change start a CLEAN arm instead of resuming into results
 # produced by different settings (resume is per-sample, so mixing would silently
 # blend two configs in one number).
-OUT=$REPO/omniprofast/${OUT_NAME:-output_all}
 PY=/iopsstor/scratch/cscs/dbartaula/miniforge3/envs/prosync_env/bin/python
-mkdir -p "$OUT"
 
-GEN=${GEN:-1}
-MAX_GEN=${MAX_GEN:-12}
+# ⚠️ ARGUMENTS, NOT --export. SLURM's --export splits on COMMAS to separate
+# NAME=VALUE pairs, so `--export=ALL,TASKS=a,b,c` silently became TASKS=a plus
+# three bogus bare names -- and it dropped OUT_NAME as well. No error, no warning:
+# job 2936893 ran with ONE task instead of five and wrote to the wrong directory.
+# Positional args cannot be mangled that way.
+#   sbatch run_all_audio_ok.sbatch <out_name> <task,list> [gen] [max_gen]
+OUT_NAME=${1:-${OUT_NAME:-output_all}}
+TASKS=${2:-${TASKS:-}}
+GEN=${3:-${GEN:-1}}
+MAX_GEN=${4:-${MAX_GEN:-12}}
 NSHARD=16
+OUT=$REPO/omniprofast/$OUT_NAME
+mkdir -p "$OUT"
 
 echo "[job] host=$(hostname) jobid=${SLURM_JOB_ID:-none} GEN=$GEN/$MAX_GEN commit=$(git -C $REPO rev-parse --short HEAD)"
 nvidia-smi --query-gpu=index,memory.free --format=csv,noheader || true
@@ -83,7 +91,7 @@ resubmit () {
   fi
   cd "$REPO" || return
   for attempt in $(seq 1 30); do
-    if sbatch --export=ALL,GEN=$((GEN + 1)),MAX_GEN=$MAX_GEN run_all_audio_ok.sbatch; then
+    if sbatch run_all_audio_ok.sbatch "$OUT_NAME" "$TASKS" $((GEN + 1)) "$MAX_GEN"; then
       CHAINED=1
       echo "[chain] generation $((GEN + 1)) queued (attempt $attempt)"; return
     fi
@@ -117,6 +125,8 @@ for k in 0 1 2 3; do
       bash run_fast.sh \
         --audio none_helpful \
         ${TASKS:+--tasks "$TASKS"} \
+        ${LIMIT:+--limit $LIMIT} ${SHORTEST:+--shortest} \
+        ${MAXSEC:+--max_seconds $MAXSEC} \
         --benchmark_json "$SPLIT/$G.json" \
         --dataset_dir "$DS" \
         --out "$OUT/$G" \
