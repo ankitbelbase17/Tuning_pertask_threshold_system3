@@ -89,8 +89,31 @@ Label every tick from ground truth; compute AUC / average-precision over ~3,300 
 "perception is wrong" from "gate is mistuned" — currently indistinguishable.
 **Rule:** AUC for iteration only. Every *reported* number stays OmniPro F1.
 
-> **Phase 1 gate:** two runs of the same config must give the same AUC to 3 decimals, and a
-> full sweep must finish in < 10 min. Do not proceed until both hold.
+### 1.5 ⚠️ RoPE position re-basing — a correctness bug in the core claim
+**Found 2026-07-30 while assessing omni backbones; it affects the CURRENT 8B system.**
+
+`manager.py` treats `next_pos` as a monotonic logical clock that "survives eviction"
+(`self.next_pos += embeds.shape[1]`, never rebased — lines 52/71). Eviction bounds
+*memory* but not *position*. Qwen3-VL-8B's `max_position_embeddings` is 262 144, and at
+185 tok/frame @ 1 fps we cross it after **23.6 minutes of video**. Past that the model is
+extrapolating RoPE beyond its trained range.
+
+This is precisely the mistake StreamingLLM warns about: positions must be assigned
+**within the cache window**, not from the original sequence. So the system that claims
+*unbounded* streaming currently degrades at ~23 min — and every eval so far
+(`max_seconds=300`) has run comfortably inside that window, which is why it was never seen.
+
+**Fix:** derive `pos_start` from the physical window rather than a monotonic counter. Safe
+for this design because the model reads time from the *text timestamp tokens*, not from
+RoPE positions. Removes the horizon limit entirely.
+
+**Also blocks the omni option:** Qwen3-Omni's `max_position_embeddings` is 65 536 and
+Qwen2.5-Omni's is 32 768 → ~5.9 min and ~3 min respectively. Any omni swap requires this
+fix first.
+
+> **Phase 1 gate:** two runs of the same config must give the same AUC to 3 decimals, a
+> full sweep must finish in < 10 min, **and a >25-min stream must not degrade**. Do not
+> proceed until all three hold.
 
 ---
 
