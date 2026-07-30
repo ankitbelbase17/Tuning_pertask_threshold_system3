@@ -84,6 +84,25 @@ class KVCacheManager:
         n = self._len()
         if n <= self.kv_budget:
             return 0
+        # ---- ROADMAP 1.5 GUARD (no numeric effect; loud instead of silent) ----
+        # Until the first eviction, next_pos and the physical length advance
+        # together on every path, so they are EQUAL and RoPE positions are exact.
+        # This is the instant they diverge: from here on `next_pos` keeps climbing
+        # past the trained range (Qwen3-VL-8B: max_position_embeddings=262144),
+        # while the cache holds only `kv_budget` tokens. StreamingLLM requires
+        # positions assigned WITHIN the cache window; we do not do that yet, and
+        # fixing it properly means re-rotating the cached keys (cf. MiniCPM-o's
+        # `realign_rotary_suffix`), not just changing pos_start.
+        # Every eval so far runs at max_seconds=300 (~55k tokens), so this has
+        # never fired. If it ever does, results past this point are suspect.
+        if not getattr(self, "_evict_warned", False):
+            self._evict_warned = True
+            print(f"[manager] WARNING: FIRST EVICTION at len={n} (budget="
+                  f"{self.kv_budget}). next_pos ({self.next_pos}) now diverges from "
+                  f"the physical window; RoPE positions will exceed the trained "
+                  f"range. See ROADMAP.md 1.5 — results beyond this point are "
+                  f"NOT trustworthy until position re-basing is implemented.",
+                  flush=True)
         keep_recent = self.kv_budget - self.sink
         if hasattr(self.cache, "layers"):                 # transformers 5.x
             for layer in self.cache.layers:
