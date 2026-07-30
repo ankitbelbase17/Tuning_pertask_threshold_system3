@@ -107,6 +107,21 @@ This is precisely the mistake StreamingLLM warns about: positions must be assign
 for this design because the model reads time from the *text timestamp tokens*, not from
 RoPE positions. Removes the horizon limit entirely.
 
+**Independent confirmation:** MiniCPM-o 4.5 — the rival, a shipped streaming system —
+implements exactly this, as `realign_rotary_suffix` + `streaming_position_offset`. We are
+not inventing a fix; we are adopting the one a production streaming model already needed.
+
+**Second, compounding limit — `kv_budget=262144` is not reachable today.** These GH200s
+expose **95.6 GiB**, not 120 GB. The primary cache at 262 144 tokens is 37.7 GiB, the live
+MVCC snapshot clone doubles it, plus 15.3 GiB of weights ≈ **112 GiB — over the card.**
+Max feasible is ~193 K tokens ≈ **17 min @ 1 fps**, so *memory* binds before the RoPE limit
+at 23.6 min.
+
+> **The system's real horizon today is ~17 minutes, not unbounded.** Both limits must be
+> fixed before the unbounded-stream claim is defensible: position re-basing (above) and a
+> snapshot strategy that does not double the cache (see INVARIANT 3 — the clone is the
+> cost; splice-and-truncate under the lock is the alternative in lockstep mode).
+
 **Also blocks the omni option:** Qwen3-Omni's `max_position_embeddings` is 65 536 and
 Qwen2.5-Omni's is 32 768 → ~5.9 min and ~3 min respectively. Any omni swap requires this
 fix first.

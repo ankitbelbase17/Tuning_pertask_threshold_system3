@@ -127,8 +127,13 @@ class System5Runner:
         # overrides config.gate_mode so both systems run from one checkout.
         import os
         gate_mode = os.environ.get("OMNIPRO_GATE_MODE", self.base_cfg.gate_mode)
+        # A/B switch for the schema-walk decoder: OMNIPRO_DECODE_MODE=schema|free
+        # lets both decoders run from one checkout (same commit, same weights), so
+        # the comparison is matched.
+        decode_mode = os.environ.get("OMNIPRO_DECODE_MODE", self.base_cfg.decode_mode)
         cfg = dataclasses.replace(
             self.base_cfg,
+            decode_mode=decode_mode,
             instruction=sample.question,
             event=(sample.event or sample.question),
             video_path=sample.video_path,
