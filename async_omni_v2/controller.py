@@ -269,7 +269,9 @@ def controller_thread(cfg, mgr, ctrl, clock, stop, prof=None, evaluator=None, wb
              "have_enough_info": False, "new_event": False, "answer": "",
              "question_for_next": "", "seen": "", "event_time_s": None,
              "count": 0, "phase": ""}
-    notes = []                                 # append-only memory log (bounded ring)
+    notes = []                                 # model-authored notes (bounded ring)
+    seen_trace = []                            # (vt, seen) — the perception trace;
+                                               # consecutive duplicates collapsed
     # true/false must be SINGLE tokens for the logit read; verified for Qwen3-VL
     # ('true'->1866, 'false'->3849). Fall back to free decode if a tokenizer splits them.
     ids_bool = (_single_tok(b.tok, "true"), _single_tok(b.tok, "false"))
@@ -322,10 +324,32 @@ def controller_thread(cfg, mgr, ctrl, clock, stop, prof=None, evaluator=None, wb
             prompt += (f"\nYou previously asked yourself: '{pending_q}'. "
                        f"Judge it now from the MOST RECENT frames.")
         # timestamped history: a LATER onset is a new event, not a repeat of these
-        convo = "".join(f"assistant @{rvt:.0f}s: {a}\n" for rvt, a in reported) or "assistant: none\n"
-        prompt += ("\n\nAlready reported so far (PAST occurrences with their times; a fresh "
-                   "onset at a later time is a NEW event — set new_event=false ONLY while the "
-                   "SAME occurrence is still on screen):\n" + convo)
+        # ---- MEMORY (MISSION pillar 7): the writer's own trace, fed back in ----
+        # Two halves, both timestamped and append-only:
+        #   WHAT I SAW  -- the `seen` trace. Until now `seen` was reset and thrown
+        #                  away every tick, so the controller had no idea what it
+        #                  had already looked at. Consecutive duplicates are
+        #                  collapsed (the log showed the same scene repeated 3-4
+        #                  ticks running), so this reads as a scene-CHANGE history
+        #                  and stays cheap.
+        #   WHAT I SAID -- `reported`, code-owned. The model must never be able to
+        #                  write this: if it could, it could hallucinate having
+        #                  already answered and dedup would silently fail open.
+        # Both are bounded rings -> per-tick prompt cost is O(1), not O(stream).
+        # This is what makes dedup and accumulation possible at all.
+        if seen_trace:
+            trace = "".join(f"  @{svt:.0f}s {s}\n" for svt, s in seen_trace)
+        else:
+            trace = "  (nothing yet)\n"
+        prompt += ("\n\nWHAT YOU HAVE SEEN so far (your own observations, newest last; "
+                   "repeats collapsed):\n" + trace)
+        convo = "".join(f"  @{rvt:.0f}s {a}\n" for rvt, a in reported) or "  (nothing yet)\n"
+        prompt += ("\nWHAT YOU HAVE ALREADY TOLD THE USER (past occurrences with their "
+                   "times; a fresh onset at a later time is a NEW event — it is only a "
+                   "repeat while the SAME occurrence is still on screen):\n" + convo)
+        if notes:
+            prompt += ("\nNOTES YOU KEPT:\n"
+                       + "".join(f"  @{nvt:.0f}s {n}\n" for nvt, n in notes))
         prompt += "\nNow emit ONLY your control JSON for the current stream:\n"
 
         # PRIME the decoder with an open brace: Qwen3-VL is an instruct model and,
@@ -398,6 +422,14 @@ def controller_thread(cfg, mgr, ctrl, clock, stop, prof=None, evaluator=None, wb
         level = bool(state["have_enough_info"])   # "condition satisfied NOW"
         answer = (state["answer"] or "").strip()
         pending_q = (state.get("question_for_next") or "").strip()
+
+        # MEMORY: record what we just saw. Collapse consecutive duplicates so the
+        # trace is a scene-CHANGE history rather than one line per tick, then keep
+        # only the last `seen_trace_ring` entries so the prompt cost stays O(1).
+        seen_now = (state["seen"] or "").strip()
+        if seen_now and (not seen_trace or seen_trace[-1][1] != seen_now):
+            seen_trace.append((vt, seen_now))
+            del seen_trace[:-cfg.seen_trace_ring]
 
         # fire decision: rising edge of the level signal; OR, within a true
         # stretch, an answer that is clearly a DIFFERENT occurrence than the last

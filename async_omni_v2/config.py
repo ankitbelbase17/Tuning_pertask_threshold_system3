@@ -103,7 +103,13 @@ class AsyncOmniConfig:
     # boolean slot. If it is not a boolean at all, the logit read is imposing
     # structure the model did not intend — we must know before trusting this path.
     verify_logit_read: bool = True
-    notes_ring: int = 8                 # bounded append-only memory log
+    notes_ring: int = 8                 # model-authored notes (bounded ring)
+    # MEMORY (MISSION pillar 7) — the writer's own trace, fed back into the prompt:
+    # WHAT I SAW (`seen`, consecutive duplicates collapsed) + WHAT I SAID
+    # (`reported`, code-owned so the model cannot fake having answered).
+    # Bounded so per-tick prompt cost is O(1), not O(stream length) — a memory that
+    # grows without bound would make the system slower the longer it watches.
+    seen_trace_ring: int = 10           # how many past observations to show
 
     # In-context "control language" (VISPROG-style): a compact JSON DSL the frozen
     # model emits each tick to drive its own probing. Taught via worked
