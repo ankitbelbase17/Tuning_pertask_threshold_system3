@@ -262,7 +262,29 @@ class AsyncOmniConfig:
     probe_default_s: float = 1.0
     probe_min_s: float = 0.2      # finer check grid (was 1.0) so vt lands closer to onsets
     probe_max_s: float = 1.5      # finer check grid (was 3.0)
-    controller_max_tokens: int = 300  # cap for the control-JSON generation
+    controller_max_tokens: int = 300  # cap for the control-JSON generation (free mode)
+
+    # ---- SCHEMA-WALKED DECODE (the fix for "the diff never diffs") ------------
+    # "schema": code force-feeds every key/punctuation as a batched PREFILL and the
+    #           model only samples value slots; booleans are READ from the logits at
+    #           the forced position (zero decode steps, continuous confidence).
+    #           Measured motivation: 25 of the 35 tokens in a quiet tick were JSON
+    #           structure the code already knew, and the prose rule "omit fps unless
+    #           it changed" was obeyed 0/15 ticks. A diff is a DECODER CONSTRAINT,
+    #           not a prompt instruction.
+    # "free":   the legacy open-brace generate loop (kept for A/B).
+    decode_mode: str = "schema"
+    schema_max_seen_tokens: int = 12    # cap on the `seen` value slot
+    schema_max_answer_tokens: int = 32  # cap on the `answer` value slot (hot ticks only)
+    schema_max_int_tokens: int = 4      # cap on `event_time_s`
+    schema_max_tail_tokens: int = 60    # cap on the `more` escape-hatch tail
+    hit_threshold: float = 0.5          # P(true) above which the level is TRUE
+    more_threshold: float = 0.5         # P(true) above which the tail is decoded
+    # Log, every tick, what an UNRESTRICTED argmax would have produced at the
+    # boolean slot. If it is not a boolean at all, the logit read is imposing
+    # structure the model did not intend — we must know before trusting this path.
+    verify_logit_read: bool = True
+    notes_ring: int = 8                 # bounded append-only memory log
     # In-context "control language" (VISPROG-style): a compact JSON DSL the frozen
     # model emits each tick to drive its own probing. Taught via worked
     # (Situation -> Control) pairs that demonstrate the DECISIONS (stay quiet /

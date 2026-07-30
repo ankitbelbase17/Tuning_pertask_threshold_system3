@@ -20,6 +20,7 @@ plus a local last-answer guard. It never writes back to the primary cache
 (single-writer invariant preserved; "no writer cache").
 """
 import json
+import math
 import re
 import time
 
@@ -103,6 +104,134 @@ def _clamp(x, lo, hi, default):
         return default
 
 
+def _single_tok(tok, s):
+    """Token id for a surface form that MUST be one token; None otherwise."""
+    ids = tok.encode(s, add_special_tokens=False)
+    return ids[0] if len(ids) == 1 else None
+
+
+def _read_bool(logits, true_id, false_id):
+    """P(true) restricted to {true,false} at the CURRENT position — a logit read,
+    not a decode. Costs zero extra forward passes: these logits were already
+    produced by the forward that force-fed the key. Returns a CONTINUOUS
+    confidence, which is what lets the tuned Schmitt/hysteresis gate apply here at
+    all (a decoded 'true'/'false' token gives only a hard bit)."""
+    lt, lf = float(logits[true_id]), float(logits[false_id])
+    m = max(lt, lf)
+    et, ef = math.exp(lt - m), math.exp(lf - m)
+    return et / (et + ef)
+
+
+def _decode_until(step, b, logits, cfg, gen, stop_chars, max_tokens):
+    """Sample a VALUE slot until a stop char appears (or the cap is hit).
+
+    The stop token is deliberately NOT fed back into the cache — the caller
+    force-feeds the next literal (which begins with that same delimiter) instead,
+    so the JSON stays well-formed by construction."""
+    ids, text = [], ""
+    for _ in range(max_tokens):
+        logits[b.eos_id] = float("-inf")
+        tid = _sample(logits, ids, cfg, gen)
+        piece = b.tok.decode([tid])
+        stops = [c for c in stop_chars if c in piece]
+        if stops:
+            text += piece[:min(piece.index(c) for c in stops)]
+            return text, ids, logits
+        ids.append(tid)
+        text += piece
+        logits = step(b.embed_token(tid))
+    return text, ids, logits
+
+
+def _schema_tick(b, cfg, gen, step, prompt, ids_bool):
+    """SCHEMA-WALKED DECODE — the fix for "the diff never actually diffs".
+
+    Instead of handing the model an open brace and hoping it obeys prose rules
+    ("omit fps unless it changed" — measured 0/15 compliance), the CODE walks a
+    fixed skeleton and the model only fills value slots:
+
+        force  {"seen":"          4 tokens, ONE forward (prefill is parallel)
+        SAMPLE <seen text>        the only free decode on a quiet tick
+        force  ","have_enough_info":
+        READ   P(true)            ZERO decode steps, continuous confidence
+        [if hit] force ,"event_time_s":  SAMPLE int
+                 force ,"answer":"       SAMPLE text
+        force  ","more":
+        READ   P(true)            escape hatch; if true, free-decode the tail
+                                  (fps / next_check_s / note / count / phase)
+
+    Prefill of k tokens costs ONE forward; decoding k tokens costs k forwards.
+    So every forced token is ~free. A quiet tick drops from 35 sequential decodes
+    to ~6 decodes + ~4 batched prefills, and the model becomes PHYSICALLY UNABLE
+    to emit fps/next_check_s on the default path.
+
+    Returns (diff, meta)."""
+    true_id, false_id = ids_bool
+    diff, meta = {}, {}
+    n_dec = 0
+
+    # ---- seen: forced key, sampled value (look BEFORE judging, every tick) ----
+    logits = step(b.embed_text(prompt + '{"seen":"'))
+    seen, sids, logits = _decode_until(step, b, logits, cfg, gen,
+                                       '"', cfg.schema_max_seen_tokens)
+    n_dec += len(sids)
+    diff["seen"] = seen.strip()
+
+    # ---- have_enough_info: forced key, LOGIT READ (no decode at all) ----------
+    logits = step(b.embed_text('","have_enough_info":'))
+    p_hit = _read_bool(logits, true_id, false_id)
+    hit = p_hit >= cfg.hit_threshold
+    diff["have_enough_info"] = hit
+    meta["p_hit"] = p_hit
+    if cfg.verify_logit_read:
+        # VERIFICATION (ROADMAP 1.1): what would a FREE decode have produced here?
+        # If the unrestricted argmax is not a boolean at all, the logit read is
+        # imposing structure the model did not intend — we must know that before
+        # trusting this path. Logged every tick, costs nothing.
+        top = int(torch.argmax(logits).item())
+        meta["argmax_tok"] = b.tok.decode([top])
+        meta["argmax_is_bool"] = top in (true_id, false_id)
+        meta["argmax_agrees"] = (top == (true_id if hit else false_id))
+
+    lit = "true" if hit else "false"
+
+    # ---- hot path only: onset time + answer -----------------------------------
+    if hit:
+        logits = step(b.embed_text(lit + ',"event_time_s":'))
+        t_txt, tids, logits = _decode_until(step, b, logits, cfg, gen,
+                                            ',"}', cfg.schema_max_int_tokens)
+        n_dec += len(tids)
+        try:
+            diff["event_time_s"] = float(t_txt.strip())
+        except (TypeError, ValueError):
+            pass
+        logits = step(b.embed_text(',"answer":"'))
+        ans, aids, logits = _decode_until(step, b, logits, cfg, gen,
+                                          '"', cfg.schema_max_answer_tokens)
+        n_dec += len(aids)
+        diff["answer"] = ans.strip()
+        logits = step(b.embed_text('","more":'))
+    else:
+        logits = step(b.embed_text(lit + ',"more":'))
+
+    # ---- more: the escape hatch ----------------------------------------------
+    # One forced literal + one logit read. On the ~99% quiet path that is ONE
+    # forward and ZERO decodes, yet the model keeps full power to change cadence,
+    # append memory or bump a counter when it actually wants to. Pay only to speak.
+    p_more = _read_bool(logits, true_id, false_id)
+    meta["p_more"] = p_more
+    if p_more >= cfg.more_threshold:
+        logits = step(b.embed_text('true,'))
+        tail, mids, logits = _decode_until(step, b, logits, cfg, gen,
+                                           '}', cfg.schema_max_tail_tokens)
+        n_dec += len(mids)
+        for k, v in (_extract_json("{" + tail + "}") or {}).items():
+            diff[k] = v
+
+    meta["n_decode"] = n_dec
+    return diff, meta
+
+
 def _word_sim(a, b):
     """Jaccard word overlap in [0,1]; rewordings of the SAME occurrence score high
     ('reports 80 dead' vs 'now reports 80 dead'), different occurrences score low
@@ -133,9 +262,22 @@ def controller_thread(cfg, mgr, ctrl, clock, stop, prof=None, evaluator=None, wb
     # that CHANGE each tick (a compact JSON diff), so it rarely decodes the string
     # fields -> much less latency. Transient fields (have_enough_info/answer/seen/
     # event_time_s) RESET to default every tick and must be re-asserted.
+    # count/phase are PERSISTENT task accumulators (MISSION.md pillar 7c). They must
+    # exist here or the merge below (`if key in state`) silently DISCARDS them —
+    # which is what happened to every count/phase the model ever emitted.
     state = {"fps": cfg.encoder_idle_fps, "next_check_s": cfg.probe_default_s,
              "have_enough_info": False, "new_event": False, "answer": "",
-             "question_for_next": "", "seen": "", "event_time_s": None}
+             "question_for_next": "", "seen": "", "event_time_s": None,
+             "count": 0, "phase": ""}
+    notes = []                                 # append-only memory log (bounded ring)
+    # true/false must be SINGLE tokens for the logit read; verified for Qwen3-VL
+    # ('true'->1866, 'false'->3849). Fall back to free decode if a tokenizer splits them.
+    ids_bool = (_single_tok(b.tok, "true"), _single_tok(b.tok, "false"))
+    use_schema = (cfg.decode_mode == "schema" and None not in ids_bool)
+    if cfg.decode_mode == "schema" and not use_schema:
+        log("controller", 0.0, "WARNING: true/false are not single tokens -> "
+                               "falling back to free decode")
+    log("controller", 0.0, f"decode_mode={'schema' if use_schema else 'free'}")
     # LEVEL -> EDGE in CODE (semantic Schmitt gate): the model reports whether the
     # condition is satisfied NOW (a LEVEL it can judge from the cache snapshot);
     # firing happens only on the RISING edge (false -> true across ticks), so a
@@ -190,30 +332,39 @@ def controller_thread(cfg, mgr, ctrl, clock, stop, prof=None, evaluator=None, wb
         # spliced as raw text onto the cache (no assistant-turn markers), it would
         # otherwise emit EOS immediately at the splice point. Starting mid-object
         # forces it to complete the JSON. We reconstruct raw = "{" + generated.
-        t_prefill0 = time.time()
-        logits = step(b.embed_text(prompt + "{"))
-        prefill_s = time.time() - t_prefill0      # ICL+convo prefill cost this tick
-        ids = []
+        meta = {}
         t_dec0 = time.time()
-        for _ in range(cfg.controller_max_tokens):
-            # MASK EOS: as an instruct model spliced raw onto the cache, Qwen often
-            # samples the end token as the very first token (-> empty output). We
-            # stop on the closing "}" ourselves, so EOS is never wanted here.
-            logits[b.eos_id] = float("-inf")
-            tok_id = _sample(logits, ids, cfg, gen)
-            ids.append(tok_id)
-            if "}" in b.tok.decode([tok_id]):     # first close -> flat object done
-                break
-            logits = step(b.embed_token(tok_id))
+        if use_schema:
+            # SCHEMA WALK: code forces every key/punctuation, model fills only the
+            # value slots, booleans come from a logit read. The model can no longer
+            # emit fps/next_check_s on the default path -> the diff is a diff.
+            diff, meta = _schema_tick(b, cfg, gen, step, prompt, ids_bool)
+            ids = [None] * meta.get("n_decode", 0)   # count only, for telemetry
+            raw = json.dumps(diff, separators=(",", ":"))
+        else:
+            logits = step(b.embed_text(prompt + "{"))
+            ids = []
+            for _ in range(cfg.controller_max_tokens):
+                # MASK EOS: as an instruct model spliced raw onto the cache, Qwen often
+                # samples the end token as the very first token (-> empty output). We
+                # stop on the closing "}" ourselves, so EOS is never wanted here.
+                logits[b.eos_id] = float("-inf")
+                tok_id = _sample(logits, ids, cfg, gen)
+                ids.append(tok_id)
+                if "}" in b.tok.decode([tok_id]):     # first close -> flat object done
+                    break
+                logits = step(b.embed_token(tok_id))
+            raw = "{" + b.decode(ids)
+            diff = _extract_json(raw)             # the model's DIFF (partial dict); {} = no change
         decode_s = time.time() - t_dec0
         if prof is not None:
-            prof.observe("ctrl_prefill_s", prefill_s)
             prof.observe("ctrl_decode_s", decode_s)
             if ids:
                 prof.observe("ctrl_decode_ms_per_tok", 1000 * decode_s / len(ids))
-
-        raw = "{" + b.decode(ids)
-        diff = _extract_json(raw)                 # the model's DIFF (partial dict); {} = no change
+            if "p_hit" in meta:
+                prof.observe("ctrl_p_hit", meta["p_hit"])
+                prof.incr("ctrl_argmax_agrees" if meta.get("argmax_agrees")
+                          else "ctrl_argmax_disagrees")
         gen_s = time.time() - t0
 
         # ---- apply the DIFF onto the persistent config ----
@@ -226,7 +377,15 @@ def controller_thread(cfg, mgr, ctrl, clock, stop, prof=None, evaluator=None, wb
         state["event_time_s"] = None
         for k, v in diff.items():
             key = "question_for_next" if k == "question" else k   # accept legacy key
-            if key in state:
+            if key == "note":
+                # MEMORY IS A LOG, NOT A DOCUMENT: append, never rewrite. A memory
+                # the model rewrites each tick costs tokens proportional to its
+                # length, so tick latency would grow with watch time — backwards
+                # for an unbounded stream. Bounded ring keeps per-tick cost O(1).
+                if str(v).strip():
+                    notes.append((vt, str(v).strip()))
+                    del notes[:-cfg.notes_ring]
+            elif key in state:
                 state[key] = v
 
         fps = _clamp(state["fps"], cfg.encoder_idle_fps, cfg.encoder_focus_fps,
@@ -251,9 +410,19 @@ def controller_thread(cfg, mgr, ctrl, clock, stop, prof=None, evaluator=None, wb
         # log EVERY tick's raw diff so all responses are inspectable in the log file
         vid = cfg.video_id or "?"
         log("ctrl.raw", vt, f"[{vid}] " + (raw.strip()[:240] if diff else f"NO-DIFF raw={raw[:120]!r}"))
+        # p_hit is the CONTINUOUS confidence from the logit read; agree= is the
+        # verification that a free decode would have produced the same boolean.
+        extra = ""
+        if meta:
+            extra = (f" p_hit={meta.get('p_hit', float('nan')):.3f}"
+                     f" p_more={meta.get('p_more', float('nan')):.3f}")
+            if cfg.verify_logit_read and "argmax_agrees" in meta:
+                extra += (f" agree={meta['argmax_agrees']}"
+                          f" argmax={meta['argmax_tok']!r}")
         log("ctrl.gate", vt, f"[{vid}] fps={fps:.1f} level={level} rise={rising} "
                              f"new_occ={distinct} fire={fire} next={nxt:.1f}s "
-                             f"gen={gen_s:.1f}s ntok={len(ids)} q={pending_q!r}")
+                             f"gen={gen_s:.1f}s ntok={len(ids)} q={pending_q!r}"
+                             f"{extra} count={state['count']} notes={len(notes)}")
 
         if fire:
             # the onset may predate this tick; if the model read the event time off
