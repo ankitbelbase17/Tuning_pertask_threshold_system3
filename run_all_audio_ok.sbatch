@@ -5,68 +5,94 @@
 #SBATCH --time=01:30:00
 #SBATCH --nodes=1
 #SBATCH --gres=gpu:4
-#SBATCH --array=0-3
-#SBATCH --output=/iopsstor/scratch/cscs/dbartaula/system_3/omniprofast/output_all/slurm_%A_%a.log
+#SBATCH --output=/iopsstor/scratch/cscs/dbartaula/system_3/omniprofast/output_all/slurm_%j.log
 #
 # FULL RUN — every OmniPro sample that does NOT require audio.
+#   932 samples / 699 videos (audio_dependency in {none, helpful})
+#   16 duration-balanced shards, 4 GPUs, ~36.5 video-hours total
 #
-#   932 samples / 699 videos  (audio_dependency in {none, helpful})
-#   16 duration-balanced shards (splits_all/g00..g15), 2.28 video-hours each
-#   4 array tasks x 4 GPUs = 16 workers, one shard per GPU
-#   ~36.5 video-hours total -> ~3h wall at the measured 1.3 s/tick
+# SELF-CHAINING. The debug partition caps jobs at 1:30 AND enforces a per-user
+# job limit (QOSMaxSubmitJobPerUserLimit), so a dependency chain cannot be
+# pre-submitted — sbatch refuses. Instead this job RESUBMITS ITSELF at the end
+# if work remains: the resubmit lands as the current job releases its slot, so
+# the per-user limit is never violated. evaluate.py resumes by default, so each
+# generation picks up exactly where the previous one stopped.
 #
-# TWO THINGS THIS RUN FIXES vs every previous eval:
+# Stops when all 16 shards have written online_metrics.json, or at MAX_GEN.
 #
-#  1. DATASET DIR. run_fast.sh hardcodes omni_pro/dataset, which holds only 34 of
-#     the 932 videos -- so every historical result was silently capped by what
-#     happened to be downloaded (the famous "11 SCA videos" is just all there was).
-#     omnipro_data has all 932. We pass --dataset_dir explicitly.
+# TWO THINGS THIS FIXES vs every previous eval:
+#  1. DATASET DIR — run_fast.sh hardcodes omni_pro/dataset, which holds only 34
+#     of the 932 videos, so every historical result was silently capped by what
+#     happened to be downloaded (the "11 SCA videos" is just all there was).
+#     omnipro_data has all 2700. We pass --dataset_dir explicitly.
+#  2. DECODE MODE — schema-walk, which passed its gate 647/647 and runs ~3x
+#     faster with ~4x fewer tokens than the free decode.
 #
-#  2. DECODE MODE. schema-walk, which passed its gate 157/157 and runs 2.8x faster
-#     with 3.5x fewer tokens than the free decode.
-#
-# Every tick logs p_hit (the continuous confidence from the logit read), which is
-# the raw material for the dense AUC metric (ROADMAP 1.4) -- so this run doubles as
-# the dataset for offline threshold sweeps that need no GPU.
+# Per-tick p_hit is dumped to scores.jsonl every generation, so ANY firing
+# threshold or gate strategy can be re-derived offline afterwards with no GPU.
 set -uo pipefail
 
 REPO=/iopsstor/scratch/cscs/dbartaula/system_3
-DS=/iopsstor/scratch/cscs/dbartaula/omnipro_data     # <-- has ALL 932 videos
+DS=/iopsstor/scratch/cscs/dbartaula/omnipro_data
 SPLIT=$REPO/omniprofast/splits_all
 OUT=$REPO/omniprofast/output_all
+PY=/iopsstor/scratch/cscs/dbartaula/miniforge3/envs/prosync_env/bin/python
 mkdir -p "$OUT"
 
-A=${SLURM_ARRAY_TASK_ID:-0}
-echo "[job] host=$(hostname) array=$A jobid=${SLURM_JOB_ID:-none} commit=$(git -C $REPO rev-parse --short HEAD)"
-nvidia-smi --query-gpu=index,name,memory.free --format=csv,noheader || true
+GEN=${GEN:-1}
+MAX_GEN=${MAX_GEN:-12}
+NSHARD=16
 
+echo "[job] host=$(hostname) jobid=${SLURM_JOB_ID:-none} GEN=$GEN/$MAX_GEN commit=$(git -C $REPO rev-parse --short HEAD)"
+nvidia-smi --query-gpu=index,memory.free --format=csv,noheader || true
 cd "$REPO/omniprofast"
 
-# array task A drives GPUs 0..3 -> shards 4A .. 4A+3
-for k in 0 1 2 3; do
-  G=$(printf "g%02d" $((A * 4 + k)))
-  echo "[job] GPU$k -> shard $G ($(python -c "import json;print(len(json.load(open('$SPLIT/$G.json'))))" 2>/dev/null || echo '?') samples)"
-  CUDA_VISIBLE_DEVICES=$k \
-  OMNIPRO_GATE_MODE=controller \
-  OMNIPRO_DECODE_MODE=schema \
-    bash run_fast.sh \
-      --audio none_helpful \
-      --benchmark_json "$SPLIT/$G.json" \
-      --dataset_dir "$DS" \
-      --out "$OUT/$G" \
-      > "$OUT/${G}_launch.log" 2>&1 &
-done
+done_count () {   # how many shards have finished (wrote their metrics)
+  local n=0
+  for i in $(seq 0 $((NSHARD - 1))); do
+    [ -f "$OUT/$(printf 'g%02d' $i)/online_metrics.json" ] && n=$((n + 1))
+  done
+  echo $n
+}
 
+echo "[job] shards complete at start: $(done_count)/$NSHARD"
+
+# 4 GPUs; GPU k takes shards k, k+4, k+8, k+12 in order. Resume makes an already
+# finished shard cost seconds, so re-walking the list each generation is cheap.
+for k in 0 1 2 3; do
+(
+  for i in $(seq $k 4 $((NSHARD - 1))); do
+    G=$(printf "g%02d" $i)
+    if [ -f "$OUT/$G/online_metrics.json" ]; then
+      echo "[job] GPU$k  $G already complete — skip"
+      continue
+    fi
+    echo "[job] GPU$k  -> $G"
+    CUDA_VISIBLE_DEVICES=$k \
+    OMNIPRO_GATE_MODE=controller \
+    OMNIPRO_DECODE_MODE=schema \
+      bash run_fast.sh \
+        --audio none_helpful \
+        --benchmark_json "$SPLIT/$G.json" \
+        --dataset_dir "$DS" \
+        --out "$OUT/$G" \
+        >> "$OUT/${G}_launch.log" 2>&1
+  done
+) &
+done
 wait
-echo "[job] array task $A: all 4 shards finished"
-for k in 0 1 2 3; do
-  G=$(printf "g%02d" $((A * 4 + k)))
-  m="$OUT/$G/online_metrics.json"
-  echo "[job]   $G: $([ -f "$m" ] && echo present || echo MISSING)"
-done
-echo "[job] DONE array task $A"
+echo "[job] generation $GEN finished; shards complete: $(done_count)/$NSHARD"
 
-# Persist per-tick p_hit so ANY threshold / gate strategy can be re-derived later
-# offline, with no GPU. This is what makes the firing threshold a free decision.
-/iopsstor/scratch/cscs/dbartaula/miniforge3/envs/prosync_env/bin/python \
-  dump_scores.py "$OUT" 2>&1 | tail -20
+# Persist per-tick p_hit -> any threshold becomes a free, offline decision.
+"$PY" dump_scores.py "$OUT" 2>&1 | tail -20
+
+if [ "$(done_count)" -ge "$NSHARD" ]; then
+  echo "[job] ALL $NSHARD SHARDS COMPLETE — chain finished."
+elif [ "$GEN" -ge "$MAX_GEN" ]; then
+  echo "[job] hit MAX_GEN=$MAX_GEN with $(done_count)/$NSHARD done — stopping."
+else
+  echo "[job] work remains — resubmitting as generation $((GEN + 1))"
+  cd "$REPO" && sbatch --export=ALL,GEN=$((GEN + 1)),MAX_GEN=$MAX_GEN \
+    run_all_audio_ok.sbatch
+fi
+echo "[job] DONE gen $GEN"
