@@ -145,6 +145,63 @@ _ETG_WRITER_PROMPT = (
     "bottom-right. Output only that sentence.")
 
 
+# NOTE ON AUDIO: the paper defines IEA "audio-first" (prefer whistles/doorbells/
+# spoken phrases). We run the audio_dependency=none subset only, so this ICL is
+# purely VISUAL — the target is a sharp VISIBLE onset and there are no audio cues.
+#
+# Task intent: a standing instruction ("Let me know when X happens"). Alert the
+# INSTANT the event STARTS on screen; timing is frame-precise (±3s temporal match)
+# and the answer is a short natural description (LLM-judged, not exact-match).
+# Usually ONE occurrence per video (max ~3), so after it ends keep watching.
+_INSTANT_EVENT_ALERT = (
+    "\nYou are the CONTROLLER of a live video monitor. Your task (in the system "
+    "instruction above) is a STANDING INSTRUCTION to alert the user the moment a "
+    "specific EVENT happens on screen (e.g. 'let me know when the audience starts "
+    "clapping'). The event is a SHARP ONSET — the instant something STARTS — so your "
+    "timing must be precise: fire when it BEGINS, not before. It usually happens ONCE, "
+    "but can recur a few times; after it ends, keep watching for the next occurrence.\n"
+    "Each turn, read the stream so far and emit a compact JSON control update. ALWAYS "
+    "start with seen, then have_enough_info — looking BEFORE judging, every tick. "
+    "Whenever have_enough_info is true, ALSO include event_time_s and answer. Include "
+    "fps, next_check_s, or question_for_next ONLY when they change from their current "
+    "value (otherwise omit them to stay short). Fields:\n"
+    '  seen              : ALWAYS FIRST — 3-8 words: what is on screen now, relevant to the event\n'
+    "  have_enough_info  : true the moment the event is happening on screen NOW; stays true "
+    "while it continues; back to false once it is over\n"
+    "  event_time_s      : when have_enough_info is true -> the video time in seconds when THIS "
+    "occurrence STARTED (read it off the 'time Xs' markers in the stream)\n"
+    '  answer            : REQUIRED whenever have_enough_info is true -> ONE natural sentence '
+    '(UNDER 20 words) stating WHAT just happened; else ""\n'
+    "  fps               : how densely to sample next (1-3; raise when the event feels close)\n"
+    "  next_check_s      : seconds until the next check (small — the onset is a precise instant)\n"
+    '  question_for_next : a short check to verify on the next turn; else ""\n'
+    "YOU DO NOT DECIDE WHEN TO ALERT — the system does. It alerts the user only when "
+    "have_enough_info goes false -> true (or when your answer describes a clearly DIFFERENT "
+    "occurrence), so you will NEVER double-alert by keeping it true while the same event stays on "
+    "screen. Your only job each tick: judge honestly whether the event is happening NOW and "
+    "describe what you see.\n"
+    "The 'Already reported' list below shows PAST occurrences WITH THEIR TIMES.\n"
+    "Rules: base every judgment on what is actually visible; do NOT fire before the event "
+    "actually starts; NEVER copy the example text.\n"
+    "Worked example (a DIFFERENT video — instruction: 'Let me know when the audience starts "
+    "clapping'). The video is a university auditorium: speakers give speeches about the "
+    "university, the camera cutting between the podium and the seated audience. Every output "
+    "starts with seen + have_enough_info; other fields appear only when they change:\n"
+    "At 20s a speaker is talking, the audience is seated and still -> event NOT happening:\n"
+    '{"seen":"speaker at podium, audience seated still","have_enough_info":false,"fps":1.0,"question_for_next":"Has the audience started clapping?"}\n'
+    "At 34s the speaker is wrapping up his segment, still no clapping (question unchanged -> omit it):\n"
+    '{"seen":"speaker finishing his remarks","have_enough_info":false}\n'
+    "At 38s the camera cuts to the audience clapping -> event STARTS; describe it and read its time:\n"
+    '{"seen":"audience clapping in their seats","have_enough_info":true,"event_time_s":38,"answer":"The audience is clapping now after the opening remarks.","next_check_s":1}\n'
+    "At 40s they are still clapping -> STILL happening; keep reporting it (the system will not double-alert):\n"
+    '{"seen":"audience still applauding","have_enough_info":true,"event_time_s":38,"answer":"The audience is clapping now after the opening remarks."}\n'
+    "At 48s the clapping has stopped and the next speaker is walking up -> event over:\n"
+    '{"seen":"applause stopped, new speaker approaching","have_enough_info":false}\n'
+    "At 64s the audience breaks into applause again as a family is invited on stage -> a NEW occurrence:\n"
+    '{"seen":"audience applauding again","have_enough_info":true,"event_time_s":64,"answer":"The audience has started applauding again as the family is invited to the stage."}\n'
+)
+
+
 @dataclass
 class AsyncOmniConfig:
     # ---- model ----
@@ -184,7 +241,7 @@ class AsyncOmniConfig:
     # ---- video / pacing ----
     video_path: str = ""
     fps: float = 1.0                  # encoder base frame rate (frames/s of video)
-    max_seconds: float = 300.0
+    max_seconds: float = 600.0
     realtime: bool = True             # pace the encoder to a wall clock (the
                                       # controller self-paces in VIDEO time, so it
                                       # needs realtime; batch fast-forwards the clip)
@@ -284,9 +341,71 @@ class AsyncOmniConfig:
     task_controller_prompts: dict = field(default_factory=lambda: {
         "semantic_condition_alert": _SEMANTIC_CONDITION_ALERT,
         "explicit_target_grounding": _EXPLICIT_TARGET_GROUNDING,
+        "instant_event_alert": _INSTANT_EVENT_ALERT,
     })
     # Per-task writer prompts for the PROBE-GATE arm (same idea: the answer format
     # is task knowledge both systems get; the architecture is what differs).
     task_writer_prompts: dict = field(default_factory=lambda: {
         "explicit_target_grounding": _ETG_WRITER_PROMPT,
     })
+
+
+
+"""
+# Prompt generation information from me to ai agent for remaining tasks should be similar to those above 3 tasks.
+For now we do not use the audio signal at all. so the prompts should refrain from telling anything about audio, evn though the prompts i pasted here from the original eval paper contain the prompt about audio
+https://github.com/RuixiangZhao/OmniPro this is the official repo of the OmniPro paper. The prompts above are copied from the original repo. avoiding the audio paert.
+
+next we will use audio_dependency=none or helpful subsets only. on all the tasks.
+
+Below i give some real video examples for in context learning ICL you should use to generate the prompts for the remaining tasks.
+
+## Task: dedup_counting 
+Video description: A video showing a man inteviewing in front of the camera giving the review of the restaurant, tables of a restaurant, a chef handling pizza in the oven and a girl working in the center of the restaurant while other people are eating and talking.
+
+Question: Count how many different people are featured as the primary subject of a scene while working or giving an interview.
+ground truth answer: [{"trigger_time": "00:02", "trigger_time_sec": 2, "response": "First person — Rice, the interviewee wearing a t-shirt.", "trigger_type": "visual", "event_description": "Rice first appears giving an interview", "count": 1}, {"trigger_time": "00:8", "trigger_time_sec": 10, "response": "Second person — the chef in a white shirt and black cap working in the kitchen.", "trigger_type": "visual", "event_description": "The chef first appears working in the kitchen", "count": 2}, {"trigger_time": "00:26", "trigger_time_sec": 26, "response": "Third person — a blonde girl with glasses working at a table.", "trigger_type": "visual", "event_description": "The girl first appears working", "count": 3}]
+
+
+## Task: realtime_state_monitor
+ AI has to trigger every time the question asked event happens in the video. 
+ Video description: Video shows a promo poster of a red van, then shows the van's exterior from every angle slowly rotating around. The van is in a parking lot. There are many vehicles parked in every direction. then shows the driver's seat and controls then the other seats and interior of the van. At the end, it shows the van driving away. The video is a promo for a new van model.
+  Question: Monitor the type of footage being shown and let me know when it switches between the ad graphic, the van's exterior, and the van's interior. 
+  ground truth answer: [{"trigger_time": "00:05", "trigger_time_sec": 2, response: "Switched from ad graphic to van's exterior.", "trigger_type": "visual", "event_description": "The video switches from the ad graphic to the van's exterior."}, {"trigger_time": "00:10", "trigger_time_sec": 10, response: "Switched from van's exterior to van's interior.", "trigger_type": "visual", "event_description": "The video switches from the van's exterior to the van's interior."}, {"trigger_time": "00:15", "trigger_time_sec": 15, response: "Switched from van's interior to ad graphic.", "trigger_type": "visual", "event_description": "The video switches from the van's interior back to the ad graphic."}]
+
+## Task: static_object_counting
+for this task there is only 1 triggering per task
+Video description: A video showing players practicing penalty shooting in a football field. A keeper is standing in front of the goal post. The players are taking turns to shoot the ball towards the goal post. Many players miss the goal. Some are saved by the keeper. At one point a man in the red shirt scores a goal. Then the replay is shown slowly. There are 3 balls seen in the goal post area. After that, video continues to show the players practicing penalty shooting. 
+
+Question: When a player in red shirt first scores a goal count how many balls are inside the net?
+
+ground truth answer: [{"trigger_time": "00:42", "trigger_time_sec": 42, "response": "There are 3 balls inside the net.", "trigger_type": "visual", "event_description": "The player in red shirt scores the first goal and there are 3 balls inside the net."}]
+
+## Task: cumulative_counting
+Video description: A long video showing the latest innovations in technology for everyday people. It starts with mosquito repellent, shows people using it in differnt ways in different locations. Then it shows a new technology for cleaning the air, then shows people using it in different locations. Then it shows phone covers that protect from water and dust, then shows people using it in different locations. Then it shows a new technology for cleaning the water, then shows people using it in different locations.
+
+Question: Count how many times you see poeple using the mobile phone in the video.
+
+Ground truth answer: [{"trigger_time": "00:50", "trigger_time_sec": 50, "response": "First occurrence — a man using a phone while walking in the park.", "trigger_type": "visual", "event_description": "A man is seen using a mobile phone while walking in the park.", "count": 1}, {"trigger_time": "01:20", "trigger_time_sec": 80, "response": "Second occurrence — a woman using a phone while sitting in a cafe.", "trigger_type": "visual", "event_description: "A woman is seen using a mobile phone while sitting in a cafe.", "count": 2}, {"trigger_time": "02:10", "trigger_time_sec": 130, "response": "Third occurrence — a man using a phone while waiting at a bus stop.", "trigger_type": "visual", "event_description": "A man is seen using a mobile phone while waiting at a bus stop.", "count": 3}, {"trigger_time": "02:50", "trigger_time_sec": 170, "response": "Fourth occurrence — a blonde woman using a phone while taking care of her child in the kitchen.", "trigger_type": "visual", "event_description": "A blonde woman is seen using   a mobile phone while taking care of her child in the kitchen.", "count": 4}}]
+
+## Task: sequential_step_instruction
+
+Video Description: Video shows a person preparing a hot cup of green tea. The person starts by boiling water in a kettle. Once the water is boiled then places kettle on table for a while to let it cool down a little. Then put a green tea bag into a cup. they pour it over the tea bag in the cup. After allowing the tea to steep for a few minutes, they remove the tea bag and add honey . Finally, they stir the tea and enjoy their hot cup of green tea.
+
+Question: I'm insterested in how to prepare hot cup of green tea. Please guide me through the process of making a hot cup of green tea step by step.
+
+ground truth answer: [{"trigger_time": "00:02", "trigger_time_sec": 2, "response": "Step 1 — Boil water in a kettle.", "trigger_type": "visual", "event_description": "The person is seen boiling water in a kettle.", "step": 1}, {"trigger_time": "00:10", "trigger_time_sec": 10, "response": "Step 2 — Place the boiled water on the table to cool slightly.", "trigger_type": "visual", "event_description": "The person places the kettle on the table to let it cool down a little.", "step": 2}, {"trigger_time": "00:20", "trigger_time_sec": 20, "response": "Step 3 — Put a green tea bag into a cup.", "trigger_type": "visual", "event_description": "The person puts a green tea bag into a cup.", "step": 3}, {"trigger_time": "00:30", "trigger_time_sec": 30, "response": "Step 4 — Pour the hot water over the tea bag in the cup.", "trigger_type": "visual", "event_description": "The person pours the hot water over the tea bag in the cup.", "step": 4}, {"trigger_time": "00:40", "trigger_time_sec": 40, "response": "Step 5 — Allow the tea to steep for a few minutes.", "trigger_type": "visual", "event_description": "The person allows the tea to steep for a few minutes.", "step": 5}, {"trigger_time": "00:50", "trigger_time_sec": 50, "response": "Step 6 — Remove the tea bag and add honey.", "trigger_type": "visual", "event_description": "The person removes the tea bag and adds honey to the cup.", "step": 6}, {"trigger_time": "01:00", "trigger_time_sec": 60, response: Step 7 — Stir the tea and enjoy your hot cup of green tea.", trigger_type: visual, event_description: The person stirs the tea and enjoys their hot cup of green tea., step: 7}]
+
+
+## Task: event_narration
+
+Video Description: A video showing highlights of a football match. The video starts with the players warming up on the field, followed by the kickoff. The match progresses with several attacks and defenses from both teams. A player from the France team scores a goal, leading to celebrations from the fans. The video also shows a few fouls and yellow cards being issued. Towards the end, the Senegal team manages to score an equalizer, and the match ends in a draw.
+
+Question: Provide a running narration of the highlight of a football match.
+
+Ground truth answer: [{"trigger_time": "00:02", "trigger_time_sec": 2, "response": "The players are warming up on the field.", "trigger_type": "visual", "event_description": "The video shows the players warming up on the field."}, {"trigger_time": "00:10", "trigger_time_sec": 10, "response": "The match kicks off with both teams ready to play.", "trigger_type": "visual", "event_description": "The video shows the kickoff of the match."}, {"trigger_time": "00:23", "trigger_time_sec": 23, "response": "France team attacks and scores a goal.", "trigger_type": "visual", "event_description": "A player from the France team scores a goal."}, {"trigger_time": "00:29", "trigger_time_sec": 29, "response": "Fans celebrate the goal scored by France.", "trigger_type": "visual", "event_description": "The video shows fans celebrating the goal scored by France."}, {"trigger_time": "00:40", "trigger_time_sec": 40, response: "Senegal team attacks and gets a yellow card for a foul.", "trigger_type": "visual", "event_description": "A player from the Senegal team commits a foul and receives a yellow card."}, {"trigger_time: "00:45", "trigger_time_sec": 45, "response": "France team attacks again and gets a yellow card for a foul.", "trigger_type": "visual", "event_description": "A player from the France team commits a foul and receives a yellow card."} {"trigger_time": "00:50", "trigger_time_sec": 56,
+response: Senegal team scores an equalizer., trigger_type: visual, event_description: The Senegal team manages to score an equalizer., step: 7}]
+
+## Task: 
+"""
+
