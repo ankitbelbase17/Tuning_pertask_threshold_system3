@@ -5,6 +5,7 @@
 #SBATCH --time=01:30:00
 #SBATCH --nodes=1
 #SBATCH --gres=gpu:4
+#SBATCH --signal=B:USR1@180
 #SBATCH --output=/iopsstor/scratch/cscs/dbartaula/system_3/omniprofast/output_all/slurm_%j.log
 #
 # FULL RUN — every OmniPro sample that does NOT require audio.
@@ -57,6 +58,45 @@ done_count () {   # how many shards have finished (wrote their metrics)
 
 echo "[job] shards complete at start: $(done_count)/$NSHARD"
 
+# ---------------------------------------------------------------------------
+# CHAIN REPAIR (2026-07-30). Generation 1 (job 2932056) TIMED OUT and never
+# resubmitted, so the chain died after one link with 20/932 samples done.
+#
+# Why the old design could never work: `wait` below blocks until all four GPU
+# lanes finish their shards, and a shard is ~58 samples -- far more than fits in
+# 1:30. So the tail of this script (including the resubmit) was UNREACHABLE; the
+# job was always killed at the wall clock first.
+#
+# Fix: --signal=B:USR1@180 makes SLURM signal the batch script 180s BEFORE the
+# limit. We resubmit from the handler, while still alive but with the slot about
+# to free. Retry in a loop because the debug QOS caps submitted jobs per user --
+# as this job winds down a retry gets in.
+# ---------------------------------------------------------------------------
+CHAINED=0                 # guard: resubmit at most once per generation
+resubmit () {
+  [ "$CHAINED" = "1" ] && { echo "[chain] already chained — skip."; return; }
+  if [ "$GEN" -ge "$MAX_GEN" ]; then
+    echo "[chain] hit MAX_GEN=$MAX_GEN — not resubmitting."; return
+  fi
+  cd "$REPO" || return
+  for attempt in $(seq 1 30); do
+    if sbatch --export=ALL,GEN=$((GEN + 1)),MAX_GEN=$MAX_GEN run_all_audio_ok.sbatch; then
+      CHAINED=1
+      echo "[chain] generation $((GEN + 1)) queued (attempt $attempt)"; return
+    fi
+    echo "[chain] sbatch refused (attempt $attempt) — retrying in 5s"; sleep 5
+  done
+  echo "[chain] FAILED to queue generation $((GEN + 1)) after 30 attempts"
+}
+
+on_timeout () {
+  echo "[chain] SIGUSR1: ~180s to the wall clock. Saving scores + chaining."
+  "$PY" dump_scores.py "$OUT" 2>&1 | tail -5 || true
+  resubmit
+  # let the shards keep working with the remaining time; SLURM kills us shortly.
+}
+trap on_timeout USR1
+
 # 4 GPUs; GPU k takes shards k, k+4, k+8, k+12 in order. Resume makes an already
 # finished shard cost seconds, so re-walking the list each generation is cheap.
 for k in 0 1 2 3; do
@@ -73,6 +113,7 @@ for k in 0 1 2 3; do
     OMNIPRO_DECODE_MODE=schema \
       bash run_fast.sh \
         --audio none_helpful \
+        ${TASKS:+--tasks "$TASKS"} \
         --benchmark_json "$SPLIT/$G.json" \
         --dataset_dir "$DS" \
         --out "$OUT/$G" \
@@ -80,19 +121,21 @@ for k in 0 1 2 3; do
   done
 ) &
 done
-wait
+# A plain `wait` is INTERRUPTED when the USR1 trap fires and would fall through
+# with the lanes still running, so loop until no background lane remains.
+while [ -n "$(jobs -pr)" ]; do
+  wait -n 2>/dev/null || true
+done
 echo "[job] generation $GEN finished; shards complete: $(done_count)/$NSHARD"
 
 # Persist per-tick p_hit -> any threshold becomes a free, offline decision.
 "$PY" dump_scores.py "$OUT" 2>&1 | tail -20
 
+# Normal-exit path. If the USR1 handler already chained, `resubmit` is a no-op.
 if [ "$(done_count)" -ge "$NSHARD" ]; then
   echo "[job] ALL $NSHARD SHARDS COMPLETE — chain finished."
-elif [ "$GEN" -ge "$MAX_GEN" ]; then
-  echo "[job] hit MAX_GEN=$MAX_GEN with $(done_count)/$NSHARD done — stopping."
 else
-  echo "[job] work remains — resubmitting as generation $((GEN + 1))"
-  cd "$REPO" && sbatch --export=ALL,GEN=$((GEN + 1)),MAX_GEN=$MAX_GEN \
-    run_all_audio_ok.sbatch
+  echo "[job] work remains ($(done_count)/$NSHARD) — chaining generation $((GEN + 1))"
+  resubmit
 fi
 echo "[job] DONE gen $GEN"
