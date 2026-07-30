@@ -111,6 +111,24 @@ class AsyncOmniConfig:
     # each is tested as one variable:
     seen_trace_in_prompt: bool = False  # was on; the suspected cause
     now_anchor: bool = False            # "it is now Ns; describe the LATEST frame"
+
+    # ---- PRIVILEGE THE PRESENT ------------------------------------------------
+    # The task ICL is CONSTANT but was spliced fresh AFTER the video tokens every
+    # tick, putting ~1400 tokens of instruction prose between the newest frame and
+    # the point of generation — so the last thing the model saw before answering
+    # was the manual, not the video. Seeding it into the pinned eviction sink puts
+    # the newest frame adjacent to the decision AND prefills the ICL once per run
+    # instead of once per tick.
+    icl_in_sink: bool = True
+
+    # ---- OUTPUT GATE ----------------------------------------------------------
+    # "edge"       rising edge of the boolean level (original behaviour)
+    # "hysteresis" Schmitt gate on the CONTINUOUS p_hit — only possible now that the
+    #              logit read returns a real number. Targets PRECISION, measured at
+    #              0.112 (89% of emits were false positives). Uses gate_high_thr /
+    #              gate_low_thr / gate_rearm_s / debounce_s below.
+    gate_strategy: str = "hysteresis"
+    distinct_sim_thr: float = 0.5   # word-overlap below this = a different occurrence
     schema_max_seen_tokens: int = 12    # cap on the `seen` value slot
     schema_max_answer_tokens: int = 32  # cap on the `answer` value slot (hot ticks only)
     schema_max_int_tokens: int = 4      # cap on `event_time_s`

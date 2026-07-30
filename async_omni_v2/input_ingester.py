@@ -29,6 +29,17 @@ from util import log
 def input_ingester_thread(cfg, mgr, vis_q, ctrl, stop, prof=None, clock=None,
                           feed_done=None, writer_q=None, evaluator=None):
     system_prompt = cfg.system_prompt.replace("{instruction}", cfg.instruction)
+    # ICL IN THE SINK (cfg.icl_in_sink) — PRIVILEGE THE PRESENT.
+    # The task ICL is CONSTANT, but it was being spliced fresh after the video
+    # tokens on every tick, which put ~1400 tokens of instruction prose BETWEEN
+    # the newest frame and the point of generation:
+    #     [~100k vision tokens] .. [newest frame] -> [1400 tok of ICL] -> {"seen":"
+    # so the last thing the model saw before answering was the manual, not the
+    # video. Seeding it into the pinned eviction sink instead means the newest
+    # frame is adjacent to the decision, and the ICL is prefilled ONCE per run
+    # rather than re-prefilled every tick.
+    if cfg.icl_in_sink and cfg.controller_prompt:
+        system_prompt = system_prompt.rstrip() + "\n" + cfg.controller_prompt.rstrip() + "\n"
     sink = mgr.seed(system_prompt)
     log("ingester", 0.0, f"seeded cache, sink={sink} tokens, budget={cfg.kv_budget} "
                          f"(deterministic={cfg.deterministic}, gate_mode={cfg.gate_mode})")

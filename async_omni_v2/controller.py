@@ -308,6 +308,8 @@ def controller_thread(cfg, mgr, ctrl, clock, stop, prof=None, evaluator=None, wb
     # (low word overlap with the last fired answer) — e.g. date poster then ticket
     # prices with no gap in between.
     prev_level = False
+    armed = True             # hysteresis gate (cfg.gate_strategy): ready to fire
+    last_fire_vt = -1e9      # for debounce + timed re-arm
     clock.set_next_check(next_check_vt)        # LOCKSTEP: tell the ingester when the
                                                # first tick is due (it waits on this)
 
@@ -339,7 +341,11 @@ def controller_thread(cfg, mgr, ctrl, clock, stop, prof=None, evaluator=None, wb
         # Build the controller prompt: task ICL + (optional) deferred check +
         # CONVERSATION HISTORY of what has already been reported, so the model can
         # set new_event=false for repeats and only fire on genuinely new details.
-        prompt = cfg.controller_prompt.rstrip()
+        # With icl_in_sink the ICL was already seeded into the pinned sink by the
+        # ingester, so DON'T splice it again here — re-splicing would both duplicate
+        # it and re-insert the 1400-token wall between the newest frame and the
+        # generation point, which is exactly what we are removing.
+        prompt = "" if cfg.icl_in_sink else cfg.controller_prompt.rstrip()
         if pending_q:
             prompt += (f"\nYou previously asked yourself: '{pending_q}'. "
                        f"Judge it now from the MOST RECENT frames.")
@@ -473,13 +479,34 @@ def controller_thread(cfg, mgr, ctrl, clock, stop, prof=None, evaluator=None, wb
             seen_trace.append((vt, seen_now))
             del seen_trace[:-cfg.seen_trace_ring]
 
-        # fire decision: rising edge of the level signal; OR, within a true
-        # stretch, an answer that is clearly a DIFFERENT occurrence than the last
-        # fired one (low word overlap) — back-to-back distinct events, no gap.
+        # ---- FIRE DECISION -------------------------------------------------
+        # "edge"       : rising edge of the boolean level (original).
+        # "hysteresis" : Schmitt gate on the CONTINUOUS p_hit — only possible now
+        #   that the logit read gives a real number instead of a bit. This is the
+        #   tuned "hyst2b" from the probe-gate arm (EXPERIENCE.md), which lifted
+        #   joint_f1 0.149 -> 0.206 there. Aimed at PRECISION: measured 0.112, i.e.
+        #   89% of emits were false positives (206 emits for 84 GT).
+        #     fire   when armed AND p_hit >= high AND debounce elapsed
+        #     re-arm when p_hit < low  OR  rearm_s elapsed since the last fire
+        # A single threshold cannot do this: it re-fires on every jitter across the
+        # line, which is what the raw level did.
         rising = level and not prev_level
         distinct = (level and prev_level and answer and reported
-                    and _word_sim(answer, reported[-1][1]) < 0.5)
-        fire = bool(answer) and (rising or distinct)
+                    and _word_sim(answer, reported[-1][1]) < cfg.distinct_sim_thr)
+        p_hit = meta.get("p_hit")
+        if cfg.gate_strategy == "hysteresis" and p_hit is not None:
+            if not armed and (p_hit < cfg.gate_low_thr
+                              or (cfg.gate_rearm_s > 0
+                                  and (vt - last_fire_vt) >= cfg.gate_rearm_s)):
+                armed = True
+            fire = bool(answer) and armed and p_hit >= cfg.gate_high_thr \
+                and (vt - last_fire_vt) > cfg.debounce_s
+            if fire:
+                armed = False
+        else:
+            fire = bool(answer) and (rising or distinct)
+        if fire:
+            last_fire_vt = vt
 
         # log EVERY tick's raw diff so all responses are inspectable in the log file
         vid = cfg.video_id or "?"
