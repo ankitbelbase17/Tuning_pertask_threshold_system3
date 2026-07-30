@@ -202,6 +202,28 @@ _INSTANT_EVENT_ALERT = (
 )
 
 
+def _all9_prompts():
+    """Per-task ICL for all 9 OmniPro tasks: the 3 blocks defined above plus the 6
+    in `task_prompts_all9.py`. Called at config-instantiation time (see the field
+    comment) — never at import time. Any failure degrades to the 3 local blocks
+    with a warning rather than taking down the run."""
+    base = {
+        "semantic_condition_alert": _SEMANTIC_CONDITION_ALERT,
+        "explicit_target_grounding": _EXPLICIT_TARGET_GROUNDING,
+        "instant_event_alert": _INSTANT_EVENT_ALERT,
+    }
+    try:
+        from task_prompts_all9 import TASK_CONTROLLER_PROMPTS_ALL9 as _all9
+    except Exception as e:                       # missing / mid-edit / syntax error
+        print(f"[config] WARNING: task_prompts_all9 unavailable "
+              f"({type(e).__name__}: {e}) -> only {len(base)} of 9 tasks have ICL; "
+              f"the rest fall back to the generic controller_prompt.", flush=True)
+        return base
+    merged = dict(base)
+    merged.update({k: v for k, v in _all9.items() if v})
+    return merged
+
+
 @dataclass
 class AsyncOmniConfig:
     # ---- model ----
@@ -359,12 +381,18 @@ class AsyncOmniConfig:
         "According to the video you are watching, your task is: {instruction}")
 
     # Per-task ICL prompts (override `controller_prompt` when sample.task matches;
-    # the adapter selects by task). We fill these in one category at a time.
-    task_controller_prompts: dict = field(default_factory=lambda: {
-        "semantic_condition_alert": _SEMANTIC_CONDITION_ALERT,
-        "explicit_target_grounding": _EXPLICIT_TARGET_GROUNDING,
-        "instant_event_alert": _INSTANT_EVENT_ALERT,
-    })
+    # the adapter selects by task). ALL 9 OmniPro tasks are covered: the 3 blocks
+    # above are hand-written here, the other 6 live in `task_prompts_all9.py` and
+    # are written in the same style + DSL (counting/state tasks additionally carry
+    # `count` / `phase`, which the controller state now persists).
+    #
+    # Loaded LAZILY via default_factory, not at import time: task_prompts_all9
+    # reads THIS file back (to import the 3 blocks rather than copy them), so an
+    # import-time dependency would re-enter config.py mid-initialisation. By the
+    # time a config is instantiated, this module is fully loaded and it is safe.
+    # Falls back to the 3 local blocks if that module is missing or broken, so a
+    # bad prompt file degrades coverage instead of breaking every run.
+    task_controller_prompts: dict = field(default_factory=lambda: _all9_prompts())
     # Per-task writer prompts for the PROBE-GATE arm (same idea: the answer format
     # is task knowledge both systems get; the architecture is what differs).
     task_writer_prompts: dict = field(default_factory=lambda: {
