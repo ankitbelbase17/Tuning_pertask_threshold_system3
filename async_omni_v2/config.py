@@ -7,223 +7,20 @@ KV cache -> the controller reads that cache each tick and emits ONE control JSON
 (fps / have_enough_info / new_event / answer / question / next_check_s), which is
 both the output gate and the writer. There are no fixed yes/no gates here.
 
-This is also the SINGLE place to edit all prompt text: `system_prompt` (the
-role/task template, {instruction} filled per-run) and `controller_prompt` (the
-control-JSON DSL taught to the model). The eval harness carries no prompt text.
+SETTINGS ONLY. All prompt TEXT lives in `prompts.py` — one home for every string
+we say to the model (per-task ICL for all 9 tasks, the generic controller DSL,
+the probe-gate/system templates). This file just names and wires them. The eval
+harness carries no prompt text either.
 
 (The fixed-gate ablations, multi-GPU replicas, and VisionZip pruning live on the
 `main` branch.)
 """
 from dataclasses import dataclass, field
 
-
-# ---------------------------------------------------------------------------
-# Task-specific controller ICL prompts.
-# Each replaces the generic `controller_prompt` for one OmniPro task category
-# (the adapter selects by sample.task). They teach the SAME control-JSON DSL but
-# with a worked, task-concrete (Situation -> Control) example. Schema per tick:
-#   fps, have_enough_info, new_event, answer, next_check_s, question_for_next
-# The controller appends an "Already reported" conversation history + the final
-# emit cue at runtime, so these strings END with the worked example.
-# ---------------------------------------------------------------------------
-# NOTE ON AUDIO: the OmniPro paper defines semantic_condition_alert as "audio-first",
-# but our pipeline does NOT use audio at all right now — we monitor VISUAL + semantic
-# cues only. This ICL therefore deliberately avoids any audio/speech references.
-#
-# Paper's task intent (baked into this prompt): SCA tests COMPREHENSION/JUDGMENT, not
-# perception. The model must (1) understand the user's abstract intent, (2) reason about
-# whether what's on screen actually MEETS it, (3) alert at each occurrence. Each response
-# should state WHAT happened AND WHY it satisfies the condition, in under 25 words. In the
-# eval, a temporal match only counts if the response is also content-correct (LLM-judged).
-_SEMANTIC_CONDITION_ALERT = (
-    "\nYou are the CONTROLLER of a live video monitor. Your monitoring task (the CONDITION "
-    "to alert on) is in the system instruction above. This condition is SEMANTIC: it needs "
-    "COMPREHENSION and REASONING, not mere object/keyword spotting. You must understand the "
-    "user's intent and JUDGE whether what is happening on screen actually MEETS it, then alert "
-    "at EACH occurrence where it is satisfied.\n"
-    "Each turn, read the stream so far and emit a compact JSON control update. ALWAYS start with "
-    "seen, then have_enough_info — looking BEFORE judging, every tick. Whenever have_enough_info "
-    "is true, ALSO include event_time_s and answer. Include fps, next_check_s, or "
-    "question_for_next ONLY when they change from their current value (otherwise omit them to stay "
-    "short). Fields:\n"
-    '  seen              : ALWAYS FIRST — 3-8 words: what is on screen now that is relevant to the condition\n'
-    "  have_enough_info  : true when the condition is satisfied on screen NOW; keep reporting true "
-    "for as long as it remains satisfied; back to false when it no longer is\n"
-    "  event_time_s      : when have_enough_info is true -> the video time in seconds when THIS "
-    "occurrence appeared (read it off the 'time Xs' markers in the stream)\n"
-    '  answer            : REQUIRED whenever have_enough_info is true -> ONE sentence (UNDER 25 '
-    'words) stating WHAT is happening AND WHY it satisfies the condition; else ""\n'
-    "  fps               : how densely to sample next (1-3; raise when the scene is busy)\n"
-    "  next_check_s      : seconds until the next check (1-3; keep it small — more may come)\n"
-    '  question_for_next : a short check to verify on the next turn; else ""\n'
-    "YOU DO NOT DECIDE WHEN TO ALERT — the system does. It alerts the user only when "
-    "have_enough_info goes false -> true (or when your answer describes a clearly DIFFERENT "
-    "occurrence), so you will NEVER double-alert by keeping it true while the same thing stays on "
-    "screen. Your only job each tick: judge the level honestly and describe what you see. The "
-    "condition typically recurs (about 3 times per video on average), so after it stops, keep "
-    "watching for the NEXT occurrence.\n"
-    "The 'Already reported' list below shows PAST occurrences WITH THEIR TIMES.\n"
-    "Rules: base every judgment on what is actually visible; reason about the user's intent; "
-    "NEVER copy the example text.\n"
-    "Worked example (a DIFFERENT video — condition: 'alert whenever the video provides specific "
-    "logistical details for the match, such as the date, location, or ticket pricing'). The video "
-    "is a football club TV commercial: fans in body paint, the crowd roaring, then a poster with "
-    "the match date and location, then ticket pricing. Every output starts with seen + "
-    "have_enough_info; other fields appear only when they change:\n"
-    "At 3s, none of the asked-for details shown yet -> condition NOT satisfied:\n"
-    '{"seen":"fans buying green body paint","have_enough_info":false,"fps":1.0,"question_for_next":"Is the date, location or ticket price shown now?"}\n'
-    "At 6s still nothing (question unchanged -> omit it):\n"
-    '{"seen":"crowd roaring in the stadium","have_enough_info":false}\n'
-    "At 16s the poster shows the date and location -> satisfied; describe it and read its time:\n"
-    '{"seen":"poster with match date and venue","have_enough_info":true,"event_time_s":16,"answer":"The match date is August 14th and the location is Dairy Farmers Stadium.","question_for_next":"Is the ticket price shown now?"}\n'
-    "At 17s the same poster is still on screen -> STILL satisfied; keep reporting it (the system "
-    "will not double-alert):\n"
-    '{"seen":"same date and venue poster","have_enough_info":true,"event_time_s":16,"answer":"The match date is August 14th and the location is Dairy Farmers Stadium."}\n'
-    "At 20s the poster is gone, players celebrating -> no longer satisfied:\n"
-    '{"seen":"players celebrating on the pitch","have_enough_info":false}\n'
-    "At 23s ticket pricing appears -> satisfied AGAIN by a new detail:\n"
-    '{"seen":"ticket prices and purchase info on screen","have_enough_info":true,"event_time_s":23,"answer":"The video now details ticket costs for different groups and gives a purchase website and phone number.","fps":3.0,"next_check_s":3}\n'
-    "(all asked-for details reported -> sample sparsely, keep watching in case more appear)\n"
-)
-
-
-# NOTE ON AUDIO: the paper defines ETG "audio-first" (prefer audio triggers); we run the
-# audio_dependency=none subset only, so this ICL is purely VISUAL — no audio references.
-#
-# Paper's task intent: the question names a TRIGGER moment and a TARGET object. When the
-# trigger fires (instantaneous, frame-precise), locate the target on a 3x3 grid. Scoring
-# is EXACT-MATCH on the grid cell extracted from the answer text (no LLM judge), plus the
-# usual ±3s temporal match — so the answer MUST contain exactly one of the nine cell
-# names, and firing time must be sharp. Usually ONE trigger per video (max 4).
-_EXPLICIT_TARGET_GROUNDING = (
-    "\nYou are the CONTROLLER of a live video monitor. Your task (in the system "
-    "instruction above) names a TRIGGER moment and a TARGET object: the moment the "
-    "trigger happens, report WHERE the target is on screen using EXACTLY ONE of these "
-    "nine grid cells (imagine the frame divided 3x3):\n"
-    "  top-left | top-center | top-right | center-left | center | center-right | "
-    "bottom-left | bottom-center | bottom-right\n"
-    "Each turn, read the stream so far and emit a compact JSON control update. ALWAYS "
-    "start with seen, then have_enough_info — looking BEFORE judging, every tick. "
-    "Whenever have_enough_info is true, ALSO include event_time_s and answer. Include "
-    "fps, next_check_s, or question_for_next ONLY when they change. Fields:\n"
-    '  seen              : ALWAYS FIRST — 3-8 words: what is on screen now, relevant to the trigger/target\n'
-    "  have_enough_info  : true when the TRIGGER is happening on screen NOW and the "
-    "target is visible; back to false once it is over\n"
-    "  event_time_s      : when true -> the video time when the trigger occurred (read "
-    "the 'time Xs' markers in the stream)\n"
-    '  answer            : REQUIRED when true -> ONE sentence UNDER 20 words naming the '
-    'trigger AND the target\'s grid cell; it MUST contain exactly one cell name; else ""\n'
-    "  fps               : how densely to sample next (1-3; raise when the trigger feels close)\n"
-    "  next_check_s      : seconds until the next check (small — the trigger is a precise instant)\n"
-    '  question_for_next : a short check to verify on the next turn; else ""\n'
-    "YOU DO NOT DECIDE WHEN TO ALERT — the system does (it alerts only when "
-    "have_enough_info goes false -> true). The trigger usually happens ONCE; after "
-    "reporting, return to false when it is over and keep watching in case it recurs.\n"
-    "The 'Already reported' list below shows PAST reports with their times.\n"
-    "Rules: report only what is actually visible; the answer must contain exactly ONE "
-    "grid-cell name; NEVER copy the example text.\n"
-    "Worked example (a DIFFERENT video — a fast-paced montage of short sports clips: "
-    "cycling, tennis, cardio, big crowds. Task: 'When the drummer first appears playing "
-    "his drums, tell me where his red cap is in the frame.'):\n"
-    "At 5s, cyclists racing, no drummer yet:\n"
-    '{"seen":"cyclists racing past a crowd","have_enough_info":false,"fps":1.0,"question_for_next":"Has the drummer appeared playing his drums?"}\n'
-    "At 12s, tennis rally, still no drummer:\n"
-    '{"seen":"tennis player mid-rally","have_enough_info":false}\n'
-    "At 19s the drummer appears playing, red cap visible in the upper middle -> TRIGGER; "
-    "locate the cap and read the time:\n"
-    '{"seen":"drummer playing, red cap upper middle","have_enough_info":true,"event_time_s":19,"answer":"The drummer is now playing - his red cap is in the top-center of the frame."}\n'
-    "At 21s the montage cut away, drummer gone -> trigger over:\n"
-    '{"seen":"crowd cheering, drummer gone","have_enough_info":false}\n'
-)
-
-# Probe-gate arm needs an ETG-specific WRITER prompt too (its generic writer says
-# "what+why", which would never contain a grid cell -> auto-wrong on exact match).
-_ETG_WRITER_PROMPT = (
-    "\nThe trigger just occurred on screen. In ONE sentence UNDER 20 words, state the "
-    "trigger and WHERE the target is, using exactly one of: top-left, top-center, "
-    "top-right, center-left, center, center-right, bottom-left, bottom-center, "
-    "bottom-right. Output only that sentence.")
-
-
-# NOTE ON AUDIO: the paper defines IEA "audio-first" (prefer whistles/doorbells/
-# spoken phrases). We run the audio_dependency=none subset only, so this ICL is
-# purely VISUAL — the target is a sharp VISIBLE onset and there are no audio cues.
-#
-# Task intent: a standing instruction ("Let me know when X happens"). Alert the
-# INSTANT the event STARTS on screen; timing is frame-precise (±3s temporal match)
-# and the answer is a short natural description (LLM-judged, not exact-match).
-# Usually ONE occurrence per video (max ~3), so after it ends keep watching.
-_INSTANT_EVENT_ALERT = (
-    "\nYou are the CONTROLLER of a live video monitor. Your task (in the system "
-    "instruction above) is a STANDING INSTRUCTION to alert the user the moment a "
-    "specific EVENT happens on screen (e.g. 'let me know when the audience starts "
-    "clapping'). The event is a SHARP ONSET — the instant something STARTS — so your "
-    "timing must be precise: fire when it BEGINS, not before. It usually happens ONCE, "
-    "but can recur a few times; after it ends, keep watching for the next occurrence.\n"
-    "Each turn, read the stream so far and emit a compact JSON control update. ALWAYS "
-    "start with seen, then have_enough_info — looking BEFORE judging, every tick. "
-    "Whenever have_enough_info is true, ALSO include event_time_s and answer. Include "
-    "fps, next_check_s, or question_for_next ONLY when they change from their current "
-    "value (otherwise omit them to stay short). Fields:\n"
-    '  seen              : ALWAYS FIRST — 3-8 words: what is on screen now, relevant to the event\n'
-    "  have_enough_info  : true the moment the event is happening on screen NOW; stays true "
-    "while it continues; back to false once it is over\n"
-    "  event_time_s      : when have_enough_info is true -> the video time in seconds when THIS "
-    "occurrence STARTED (read it off the 'time Xs' markers in the stream)\n"
-    '  answer            : REQUIRED whenever have_enough_info is true -> ONE natural sentence '
-    '(UNDER 20 words) stating WHAT just happened; else ""\n'
-    "  fps               : how densely to sample next (1-3; raise when the event feels close)\n"
-    "  next_check_s      : seconds until the next check (small — the onset is a precise instant)\n"
-    '  question_for_next : a short check to verify on the next turn; else ""\n'
-    "YOU DO NOT DECIDE WHEN TO ALERT — the system does. It alerts the user only when "
-    "have_enough_info goes false -> true (or when your answer describes a clearly DIFFERENT "
-    "occurrence), so you will NEVER double-alert by keeping it true while the same event stays on "
-    "screen. Your only job each tick: judge honestly whether the event is happening NOW and "
-    "describe what you see.\n"
-    "The 'Already reported' list below shows PAST occurrences WITH THEIR TIMES.\n"
-    "Rules: base every judgment on what is actually visible; do NOT fire before the event "
-    "actually starts; NEVER copy the example text.\n"
-    "Worked example (a DIFFERENT video — instruction: 'Let me know when the audience starts "
-    "clapping'). The video is a university auditorium: speakers give speeches about the "
-    "university, the camera cutting between the podium and the seated audience. Every output "
-    "starts with seen + have_enough_info; other fields appear only when they change:\n"
-    "At 20s a speaker is talking, the audience is seated and still -> event NOT happening:\n"
-    '{"seen":"speaker at podium, audience seated still","have_enough_info":false,"fps":1.0,"question_for_next":"Has the audience started clapping?"}\n'
-    "At 34s the speaker is wrapping up his segment, still no clapping (question unchanged -> omit it):\n"
-    '{"seen":"speaker finishing his remarks","have_enough_info":false}\n'
-    "At 38s the camera cuts to the audience clapping -> event STARTS; describe it and read its time:\n"
-    '{"seen":"audience clapping in their seats","have_enough_info":true,"event_time_s":38,"answer":"The audience is clapping now after the opening remarks.","next_check_s":1}\n'
-    "At 40s they are still clapping -> STILL happening; keep reporting it (the system will not double-alert):\n"
-    '{"seen":"audience still applauding","have_enough_info":true,"event_time_s":38,"answer":"The audience is clapping now after the opening remarks."}\n'
-    "At 48s the clapping has stopped and the next speaker is walking up -> event over:\n"
-    '{"seen":"applause stopped, new speaker approaching","have_enough_info":false}\n'
-    "At 64s the audience breaks into applause again as a family is invited on stage -> a NEW occurrence:\n"
-    '{"seen":"audience applauding again","have_enough_info":true,"event_time_s":64,"answer":"The audience has started applauding again as the family is invited to the stage."}\n'
-)
-
-
-def _all9_prompts():
-    """Per-task ICL for all 9 OmniPro tasks: the 3 blocks defined above plus the 6
-    in `task_prompts_all9.py`. Called at config-instantiation time (see the field
-    comment) — never at import time. Any failure degrades to the 3 local blocks
-    with a warning rather than taking down the run."""
-    base = {
-        "semantic_condition_alert": _SEMANTIC_CONDITION_ALERT,
-        "explicit_target_grounding": _EXPLICIT_TARGET_GROUNDING,
-        "instant_event_alert": _INSTANT_EVENT_ALERT,
-    }
-    try:
-        from task_prompts_all9 import TASK_CONTROLLER_PROMPTS_ALL9 as _all9
-    except Exception as e:                       # missing / mid-edit / syntax error
-        print(f"[config] WARNING: task_prompts_all9 unavailable "
-              f"({type(e).__name__}: {e}) -> only {len(base)} of 9 tasks have ICL; "
-              f"the rest fall back to the generic controller_prompt.", flush=True)
-        return base
-    merged = dict(base)
-    merged.update({k: v for k, v in _all9.items() if v})
-    return merged
-
-
+# ALL prompt text lives in prompts.py (settings here, content there).
+from prompts import (CONTROLLER_PROMPT_GENERIC, GOAL_QUESTION, SYSTEM_PROMPT,
+                     TASK_CONTROLLER_PROMPTS, TASK_WRITER_PROMPTS, WRITER_CUE,
+                     WRITER_PROMPT)
 @dataclass
 class AsyncOmniConfig:
     # ---- model ----
@@ -307,32 +104,15 @@ class AsyncOmniConfig:
     # structure the model did not intend — we must know before trusting this path.
     verify_logit_read: bool = True
     notes_ring: int = 8                 # bounded append-only memory log
+
     # In-context "control language" (VISPROG-style): a compact JSON DSL the frozen
     # model emits each tick to drive its own probing. Taught via worked
     # (Situation -> Control) pairs that demonstrate the DECISIONS (stay quiet /
     # defer-with-question / fire-once / suppress-repeat), not just the syntax.
-    controller_prompt: str = (
-        "\nYou are the CONTROLLER of a live video monitor for the target event in your "
-        "task. Each turn you read the stream so far (above) and emit exactly ONE control "
-        "command as a compact JSON object with these fields:\n"
-        "  fps              : how densely to sample next (1-3; raise when the scene is busy)\n"
-        "  have_enough_info : true ONLY when you are confident the target event has occurred\n"
-        "  new_event        : true ONLY if this occurrence is NEW (not already reported)\n"
-        '  answer           : if have_enough_info AND new_event -> ONE sentence describing the REAL event; else ""\n'
-        '  question         : if unsure but something may be developing -> a short yes/no check to verify next time; this is optional you may keep it empty if there is no important question at this time; else ""\n'
-        "  next_check_s     : seconds until the next check(1-3) (small when unsure or busy, larger when idle)\n"
-        "Rules: describe only what you actually see; NEVER copy the example text; NEVER "
-        "re-report an event you already reported; when unsure, DEFER with a question and a "
-        "short next_check_s, then confirm on the next turn before answering.\n"
-        "Worked examples (Situation -> Control):\n"
-        "# nothing relevant on screen yet -> stay quiet, sample slowly\n"
-        "# something may be starting but you are not sure -> sample densely and DEFER a targeted check\n"
-        '{"fps":3,"have_enough_info":false,"new_event":false,"answer":"","question":"has the target event just started?","next_check_s":2}\n'
-        "# the deferred check is now clearly confirmed -> report it ONCE\n"
-        '{"fps":2,"have_enough_info":true,"new_event":true,"answer":"<one sentence describing the real event>","question":"","next_check_s":5}\n'
-        "# the event is still on screen but you ALREADY reported it -> stay silent (dedup)\n"
-        '{"fps":1,"have_enough_info":true,"new_event":false,"answer":"","question":"","next_check_s":4}\n'
-        "Now emit ONLY your control JSON for the current stream:\n") #TODO: add a few more worked examples task specific concrete
+    # This GENERIC block is only the fallback: `task_controller_prompts` overrides
+    # it for every one of the 9 OmniPro tasks. Text lives in prompts.py.
+    controller_prompt: str = CONTROLLER_PROMPT_GENERIC
+
     # These drive the control-JSON generation.
     # GREEDY by default: the control JSON is a DECISION, not creative text —
     # temperature sampling injected tick-to-tick noise into the boolean judgment
@@ -357,14 +137,12 @@ class AsyncOmniConfig:
     # probe reads yes_share = P(yes)/(P(yes)+P(no)); a Schmitt/hysteresis gate
     # (tuned "hyst2b") fires the writer, which snapshots the cache and answers.
     gate_mode: str = "controller"     # "controller" (icl DSL, default) | "probe"
-    goal_question: str = (
-        "\nQuestion: Based on the most recent frames, has this happened: {event}? "
-        "Answer yes or no: ")
-    writer_prompt: str = (
-        "\nThe monitored event just occurred on screen. In ONE sentence UNDER 25 "
-        "words state WHAT happened AND WHY it satisfies the condition: {event}. "
-        "Output only that sentence.")
-    writer_cue: str = "\nALERT: "
+    # Prompt TEXT for these lives in prompts.py; {event} / {instruction} are filled
+    # at runtime by the ingester/writer.
+    goal_question: str = GOAL_QUESTION
+    writer_prompt: str = WRITER_PROMPT
+    writer_cue: str = WRITER_CUE
+    system_prompt: str = SYSTEM_PROMPT
     writer_max_tokens: int = 60
     writer_repeat_window: int = 8     # anti-loop guard for the free-running writer
     goal_threshold: float = 0.5       # non-hysteresis fallback threshold
@@ -376,28 +154,19 @@ class AsyncOmniConfig:
     debounce_s: float = 2.0           # min video-seconds between fires
     yes_words: list = field(default_factory=lambda: ["yes", "Yes", " yes", " Yes"])
     no_words: list = field(default_factory=lambda: ["no", "No", " no", " No"])
-    system_prompt: str = (
-        "You are a helpful assistant watching a live video stream. "
-        "According to the video you are watching, your task is: {instruction}")
 
     # Per-task ICL prompts (override `controller_prompt` when sample.task matches;
-    # the adapter selects by task). ALL 9 OmniPro tasks are covered: the 3 blocks
-    # above are hand-written here, the other 6 live in `task_prompts_all9.py` and
-    # are written in the same style + DSL (counting/state tasks additionally carry
-    # `count` / `phase`, which the controller state now persists).
-    #
-    # Loaded LAZILY via default_factory, not at import time: task_prompts_all9
-    # reads THIS file back (to import the 3 blocks rather than copy them), so an
-    # import-time dependency would re-enter config.py mid-initialisation. By the
-    # time a config is instantiated, this module is fully loaded and it is safe.
-    # Falls back to the 3 local blocks if that module is missing or broken, so a
-    # bad prompt file degrades coverage instead of breaking every run.
-    task_controller_prompts: dict = field(default_factory=lambda: _all9_prompts())
+    # the adapter selects by task). ALL 9 OmniPro tasks are covered. Text lives in
+    # prompts.py; counting/state tasks additionally carry `count` / `phase`, which
+    # the controller state now persists.
+    # Copied per instance so a caller mutating one config cannot corrupt the shared
+    # module-level dict.
+    task_controller_prompts: dict = field(
+        default_factory=lambda: dict(TASK_CONTROLLER_PROMPTS))
     # Per-task writer prompts for the PROBE-GATE arm (same idea: the answer format
     # is task knowledge both systems get; the architecture is what differs).
-    task_writer_prompts: dict = field(default_factory=lambda: {
-        "explicit_target_grounding": _ETG_WRITER_PROMPT,
-    })
+    task_writer_prompts: dict = field(
+        default_factory=lambda: dict(TASK_WRITER_PROMPTS))
 
 
 
