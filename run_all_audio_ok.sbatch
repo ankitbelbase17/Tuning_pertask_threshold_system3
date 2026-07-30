@@ -6,7 +6,7 @@
 #SBATCH --nodes=1
 #SBATCH --gres=gpu:4
 #SBATCH --signal=B:USR1@180
-#SBATCH --output=/iopsstor/scratch/cscs/dbartaula/system_3/omniprofast/output_all/slurm_%j.log
+#SBATCH --output=/iopsstor/scratch/cscs/dbartaula/system_3/omniprofast/slurm_%j.log
 #
 # FULL RUN — every OmniPro sample that does NOT require audio.
 #   932 samples / 699 videos (audio_dependency in {none, helpful})
@@ -36,7 +36,10 @@ set -uo pipefail
 REPO=/iopsstor/scratch/cscs/dbartaula/system_3
 DS=/iopsstor/scratch/cscs/dbartaula/omnipro_data
 SPLIT=$REPO/omniprofast/splits_all
-OUT=$REPO/omniprofast/output_all
+# OUT_NAME lets a config change start a CLEAN arm instead of resuming into results
+# produced by different settings (resume is per-sample, so mixing would silently
+# blend two configs in one number).
+OUT=$REPO/omniprofast/${OUT_NAME:-output_all}
 PY=/iopsstor/scratch/cscs/dbartaula/miniforge3/envs/prosync_env/bin/python
 mkdir -p "$OUT"
 

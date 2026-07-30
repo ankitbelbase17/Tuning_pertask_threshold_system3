@@ -159,7 +159,17 @@ class AsyncOmniConfig:
     # GREEDY by default: the control JSON is a DECISION, not creative text —
     # temperature sampling injected tick-to-tick noise into the boolean judgment
     # (random flip-flops / re-fires). Argmax makes the controller deterministic.
-    writer_greedy: bool = True
+    # OFF as of 2026-07-30. Greedy overrides every sampling field below, so Qwen's
+    # own recommended settings (generation_config.json: do_sample=true, T=0.7,
+    # top_p=0.8, top_k=20) were dead config the whole time.
+    # Greedy is also a prime suspect for the FROZEN-PERCEPTION bug: between ticks the
+    # context changes by one frame (~185 of ~100k tokens), which barely moves the
+    # logits, so argmax returns a byte-identical string by construction. Measured:
+    # 578 consecutive ticks, one string, 100%.
+    # The original justification ("greedy makes the controller deterministic") no
+    # longer applies -- the generator is seeded (writer_seed) and the walk is
+    # lockstep, so SEEDED SAMPLING is equally bit-reproducible.
+    writer_greedy: bool = False
     writer_seed: int = 3407
     writer_temperature: float = 0.7
     writer_top_p: float = 0.8
