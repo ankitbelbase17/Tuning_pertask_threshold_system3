@@ -98,6 +98,24 @@ class AsyncOmniConfig:
     schema_max_int_tokens: int = 4      # cap on `event_time_s`
     schema_max_tail_tokens: int = 60    # cap on the `more` escape-hatch tail
     hit_threshold: float = 0.5          # P(true) above which the level is TRUE
+    # PER-TASK firing thresholds. The single global 0.5 was wrong for every task
+    # measured: two tasks scored time_f1 0.000 not because the model failed to
+    # perceive, but because p_hit never crossed 0.5 so the gate could never fire.
+    # Fitted offline by auc.py (replay the rising-edge gate over saved p_hit, then
+    # greedy temporal match) on the 2026-07-30 smoke run:
+    #     task                      thr    time_f1@thr   was@0.5
+    #     dedup_counting           0.75       0.632       0.444
+    #     realtime_state_monitor   0.14       0.455       0.133
+    #     semantic_condition_alert 0.85       0.353       0.000
+    #     instant_event_alert      0.12       0.222       0.000
+    # ⚠️ FITTED ON ONLY 3 VIDEOS PER TASK. These are provisional: they must be
+    # re-fitted and validated on held-out videos before ANY reported number.
+    task_hit_thresholds: dict = field(default_factory=lambda: {
+        "dedup_counting": 0.75,
+        "realtime_state_monitor": 0.14,
+        "semantic_condition_alert": 0.85,
+        "instant_event_alert": 0.12,
+    })
     more_threshold: float = 0.5         # P(true) above which the tail is decoded
     # Log, every tick, what an UNRESTRICTED argmax would have produced at the
     # boolean slot. If it is not a boolean at all, the logit read is imposing

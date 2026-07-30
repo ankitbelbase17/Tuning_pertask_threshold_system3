@@ -131,9 +131,18 @@ class System5Runner:
         # lets both decoders run from one checkout (same commit, same weights), so
         # the comparison is matched.
         decode_mode = os.environ.get("OMNIPRO_DECODE_MODE", self.base_cfg.decode_mode)
+        # PER-TASK firing threshold. A single global 0.5 made two tasks score
+        # time_f1 0.000 -- not a perception failure, the gate simply could never
+        # fire. Fitted offline by auc.py; OMNIPRO_HIT_THRESHOLD forces one value
+        # across all tasks (used to reproduce the old global-0.5 behaviour).
+        hit_threshold = self.base_cfg.task_hit_thresholds.get(
+            sample.task, self.base_cfg.hit_threshold)
+        if os.environ.get("OMNIPRO_HIT_THRESHOLD"):
+            hit_threshold = float(os.environ["OMNIPRO_HIT_THRESHOLD"])
         cfg = dataclasses.replace(
             self.base_cfg,
             decode_mode=decode_mode,
+            hit_threshold=hit_threshold,
             instruction=sample.question,
             event=(sample.event or sample.question),
             video_path=sample.video_path,
