@@ -145,6 +145,34 @@ emit one of the nine region labels (upstream prefers an explicit `Position: <reg
 anchor). Both are prompt-only fixes; counting is a perception problem and ranks behind
 them.
 
+### Defect 4 (found 2026-08-01): joint-F1 used the wrong denominator
+
+The paper and the reference scorer agree: a response is valid only if it is **both**
+within ±tol **and** content-correct, and then
+
+```
+joint_precision = valid / ALL RESPONSES   = tp_content / n_emits
+joint_recall    = valid / ALL GT TRIGGERS = tp_content / n_gt
+```
+
+Upstream writes these as `tp_content / (tp_time + fp)` and `tp_content / (tp_time + fn)`,
+which are identical because `tp_time + fp == n_emits` and `tp_time + fn == n_gt`
+(verified on 642/642 of our samples).
+
+We were computing `_prf(tp_content, fp, fn)` = `tp_content / (tp_content + fp)`. That
+denominator **quietly drops every emit that matched in time but failed on content** rather
+than counting it as a false positive. Effect:
+
+| content accuracy | inflation of our joint-F1 |
+|---|---|
+| perfect (C == M) | 1.00× |
+| 0.47 | 1.02× |
+| 0.29 | 1.05× |
+| 0.10 | **1.18×** |
+
+**It flattered us most exactly where we were weakest.** Timing metrics were never
+affected. Fixed; overall `joint_f1_lb` moved 0.053 → 0.047.
+
 ---
 
 ## 3. The judge

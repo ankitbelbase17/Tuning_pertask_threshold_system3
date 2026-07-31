@@ -652,7 +652,24 @@ def aggregate(per_sample: list[dict]) -> dict:
         tpt, tpc, fp, fn = d["tp_time"], d["tp_content"], d["fp"], d["fn"]
         unj = d["n_unjudged"]
         tp_p, tp_r, tp_f = _prf(tpt, fp, fn)
-        jp, jr, jf = _prf(tpc, fp, fn)          # content-gated (joint)
+
+        # JOINT = content-gated P/R/F1, and the denominators are NOT the ones _prf
+        # would give. The paper (S3.2.1) and the reference scorer both define a
+        # response as valid only if it is BOTH within +-tol AND content-correct:
+        #     precision = valid / ALL RESPONSES        = tp_content / n_emits
+        #     recall    = valid / ALL GT TRIGGERS      = tp_content / n_gt
+        # and since tp_time + fp == n_emits and tp_time + fn == n_gt, upstream
+        # writes it as tp_content / (tp_time + fp) and tp_content / (tp_time + fn).
+        #
+        # We previously used _prf(tpc, fp, fn) = tpc/(tpc+fp), whose denominator is
+        # n_emits - (tp_time - tp_content) -- it QUIETLY DROPS every emit that
+        # matched in time but failed on content, instead of counting it as a false
+        # positive. That inflated joint-F1 by 2-18%, and worst when content was
+        # worst (1.18x at cAcc 0.10), i.e. it flattered us exactly where we were
+        # weakest. Timing metrics were never affected.
+        jp = tpc / (tpt + fp) if (tpt + fp) else 0.0
+        jr = tpc / (tpt + fn) if (tpt + fn) else 0.0
+        jf = 2 * jp * jr / (jp + jr) if (jp + jr) else 0.0
         judged = tpt - unj                      # matches with a real verdict
 
         # WITHHELD, NOT ZERO. With unjudged matches, tp_content is only a lower

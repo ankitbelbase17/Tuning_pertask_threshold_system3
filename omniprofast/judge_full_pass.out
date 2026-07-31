@@ -1,1 +1,9 @@
 [judge] OpenAI judge active: model=gpt-5-mini (structured outputs, seed=1234)
+output_full9: 616 samples | backend=openai mode=openai model=gpt-5-mini | cache=131 verdicts
+569 triples needed | 89 already cached | 480 to judge
+  judged 25/480 (new=25 failed=0)
+  judged 50/480 (new=50 failed=0)
+  judged 75/480 (new=75 failed=0)
+  judged 100/480 (new=100 failed=0)
+  judged 125/480 (new=125 failed=0)
+  judged 150/480 (new=150 failed=0)
