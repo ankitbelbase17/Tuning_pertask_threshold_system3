@@ -123,10 +123,27 @@ Two things are wrong here, and the old substring rule hid both:
    that sentence contains both `main bathroom` and `shower area`, so it counted correct
    for whichever it was matched against. The 0.396 was inflated by construction.
 
-**Action for the next iteration:** the `realtime_state_monitor` writer prompt in
-`prompts.py` must emit only the destination state name, not a sentence. The same check is
-worth running on `explicit_target_grounding` (position) and the three counting tasks —
-anywhere the benchmark expects a constrained format, prose costs us the whole task.
+**The check was run across every constrained-format task** (all matched emits in
+`output_full9`). Two are format failures, three are not:
+
+| task | kind | matched | unparsed | wrong | correct | acc | diagnosis |
+|---|---|---|---|---|---|---|---|
+| `realtime_state_monitor` | state | 296 | 0 | **296** | **0** | **0.000** | **FORMAT** |
+| `explicit_target_grounding` | position | 6 | 0 | 4 | 2 | 0.333 | **FORMAT** |
+| `dedup_counting` | count | 551 | 0 | 292 | 259 | 0.470 | perception |
+| `snapshot_counting` | count | 44 | 0 | 27 | 17 | 0.386 | perception |
+| `cumulative_counting` | count | 246 | 0 | 175 | 71 | 0.289 | perception |
+
+`unparsed = 0` everywhere is the key column: the counting tasks always yield a clean
+integer, so their errors are genuine miscounts, not formatting. Error direction runs both
+ways — exactly −1 is the most common single error (17%), 29% undercount, but
+`cumulative_counting` puts 24% at ≥ +3 — so there is no systematic offset to correct.
+
+**Action:** tracked as PRIORITY 0 in `ROADMAP.md`. The `realtime_state_monitor` writer
+prompt must emit only the destination state name, and `explicit_target_grounding` must
+emit one of the nine region labels (upstream prefers an explicit `Position: <region>`
+anchor). Both are prompt-only fixes; counting is a perception problem and ranks behind
+them.
 
 ---
 

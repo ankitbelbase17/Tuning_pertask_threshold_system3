@@ -289,7 +289,8 @@ def batch_fetch(run_dir, judge, batch_id=None, wait=0.0):
                     failed += 1
                     print(f"  {cid}: model refused")
                     continue
-                sc = int(json.loads(msg["content"])["score"])
+                _payload = json.loads(msg["content"])
+                sc = int(_payload["score"])
             except Exception as e:
                 failed += 1
                 print(f"  unparseable batch line ({type(e).__name__}: {str(e)[:100]})")
@@ -297,8 +298,17 @@ def batch_fetch(run_dir, judge, batch_id=None, wait=0.0):
             # recompute the key from the stored triple rather than trusting the
             # one saved at submit time, so the cache stays correct even if the
             # key scheme changed in between
-            judge._cache_put(judge._cache_key(req["question"], req["gt"],
-                                              req["pred"]), 1.0 if sc >= 3 else 0.0)
+            _key = judge._cache_key(req["question"], req["gt"], req["pred"])
+            _verdict = 1.0 if sc >= 3 else 0.0
+            judge._cache_put(_key, _verdict)
+            # Same audit trail as the sync path -- a batch verdict must be just as
+            # inspectable as one made interactively.
+            judge.trace(_key, req["question"], req["gt"], req["pred"], _verdict,
+                        {"score_raw": sc,
+                         "explanation": _payload.get("explanation", ""),
+                         "model": state.get("model"), "seed": state.get("seed"),
+                         "batch_id": state.get("batch_id")},
+                        source="batch")
             merged += 1
     if b.error_file_id:
         errs = client.files.content(b.error_file_id).text.strip().splitlines()

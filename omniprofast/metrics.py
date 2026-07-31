@@ -242,11 +242,16 @@ class ContentJudge:
     CACHE_PATH = os.environ.get(
         "OMNIPRO_JUDGE_CACHE",
         os.path.join(os.path.dirname(os.path.abspath(__file__)), "judge_cache.json"))
+    # Append-only audit log. Never read by the scorer; see ContentJudge.trace.
+    TRACE_PATH = os.environ.get(
+        "OMNIPRO_JUDGE_TRACE_PATH",
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), "judge_trace.jsonl"))
 
     def __init__(self, backend: str | None = None):
         self.mode = "unavailable"
         self.n_judged = 0           # verdicts actually obtained (incl. cache hits)
         self.n_unjudged = 0         # calls that could not produce a verdict
+        self._last_detail = None    # raw judge payload for the most recent call
         self._warned = False
         self._judge = None
         self._genai = None
@@ -372,6 +377,45 @@ class ContentJudge:
         except Exception:
             pass
 
+    def trace(self, key, question, gt, pred, verdict, detail=None, source="sync"):
+        """Append the FULL judgement to judge_trace.jsonl so it can be audited.
+
+        WHY THIS IS SEPARATE FROM THE CACHE. The cache is a lookup table: it maps
+        sha256(question|gt|pred)[:24] -> 0.0/1.0. That hash is irreversible and the
+        float is binarised, so from the cache alone you cannot recover WHAT was
+        judged, WHAT the judge said, or WHY -- you cannot even tell which
+        prediction a 0.0 belongs to. For a number that goes in a paper, that is not
+        good enough: a reviewer (or you, in three months) must be able to pull up
+        any verdict and read the judge's reasoning next to the text it judged.
+
+        So the trace stores the whole triple in the clear, the raw 1-5 score, the
+        judge's explanation, the model and seed, and where it came from. It is
+        append-only and never read by the scorer -- deleting it changes no metric,
+        it only costs you the ability to check.
+
+        Line-buffered O_APPEND writes of one JSON object are atomic enough for the
+        concurrent writers we have (same reason the eval's own jsonl appends are
+        safe); the trace is a log, not a source of truth.
+        """
+        if os.environ.get("OMNIPRO_JUDGE_TRACE", "1") == "0":
+            return
+        rec = {
+            "ts": time.strftime("%Y-%m-%dT%H:%M:%S"),
+            "cache_key": key,
+            "backend": self.mode,
+            "source": source,
+            "verdict": verdict,                 # 1.0 / 0.0, what the metric uses
+            "question": question,
+            "gt_response": gt,
+            "pred_text": pred,
+        }
+        rec.update(detail or {})
+        try:
+            with open(self.TRACE_PATH, "a") as fh:
+                fh.write(json.dumps(rec, ensure_ascii=False) + "\n")
+        except Exception:
+            pass                                 # auditing must never break scoring
+
     def _fail(self, why: str):
         """Record an unjudged call, loudly the first time."""
         self.n_unjudged += 1
@@ -413,7 +457,18 @@ class ContentJudge:
                 if getattr(msg, "refusal", None):
                     why = f"model refused: {str(msg.refusal)[:80]}"
                     break                                   # not retryable
-                return int(json.loads(msg.content)["score"])
+                payload = json.loads(msg.content)
+                # Keep the judge's own words so the verdict can be audited later.
+                # The cache stores a bare 0.0/1.0 under an irreversible hash, so
+                # without this there is no way to ask "why was this marked wrong?"
+                self._last_detail = {
+                    "score_raw": int(payload["score"]),
+                    "explanation": payload.get("explanation", ""),
+                    "model": self._model,
+                    "seed": self._seed if self._use_seed else None,
+                    "attempts": attempt,
+                }
+                return int(payload["score"])
             except Exception as e:
                 why = f"{type(e).__name__}: {str(e)[:160]}"
                 # Some models reject `seed`. Drop it once and retry -- the cache is
@@ -456,6 +511,7 @@ class ContentJudge:
                 return None                     # _fail() already counted + logged
             out = 1.0 if sc >= 3 else 0.0       # paper: score>=3 is correct
             self._cache_put(k, out)
+            self.trace(k, question, gt, pred, out, self._last_detail)
             self.n_judged += 1
             return out
         if self.mode == "genai" and self._genai is not None:
@@ -475,6 +531,10 @@ class ContentJudge:
                 if sc is not None:
                     out = 1.0 if sc >= 3 else 0.0   # paper: score>=3 is correct
                     self._cache_put(k, out)
+                    self.trace(k, question, gt, pred, out,
+                               {"score_raw": sc, "model": self._model,
+                                "seed": self._seed,
+                                "explanation": (getattr(r, "text", "") or "")[:500]})
                     self.n_judged += 1
                     return out
                 return self._fail("genai returned an unparseable score")

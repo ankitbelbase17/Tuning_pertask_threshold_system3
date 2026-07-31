@@ -5,6 +5,69 @@ See `MISSION.md` for the vision, `ICL_DIFF_CONTROLLER.md` for mechanism design.
 
 ---
 
+## 🔴 PRIORITY 0 — emit the format the benchmark actually scores (added 2026-07-31)
+
+**Cheapest points on the board. Prompt-only, no compute, no architecture change.**
+
+Aligning our scorer to OmniPro's (see `EVAL_PROTOCOL.md`) revealed that on two tasks our
+writer emits **prose where the benchmark requires a constrained token**. Upstream takes
+the whole payload and compares by exact equality, so a sentence can never match — the
+task is unwinnable regardless of how good the perception is.
+
+Measured over all matched emits in `output_full9` (`kind` from `TASK_CONTENT_KIND`):
+
+| task | kind | matched | unparsed | parsed-but-wrong | correct | acc | diagnosis |
+|---|---|---|---|---|---|---|---|
+| `realtime_state_monitor` | state | 296 | 0 | **296** | **0** | **0.000** | **FORMAT** — 100% are sentences |
+| `explicit_target_grounding` | position | 6 | 0 | 4 | 2 | 0.333 | **FORMAT** — descriptive, not the 9-cell label |
+| `dedup_counting` | count | 551 | 0 | 292 | 259 | 0.470 | perception |
+| `snapshot_counting` | count | 44 | 0 | 27 | 17 | 0.386 | perception |
+| `cumulative_counting` | count | 246 | 0 | 175 | 71 | 0.289 | perception |
+
+### 0.1 — `realtime_state_monitor`: emit ONLY the destination state name
+
+Every one of 296 matched emits is a sentence:
+
+```
+GT state_to : 'step one'
+our emit    : 'The tutorial transitioned from demonstrating the puzzle to showing a close-up...'
+```
+
+Upstream sets `state = payload.strip().strip("'\"").lower()` and compares to `state_to`
+exactly. **This task currently scores a structural zero.** The writer prompt must produce
+the bare destination state and nothing else.
+
+Note the old substring scorer hid this *and* inflated it: a sentence naming both the
+from- and to-state counted correct for **two different** ground-truth states. The
+pre-alignment 0.396 was an artifact.
+
+### 0.2 — `explicit_target_grounding`: emit one of the 9 region labels
+
+```
+GT 'bottom-center'  our emit 'The blue LED lights up on the charging case in the center.'  -> parsed 'center'
+GT 'center-left'    our emit 'The cleaver is in the center of the frame.'                  -> parsed 'center'
+```
+
+The model uses "center" descriptively rather than choosing from
+{top,center,bottom}×{left,center,right}. Upstream's parser prefers an explicit
+`Position: <region>` anchor — the prompt should emit exactly that. (n=6 here, so treat the
+0.333 as directional; the format defect is the certain part.)
+
+### 0.3 — audit the remaining constrained tasks the same way
+
+Counting is **not** a format problem: 0/841 matched emits were unparseable, so the integer
+always extracts cleanly. The counts themselves are wrong, and the errors run **both
+ways** — exactly −1 is the single most common error (17% of matched emits) and 29%
+undercount overall, but `cumulative_counting` puts **24% at ≥ +3** (e.g. GT 5, ours 16).
+There is no clean systematic offset to correct; this is perception, and it belongs behind
+0.1/0.2 in priority because it cannot be fixed by a prompt line.
+
+**Do this before any further threshold or gate work.** 0.1 alone converts a guaranteed
+0.000 into a real score, and neither 0.1 nor 0.2 costs a GPU-hour. Re-measure with
+`refit.py` on held-out samples, not the fitted set.
+
+---
+
 ## ⭐ PRIORITY 1 — the continuously-thinking controller
 
 **Decided 2026-07-30 (user):** triggered-time operation is good enough *for now*, but the
