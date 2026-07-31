@@ -147,6 +147,71 @@ it is **assertions that abort a run rather than let it produce a plausible numbe
 
 ---
 
+## 6b. 2026-07-31 — the measurement itself was wrong
+
+Five more silent defects, all in the **scorer**, found in one day. Same pattern as
+section 1: every one produced a finished run and a number you could put in a table.
+
+| # | defect | how it presented | how long it hid |
+|---|---|---|---|
+| 13 | LLM judge fell back to **word overlap** on any exception | log said `google-genai judge active` | every judged run |
+| 14 | `judge_cache.json` clobbered, not merged, by 4 concurrent writers | 24h of judging → 42 entries | since parallel eval |
+| 15 | `semantic_condition_alert` LLM-judged; upstream scores it `time_only` | our SCA joint-F1 strictly too low | since task setup |
+| 16 | `_extract_count` didn't strip clock times → `"At 01:23, count is 5"` = **1** | correct answers marked wrong | since counting existed |
+| 17 | state matched by **substring**, not equality → one sentence satisfied two different GT states | RSM content accuracy inflated | since counting existed |
+| 18 | `--dry-run` and `--rescore-only` **called the paid API** (report() → score_sample → judge) | invisible; only harmless because no judge worked | since judge_offline.py |
+
+**How #13 was caught, and the general technique:** re-score the run in a bare shell
+with **no API key at all**. It reproduced the shipped `content_acc` to four decimals.
+A real judge and no judge cannot agree exactly. *Run the pipeline with a dependency
+deliberately removed; if the number does not move, that dependency was never used.*
+
+### The rule this produced
+
+**A metric we could not measure is withheld, never estimated.** `ContentJudge.score()`
+returns `1.0` / `0.0` / `None`, and `None` propagates: `content_acc` and `joint_*` come
+back as `None` with `content_complete=false` and explicitly-named `*_lb` lower bounds.
+There is no fallback judge and there must never be one again. A blank cell in a table is
+a fact; a fabricated cell is a lie that survives into the paper.
+
+**Corollary: a verdict you cannot inspect is not evidence.** The cache maps an
+irreversible hash to a bare 0/1 — it could not tell you what was judged or why. Every
+judgement now appends the full triple, the raw 1–5 score, and the judge's own explanation
+to `judge_trace.jsonl` (`judge_audit.py` reads it back). Auditing is append-only and never
+read by the scorer, so it cannot affect a number — it can only let you check one.
+
+### Prose where the benchmark wants a token
+
+Aligning to upstream's scorer showed two tasks are **structurally unwinnable**, no matter
+how good perception gets:
+
+| task | matched | unparsed | wrong | acc | diagnosis |
+|---|---|---|---|---|---|
+| `realtime_state_monitor` | 296 | 0 | **296** | **0.000** | emits sentences; upstream compares whole payload to `state_to` by equality |
+| `explicit_target_grounding` | 6 | 0 | 4 | 0.333 | says "center" descriptively instead of the 9-cell label |
+| counting (×3) | 841 | **0** | 494 | 0.29–0.47 | format fine — the counts are genuinely wrong |
+
+`unparsed = 0` on counting is the column that matters: it separates *"we wrote it wrong"*
+from *"we saw it wrong"*. Two different problems that the old lenient scorer blended into
+one mediocre number.
+
+**Lesson: implement the benchmark's scorer before optimising against your own.** Six weeks
+of prompt tuning was measured against rules that did not match the ones our results will
+be judged by. Read the reference implementation, not just the paper — `TASK_CONTENT_KIND`
+came straight from upstream's source and is now the single dict every task set derives
+from, so they cannot drift apart again.
+
+### And the biggest one: the diff never diffed
+
+**79% of all 15,280 emits are byte-identical repeats** of an earlier emit. When the same
+text repeats, the self-reported `event_time_s` spans a **median of 14 s** (max 561 s), and
+**66% of repeat-groups are wider than the entire ±3 s window** — unmatchable by
+construction. Precision 0.112 is a *content* failure wearing a *gating* failure's costume,
+which is why 15 gate strategies all lost to a fixed threshold: the gate cannot tell a
+restatement from a recurrence. See `CONTROLLER_DIAGNOSIS.md` §3b.
+
+---
+
 ## 7. Standing rules earned the hard way
 
 - **A diff is a decoder constraint, not a prompt instruction.** Every conditional emission
@@ -158,3 +223,14 @@ it is **assertions that abort a run rather than let it produce a plausible numbe
 - **One variable per experiment.** Still true, still violated under time pressure.
 - **Read the logs, not just the metric.** The AUC said "chance". The logs said "it is
   describing the intro card at t=308s". Only one of those was actionable.
+- **Implement the benchmark's scorer before optimising against your own.** Read the
+  reference *source*, not just the paper. Six weeks of tuning was measured against rules
+  our results will not actually be judged by.
+- **Withhold, never estimate.** A metric that could not be measured must come back `None`,
+  never a plausible substitute. Any fallback that produces a number on failure will
+  eventually be reported as if it were real.
+- **To test whether a dependency is used, remove it.** Re-running with no API key
+  reproduced the "judged" scores exactly — which is what proved the judge was never
+  running.
+- **A verdict you cannot inspect is not evidence.** Persist the judge's raw score and
+  reasoning next to the text it judged, or you cannot defend a single content number.
