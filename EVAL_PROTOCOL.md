@@ -100,6 +100,36 @@ means the same thing and is safe to compare.
 
 ---
 
+### Consequence discovered by the alignment: our RSM writer emits the wrong format
+
+Aligning `state` to exact-match dropped `realtime_state_monitor` content accuracy from
+**0.396 → 0.000**. That is not the scorer being too strict — it exposes a real defect in
+our system.
+
+```
+GT state_to : 'main bathroom'
+our emit    : 'The setting switched from the main bathroom area to the shower area.'
+GT state_to : 'shower area'
+our emit    : 'The setting switched from the main bathroom area to the shower area.'
+```
+
+Two things are wrong here, and the old substring rule hid both:
+
+1. **The benchmark constrains this task's output to a bare state name.** Upstream's parser
+   takes the *whole payload* as the state and compares it to `state_to` by exact equality.
+   A sentence can never match. Our writer emits prose, so it scores 0 under the protocol
+   the paper actually uses.
+2. **The old substring rule let ONE emit satisfy TWO different ground-truth states** —
+   that sentence contains both `main bathroom` and `shower area`, so it counted correct
+   for whichever it was matched against. The 0.396 was inflated by construction.
+
+**Action for the next iteration:** the `realtime_state_monitor` writer prompt in
+`prompts.py` must emit only the destination state name, not a sentence. The same check is
+worth running on `explicit_target_grounding` (position) and the three counting tasks —
+anywhere the benchmark expects a constrained format, prose costs us the whole task.
+
+---
+
 ## 3. The judge
 
 Paper (§3.2.1): *"we employ Gemini-3-Flash as an LLM judge to score each prediction
