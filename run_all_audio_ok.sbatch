@@ -70,6 +70,19 @@ done_count () {   # how many shards have finished (wrote their metrics)
 echo "[job] shards complete at start: $(done_count)/$NSHARD"
 
 # ---------------------------------------------------------------------------
+# BULLETPROOF CHAIN (2026-07-30, v3). Verified: this cluster DOES accept a
+# pre-submitted dependency (the old comment claiming QOSMaxSubmitJobPerUserLimit
+# forbids it is wrong). So queue the NEXT generation RIGHT NOW with
+# --dependency=afterany, before doing any work.
+#
+# Why at the start: generation 1 (job 2932056) died at the wall clock with the
+# resubmit sitting in unreachable tail code, and the chain stopped dead after one
+# link. Pre-submitting means even SIGKILL cannot break the chain -- afterany fires
+# on ANY terminal state (COMPLETED, TIMEOUT, FAILED, CANCELLED).
+# The USR1 handler and the tail call are kept as fallbacks; CHAINED makes them no-ops.
+# ---------------------------------------------------------------------------
+
+# ---------------------------------------------------------------------------
 # CHAIN REPAIR (2026-07-30). Generation 1 (job 2932056) TIMED OUT and never
 # resubmitted, so the chain died after one link with 20/932 samples done.
 #
@@ -100,6 +113,22 @@ resubmit () {
   echo "[chain] FAILED to queue generation $((GEN + 1)) after 30 attempts"
 }
 
+resubmit_dep () {   # pre-submit with a dependency on THIS job
+  [ "$CHAINED" = "1" ] && return
+  if [ "$GEN" -ge "$MAX_GEN" ]; then
+    echo "[chain] hit MAX_GEN=$MAX_GEN — not chaining."; return
+  fi
+  cd "$REPO" || return
+  if sbatch --dependency=afterany:${SLURM_JOB_ID} \
+       run_all_audio_ok.sbatch "$OUT_NAME" "$TASKS" $((GEN + 1)) "$MAX_GEN"; then
+    CHAINED=1
+    echo "[chain] generation $((GEN + 1)) PRE-QUEUED (afterany:${SLURM_JOB_ID})"
+  else
+    echo "[chain] pre-submit refused — USR1 handler will retry at the wall clock"
+  fi
+  cd "$REPO/omniprofast" || return
+}
+
 on_timeout () {
   echo "[chain] SIGUSR1: ~180s to the wall clock. Saving scores + chaining."
   "$PY" dump_scores.py "$OUT" 2>&1 | tail -5 || true
@@ -107,6 +136,11 @@ on_timeout () {
   # let the shards keep working with the remaining time; SLURM kills us shortly.
 }
 trap on_timeout USR1
+
+# queue the next generation NOW (unless everything is already done)
+if [ "$(done_count)" -lt "$NSHARD" ]; then
+  resubmit_dep
+fi
 
 # 4 GPUs; GPU k takes shards k, k+4, k+8, k+12 in order. Resume makes an already
 # finished shard cost seconds, so re-walking the list each generation is cheap.

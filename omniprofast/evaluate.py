@@ -99,8 +99,15 @@ def main():
     agg = aggregate([score_sample(r, tolerance=args.tolerance, judge=judge) for r in rows])
     agg["n"] = len(rows)
     write_json(os.path.join(args.out, "online_metrics.json"), agg)
-    log(f"time_f1={agg['overall']['time_f1']} joint_f1={agg['overall']['joint_f1']} "
-        f"content_acc={agg['overall']['content_acc']} (n={len(rows)})")
+    o = agg["overall"]
+    log(f"time_f1={o['time_f1']} joint_f1={o['joint_f1']} "
+        f"content_acc={o['content_acc']} (n={len(rows)})")
+    if not o.get("content_complete", True):
+        # loud, because a withheld content metric means this run's headline
+        # joint-F1 does not exist yet -- it is not zero, it is unmeasured.
+        log(f"[judge] CONTENT WITHHELD: {o['n_unjudged']}/{o['n_matched']} matched "
+            f"emits went UNJUDGED (coverage {o['content_coverage']:.1%}). "
+            f"time_* are final; run judge_offline.py to fill in content.")
 
 
 if __name__ == "__main__":

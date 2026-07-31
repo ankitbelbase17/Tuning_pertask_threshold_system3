@@ -22,6 +22,15 @@ import os
 import sys
 
 
+def fmt(v, nd=3, dash="UNJUDGED"):
+    """Render a metric that may be withheld. metrics.aggregate returns None for
+    content_acc/joint_* when any matched emit went unjudged, so a plain :.3f
+    would crash — and silently substituting 0.0 would be exactly the kind of
+    fake number this change exists to eliminate."""
+    return dash if v is None else f"{v:.{nd}f}"
+
+
+
 def _load(dirs):
     preds, scores = [], []
     for d in dirs:
@@ -132,15 +141,15 @@ def main():
         a = auc_roc(pr)
         pos = (100.0 * sum(y for _, y in pr) / len(pr)) if pr else 0.0
         out(f"| {t} | {len(vids_by_task[t])} | {b['n_gt']} | {b['n_emits']} | "
-            f"{b['time_f1']:.3f} | {b['joint_f1']:.3f} | {b['content_acc']:.3f} | "
+            f"{b['time_f1']:.3f} | {fmt(b['joint_f1'])} | {fmt(b['content_acc'])} | "
             f"{b['time_precision']:.3f} | {b['time_recall']:.3f} | "
             f"{'—' if a is None else f'{a:.3f}'} | {ticks_by_task[t]} | {pos:.1f}% |")
     o = agg["overall"]
     allp = [p for v in by_task_pairs.values() for p in v]
     a = auc_roc(allp)
     out(f"| **OVERALL** | {len(set().union(*vids_by_task.values()))} | {o['n_gt']} | "
-        f"{o['n_emits']} | **{o['time_f1']:.3f}** | **{o['joint_f1']:.3f}** | "
-        f"{o['content_acc']:.3f} | {o['time_precision']:.3f} | {o['time_recall']:.3f} | "
+        f"{o['n_emits']} | **{o['time_f1']:.3f}** | **{fmt(o['joint_f1'])}** | "
+        f"{fmt(o['content_acc'])} | {o['time_precision']:.3f} | {o['time_recall']:.3f} | "
         f"{'—' if a is None else f'{a:.3f}'} | {len(allp)} | "
         f"{100.0*sum(y for _,y in allp)/len(allp) if allp else 0:.1f}% |")
     out()

@@ -10,26 +10,61 @@ Mirrors the official OmniPro online scorer (repo: metrics/online/scorer.py):
   - content-gated Joint Precision / Recall / F1;
   - micro aggregation across samples (sum tp/fp/fn, then recompute).
 
-Content judging for free-text tasks (event_narration, sequential_step_instruction)
-uses an LLM judge if OPENAI_API_KEY / GEMINI_API_KEY is set (OmniPro's protocol,
-score 1-5, correct if >=4); otherwise falls back to a lexical-overlap proxy and
-flags `judge="lexical"` so the result is never silently mislabelled.
+Content judging for the free-text tasks (event_narration,
+sequential_step_instruction) uses an LLM judge — OpenAI with Structured Outputs
+(default, $OPENAI_API_KEY) or the paper's Gemini ($GEMINI_API_KEY) — following
+OmniPro's protocol: score 1-5, correct if >=3. See ContentJudge for backends.
+
+THERE IS NO FALLBACK JUDGE. If the judge cannot be reached, the verdict is None
+(UNJUDGED) and `content_acc` / `joint_*` are reported as None rather than
+estimated — see ContentJudge. Lower bounds remain available as `content_acc_lb` /
+`joint_f1_lb`, named so they cannot be mistaken for the real thing, alongside
+`n_judged` / `n_unjudged` / `content_coverage`. Timing metrics never involve the
+judge and are always exact.
+
+Predictions are stored with their text in online_pred.jsonl, so an unjudged run
+can be completed later, without a GPU, via judge_offline.py.
 """
 from __future__ import annotations
 
 import json
 import os
+import random
 import re
+import time
 from collections import defaultdict
 
-TIME_ONLY = {"instant_event_alert"}
-COUNT_TASKS = {"snapshot_counting", "cumulative_counting", "dedup_counting"}
-POSITION_TASKS = {"explicit_target_grounding"}
-STATE_TASKS = {"realtime_state_monitor"}
-# Per the OmniPro paper, semantic_condition_alert responses are content-judged by
-# an LLM: a temporal match counts toward the joint metric ONLY if the response is
-# also content-correct (state WHAT happened AND WHY it meets the condition).
-JUDGE_TASKS = {"event_narration", "sequential_step_instruction", "semantic_condition_alert"}
+# CANONICAL TASK -> CONTENT-SCORING KIND.
+# Copied from the OmniPro reference implementation (metrics/online/scorer.py,
+# TASK_CONTENT_KIND) so our numbers are comparable to the published baselines.
+# Verified against the paper (S3.2.1): the LLM judge is used ONLY for the two
+# open-ended generation tasks; everything else is exact match on structured
+# output, and the two alert tasks do not score content at all.
+#
+# WE PREVIOUSLY HAD semantic_condition_alert IN THE JUDGE SET. That was wrong:
+# upstream scores it time_only, so a time-matched SCA emit is correct regardless
+# of what it says. Judging it made our SCA joint-F1 strictly lower than the same
+# system would score under the benchmark's own scorer.
+TASK_CONTENT_KIND = {
+    # Alert tasks — content is not evaluated; any time-matched emit is correct.
+    "instant_event_alert":         "time_only",
+    "semantic_condition_alert":    "time_only",
+    # Structured tasks — rule-based exact matching.
+    "explicit_target_grounding":   "position",
+    "snapshot_counting":           "count",
+    "cumulative_counting":         "count",
+    "dedup_counting":              "count",
+    "realtime_state_monitor":      "state",
+    # Free-text narration tasks — need the LLM judge.
+    "event_narration":             "gpt_judge",
+    "sequential_step_instruction": "gpt_judge",
+}
+
+TIME_ONLY = {t for t, k in TASK_CONTENT_KIND.items() if k == "time_only"}
+COUNT_TASKS = {t for t, k in TASK_CONTENT_KIND.items() if k == "count"}
+POSITION_TASKS = {t for t, k in TASK_CONTENT_KIND.items() if k == "position"}
+STATE_TASKS = {t for t, k in TASK_CONTENT_KIND.items() if k == "state"}
+JUDGE_TASKS = {t for t, k in TASK_CONTENT_KIND.items() if k == "gpt_judge"}
 
 # ORDER MATTERS: _extract_position returns the FIRST substring hit, so every
 # compound name must be tested before the bare "center" it contains. With the old
@@ -69,8 +104,16 @@ def match_emits_to_gt(emit_times: list[float], gt_times: list[float],
 # content parsing / scoring
 # ---------------------------------------------------------------------------
 def _extract_count(text: str):
-    m = re.findall(r"-?\d+", text or "")
-    return int(m[0]) if m else None
+    """First integer in the emit, AFTER removing clock times.
+
+    Mirrors utils/online_parser.py::_extract_integer upstream. The timestamp
+    strip is load-bearing: our writer often opens with "At 01:23, ..." and the
+    old version returned 1 (from "01") instead of the real count, marking a
+    correct answer wrong. Only affects the three counting tasks.
+    """
+    cleaned = re.sub(r"\b\d{1,2}:\d{2}(?::\d{2})?\b", " ", text or "")
+    m = re.search(r"-?\d+", cleaned)
+    return int(m.group(0)) if m else None
 
 
 def _extract_position(text: str):
@@ -81,20 +124,27 @@ def _extract_position(text: str):
     return None
 
 
-def _extract_state(text: str, states: list[str] | None):
-    t = (text or "").lower()
-    for s in (states or []):
-        if s.lower() in t:
-            return s.lower()
-    return None
+def _extract_state(text: str, states: list[str] | None = None):
+    """The WHOLE emit, lowercased and unquoted — upstream's rule.
+
+    Mirrors utils/online_parser.py: `out["state"] = payload.strip().strip("'\\"").lower()`,
+    which scorer.py then compares to gt["state_to"] by EXACT equality.
+
+    The `states` argument is ignored and kept only for call compatibility. It used
+    to drive a substring search ("is the GT state name mentioned anywhere?"), which
+    is far more lenient than upstream: a rambling emit that happened to contain the
+    target word scored correct. That inflated our realtime_state_monitor content
+    accuracy relative to the benchmark's own scorer, so it is gone.
+    """
+    return (text or "").strip().strip("'\"").lower() or None
 
 
-def _lexical_sim(a: str, b: str) -> float:
-    ta = set(re.findall(r"[a-z0-9]+", (a or "").lower()))
-    tb = set(re.findall(r"[a-z0-9]+", (b or "").lower()))
-    if not ta or not tb:
-        return 0.0
-    return len(ta & tb) / len(ta | tb)
+# NOTE: a lexical-overlap fallback used to live here and was used whenever the
+# LLM judge failed. It was DELETED on purpose (2026-07-31). Word overlap does not
+# measure whether a response describes the right event, and because the failure
+# was swallowed silently, a whole 24h run reported lexical scores under the label
+# "google-genai judge active". A missing verdict must stay MISSING -- see
+# ContentJudge.score, which returns None rather than inventing a number.
 
 
 _GENAI_JUDGE_PROMPT = (
@@ -112,6 +162,43 @@ _GENAI_JUDGE_PROMPT = (
     'Respond with ONLY a JSON object: {{"score": <int 1-5>, "explanation": "<brief>"}}')
 
 
+# Structured Outputs schema for the OpenAI backend. With strict=True the model
+# CANNOT return anything but a valid object of this shape, so "unparseable judge
+# output" stops being a failure mode -- there is no regex, and therefore nothing
+# to silently mis-parse into a wrong verdict.
+OPENAI_JUDGE_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "score": {"type": "integer", "minimum": 1, "maximum": 5},
+        "explanation": {"type": "string"},
+    },
+    "required": ["score", "explanation"],
+    "additionalProperties": False,
+}
+
+
+def openai_judge_request(model: str, question: str, gt: str, pred: str,
+                         seed: int | None = None) -> dict:
+    """The EXACT chat.completions body used by both the sync and the Batch path.
+
+    Shared on purpose: a batch verdict and a sync verdict for the same triple must
+    be the same computation, otherwise the cache would mix two different judges
+    under one key."""
+    body = {
+        "model": model,
+        "messages": [{"role": "user",
+                      "content": _GENAI_JUDGE_PROMPT.format(
+                          question=question, gt=gt, pred=pred)}],
+        "response_format": {"type": "json_schema",
+                            "json_schema": {"name": "omnipro_judge_verdict",
+                                            "strict": True,
+                                            "schema": OPENAI_JUDGE_SCHEMA}},
+    }
+    if seed is not None:
+        body["seed"] = seed
+    return body
+
+
 def _parse_judge_score(text: str):
     m = re.search(r"\{.*\}", text or "", re.DOTALL)
     if not m:
@@ -124,9 +211,29 @@ def _parse_judge_score(text: str):
 
 
 class ContentJudge:
-    """LLM-as-judge for free-text content. Priority: (1) google-genai SDK (works
-    with a bare GEMINI_API_KEY, no base URL needed); (2) the OmniPro REST llm_judge
-    (needs GEMINI_API_BASE); (3) lexical fallback. Correct if score >= 3 (paper).
+    """LLM-as-judge for free-text content. Correct if score >= 3 (paper).
+
+    Backends (`backend=` or $OMNIPRO_JUDGE_BACKEND):
+      "auto" (default)  (1) google-genai SDK (bare GEMINI_API_KEY, no base URL);
+                        (2) the OmniPro REST llm_judge (needs GEMINI_API_BASE).
+      "gemini"          same as auto, Gemini only.
+      "openai"          OpenAI chat.completions with Structured Outputs
+                        (strict json_schema), model $OPENAI_JUDGE_MODEL, default
+                        gpt-5-mini. This is the always-available judge; the paper's
+                        Gemini-3-Flash needs quota we do not have.
+
+    An explicitly requested backend NEVER silently downgrades to another one: if it
+    cannot be constructed, mode stays "unavailable" and every verdict is UNJUDGED.
+    Mixing judges inside one number is exactly the kind of silent corruption this
+    module exists to prevent.
+
+    THERE IS NO FALLBACK. If neither judge can be reached, or a call fails (quota,
+    503, parse error), `score` returns None — an explicit UNJUDGED marker that
+    propagates all the way to the reported metrics, which then refuse to publish a
+    content number. This is deliberate: the previous lexical fallback made a failed
+    judge indistinguishable from a real verdict, and a full run silently reported
+    word-overlap scores. Unjudged predictions stay on disk in online_pred.jsonl and
+    can be judged later by judge_offline.py once quota allows.
 
     REPRODUCIBLE: the Gemini call is pinned with a fixed `seed`, and every verdict
     is persisted to a JSON cache keyed by (question, gt, pred) — re-scoring the
@@ -136,18 +243,37 @@ class ContentJudge:
         "OMNIPRO_JUDGE_CACHE",
         os.path.join(os.path.dirname(os.path.abspath(__file__)), "judge_cache.json"))
 
-    def __init__(self):
-        self.mode = "lexical"
+    def __init__(self, backend: str | None = None):
+        self.mode = "unavailable"
+        self.n_judged = 0           # verdicts actually obtained (incl. cache hits)
+        self.n_unjudged = 0         # calls that could not produce a verdict
+        self._warned = False
         self._judge = None
         self._genai = None
+        self._openai = None
         self._model = None
+        self._use_seed = True
+        # When True, score() answers from the cache only and never calls the API.
+        # Set it for pure scoring passes (see judge_offline.report).
+        self.offline = False
         self._seed = int(os.environ.get("OMNIPRO_JUDGE_SEED", "1234"))
+        self._max_retries = int(os.environ.get("OMNIPRO_JUDGE_RETRIES", "5"))
+        # Prefix mixed into the cache key; see _cache_key.
+        self._key_ns = ""
         self._cache = {}
         try:
             with open(self.CACHE_PATH) as f:
                 self._cache = json.load(f)
         except Exception:
             self._cache = {}
+        backend = (backend or os.environ.get("OMNIPRO_JUDGE_BACKEND")
+                   or "auto").lower()
+        self.backend = backend
+
+        if backend == "openai":
+            self._init_openai()
+            return                  # no cross-backend fallback (see class docstring)
+
         key = os.environ.get("GEMINI_API_KEY")
 
         # (1) preferred: google-genai SDK with the key passed explicitly
@@ -155,7 +281,7 @@ class ContentJudge:
             try:
                 from google import genai
                 self._genai = genai.Client(api_key=key)
-                self._model = os.environ.get("GEMINI_MODEL", "gemini-3.5-flash")
+                self._model = os.environ.get("GEMINI_MODEL", "gemini-3-flash")
                 self.mode = "genai"
                 print(f"[judge] google-genai judge active: model={self._model}", flush=True)
                 return
@@ -180,26 +306,158 @@ class ContentJudge:
                 print(f"[judge] REST LLM judge active: provider={self._judge.provider} "
                       f"model={self._judge.model} base={self._judge.api_base}", flush=True)
             except Exception as e:
-                print(f"[judge] REST judge unavailable ({type(e).__name__}: {e}); "
-                      f"using lexical fallback", flush=True)
+                print(f"[judge] REST judge unavailable ({type(e).__name__}: {e})",
+                      flush=True)
+
+        if self.mode == "unavailable":
+            print("[judge] NO JUDGE AVAILABLE — every content verdict will be "
+                  "UNJUDGED and no content_acc/joint_f1 will be reported. "
+                  "Timing metrics are unaffected. Re-score later with "
+                  "judge_offline.py.", flush=True)
+
+    def _init_openai(self) -> bool:
+        if not os.environ.get("OPENAI_API_KEY"):
+            print("[judge] backend=openai requested but OPENAI_API_KEY is unset — "
+                  "every verdict will be UNJUDGED. Source the project .env.",
+                  flush=True)
+            return False
+        try:
+            from openai import OpenAI
+            self._openai = OpenAI()     # reads OPENAI_API_KEY from the environment
+            self._model = os.environ.get("OPENAI_JUDGE_MODEL", "gpt-5-mini")
+            # WHY THE MODEL IS IN THE CACHE KEY (and why only for OpenAI):
+            # a verdict is a function of (triple, judge), not of the triple alone,
+            # so two judges must not share a slot. The 42 pre-existing entries were
+            # all written by the Gemini/REST judge under the bare
+            # sha256(q|gt|pred) key (the deleted lexical fallback never wrote to
+            # the cache -- checked), so Gemini keeps the unprefixed namespace and
+            # those entries stay valid and free. OpenAI verdicts get their own
+            # "openai:<model>" namespace, which also means switching
+            # OPENAI_JUDGE_MODEL re-judges from scratch instead of quietly serving
+            # gpt-5-mini verdicts as if another model had produced them.
+            self._key_ns = f"openai:{self._model}\x1f"
+            self.mode = "openai"
+            print(f"[judge] OpenAI judge active: model={self._model} "
+                  f"(structured outputs, seed={self._seed})", flush=True)
+            return True
+        except Exception as e:
+            print(f"[judge] OpenAI judge unavailable ({type(e).__name__}: {e}) — "
+                  f"verdicts will be UNJUDGED", flush=True)
+            return False
 
     def _cache_key(self, question: str, gt: str, pred: str) -> str:
         import hashlib
-        return hashlib.sha256(f"{question}\x1f{gt}\x1f{pred}".encode()).hexdigest()[:24]
+        return hashlib.sha256(
+            f"{self._key_ns}{question}\x1f{gt}\x1f{pred}".encode()).hexdigest()[:24]
 
     def _cache_put(self, key: str, score: float):
+        """Merge-then-write. Four eval processes share this file; the old version
+        dumped its own dict straight over the top, so the last writer erased the
+        other three (24h of judging left 42 entries). Re-read, merge, and rename
+        a temp file into place so a reader never sees a half-written cache."""
         self._cache[key] = score
         try:
-            with open(self.CACHE_PATH, "w") as f:
-                json.dump(self._cache, f)
+            merged = {}
+            try:
+                with open(self.CACHE_PATH) as f:
+                    merged = json.load(f)
+            except Exception:
+                merged = {}
+            merged.update(self._cache)
+            self._cache = merged
+            tmp = f"{self.CACHE_PATH}.{os.getpid()}.tmp"
+            with open(tmp, "w") as f:
+                json.dump(merged, f)
+            os.replace(tmp, self.CACHE_PATH)
         except Exception:
             pass
 
-    def score(self, question: str, gt: str, pred: str) -> float:
-        """Return correctness in [0,1] (1.0 if judged score >= 3, per the paper)."""
+    def _fail(self, why: str):
+        """Record an unjudged call, loudly the first time."""
+        self.n_unjudged += 1
+        if not self._warned:
+            self._warned = True
+            print(f"[judge] UNJUDGED: {why}. Content metrics will be withheld "
+                  f"(not estimated). Further failures are counted silently.",
+                  flush=True)
+        return None
+
+    @staticmethod
+    def _retryable(exc: Exception) -> bool:
+        """Only transient server-side conditions are worth waiting for. A 400/401
+        is a bug or a bad key and retrying it just burns the budget."""
+        status = getattr(exc, "status_code", None) or getattr(exc, "status", None)
+        if isinstance(status, int):
+            return status == 408 or status == 429 or status >= 500
+        return type(exc).__name__ in ("RateLimitError", "APIConnectionError",
+                                      "APITimeoutError", "InternalServerError",
+                                      "APIError")
+
+    def _openai_verdict(self, question: str, gt: str, pred: str):
+        """One judged triple -> int score 1-5, or None if no verdict was obtained.
+
+        Bounded: at most self._max_retries requests, exponential backoff with
+        jitter on 429/5xx only. Exhausting them returns None (UNJUDGED) — never a
+        guess."""
+        why = "unknown"
+        delay = 2.0
+        attempt = 0
+        while attempt < self._max_retries:
+            attempt += 1
+            try:
+                body = openai_judge_request(
+                    self._model, question, gt, pred,
+                    seed=self._seed if self._use_seed else None)
+                r = self._openai.chat.completions.create(**body)
+                msg = r.choices[0].message
+                if getattr(msg, "refusal", None):
+                    why = f"model refused: {str(msg.refusal)[:80]}"
+                    break                                   # not retryable
+                return int(json.loads(msg.content)["score"])
+            except Exception as e:
+                why = f"{type(e).__name__}: {str(e)[:160]}"
+                # Some models reject `seed`. Drop it once and retry -- the cache is
+                # what actually makes re-scoring reproducible; seed is a bonus.
+                if (self._use_seed and "seed" in str(e).lower()
+                        and getattr(e, "status_code", None) == 400):
+                    self._use_seed = False
+                    attempt -= 1
+                    print("[judge] model rejected `seed`; retrying without it "
+                          "(cache still guarantees stable re-scores)", flush=True)
+                    continue
+                if not self._retryable(e) or attempt >= self._max_retries:
+                    break
+                s = delay * (1 + random.random() * 0.3)
+                print(f"[judge] transient ({why}); retry {attempt}/"
+                      f"{self._max_retries} in {s:.1f}s", flush=True)
+                time.sleep(s)
+                delay = min(delay * 2, 120.0)
+        self._fail(f"openai judge failed ({why})")
+        return None
+
+    def score(self, question: str, gt: str, pred: str):
+        """Correctness in [0,1] (1.0 if judged score >= 3, per the paper), or None
+        if no verdict could be obtained. None is NOT a failure to be papered over:
+        callers must propagate it so the metric is withheld rather than guessed."""
         k = self._cache_key(question, gt, pred)
         if k in self._cache:                        # persisted verdict -> stable re-scores
+            self.n_judged += 1
             return float(self._cache[k])
+        if self.offline:
+            # A scoring pass is a READ of the cache. Judging happens in an explicit,
+            # counted, budgeted loop -- never as a side effect of computing a table.
+            # Without this, --dry-run / --rescore-only / a --max-calls 3 run's final
+            # report each silently judged the entire run through the API.
+            self.n_unjudged += 1
+            return None
+        if self.mode == "openai" and self._openai is not None:
+            sc = self._openai_verdict(question, gt, pred)
+            if sc is None:
+                return None                     # _fail() already counted + logged
+            out = 1.0 if sc >= 3 else 0.0       # paper: score>=3 is correct
+            self._cache_put(k, out)
+            self.n_judged += 1
+            return out
         if self.mode == "genai" and self._genai is not None:
             try:
                 prompt = _GENAI_JUDGE_PROMPT.format(question=question, gt=gt, pred=pred)
@@ -217,36 +475,66 @@ class ContentJudge:
                 if sc is not None:
                     out = 1.0 if sc >= 3 else 0.0   # paper: score>=3 is correct
                     self._cache_put(k, out)
+                    self.n_judged += 1
                     return out
-            except Exception:
-                pass
-            return 1.0 if _lexical_sim(gt, pred) >= 0.3 else 0.0
+                return self._fail("genai returned an unparseable score")
+            except Exception as e:
+                return self._fail(f"genai call failed ({type(e).__name__}: "
+                                  f"{str(e)[:120]})")
         if self.mode == "llm" and self._judge is not None:
             try:
                 r = self._judge.judge(question, gt, pred)
                 out = 1.0 if int(r.get("score", 0)) >= 3 else 0.0   # paper: >=3
                 self._cache_put(k, out)
+                self.n_judged += 1
                 return out
-            except Exception:
-                pass
-        return 1.0 if _lexical_sim(gt, pred) >= 0.3 else 0.0
+            except Exception as e:
+                return self._fail(f"REST judge call failed ({type(e).__name__}: "
+                                  f"{str(e)[:120]})")
+        return self._fail("no judge configured (set OPENAI_API_KEY, or "
+                          "GEMINI_API_KEY for the paper's judge)")
 
 
 def _content_correct(task: str, emit_raw: str, gt_item: dict,
-                     question: str, judge: ContentJudge) -> bool:
-    if task in TIME_ONLY:
+                     question: str, judge: ContentJudge):
+    """True / False / None. None means UNJUDGED — the LLM judge could not be
+    reached — and must never be coerced to a bool. Only JUDGE_TASKS can return it;
+    the count/position/state tasks are decided by deterministic extraction and are
+    always available offline."""
+    kind = TASK_CONTENT_KIND.get(task, "gpt_judge")
+
+    # time_only: content is not part of the metric at all (IEA, SCA).
+    if kind == "time_only":
         return True
-    if task in COUNT_TASKS:
-        return _extract_count(emit_raw) == gt_item.get("count")
-    if task in POSITION_TASKS:
-        gp = (gt_item.get("position") or "").lower()
-        return _extract_position(emit_raw) == gp if gp else False
-    if task in STATE_TASKS:
-        gs = (gt_item.get("state_to") or "").lower()
-        return _extract_state(emit_raw, [gs]) == gs if gs else False
-    if task in JUDGE_TASKS:
-        return judge.score(question, gt_item.get("response", ""), emit_raw) >= 0.5
-    return True
+
+    if kind == "gpt_judge":
+        s = judge.score(question, gt_item.get("response", ""), emit_raw)
+        return None if s is None else s >= 0.5
+
+    # Structured kinds. Upstream marks an emit it cannot parse as WRONG (not
+    # unscorable) — an unparseable count is a failure to follow the output
+    # format, which is exactly what the benchmark is testing.
+    if not (emit_raw or "").strip():
+        return False
+
+    if kind == "position":
+        pp = _extract_position(emit_raw)
+        gp = (gt_item.get("position") or "").lower().strip()
+        return bool(pp and gp and pp == gp)
+
+    if kind == "count":
+        pc = _extract_count(emit_raw)
+        gc = gt_item.get("count")
+        if pc is None or gc is None:
+            return False
+        return int(pc) == int(gc)
+
+    if kind == "state":
+        ps = _extract_state(emit_raw)
+        gs = (gt_item.get("state_to") or gt_item.get("state") or "").lower().strip()
+        return bool(ps and gs and ps == gs)
+
+    return False
 
 
 # ---------------------------------------------------------------------------
@@ -267,13 +555,18 @@ def score_sample(pred: dict, tolerance: float = 3.0,
     fn = len(un_g)
 
     tp_content = 0
+    n_unjudged = 0
     for ei, gj, _dt in matches:
-        if _content_correct(task, emits[ei].get("raw", ""), gts[gj],
-                            pred.get("question", ""), judge):
+        ok = _content_correct(task, emits[ei].get("raw", ""), gts[gj],
+                              pred.get("question", ""), judge)
+        if ok is None:
+            n_unjudged += 1          # withheld, not counted as right OR wrong
+        elif ok:
             tp_content += 1
 
     return {"id": pred["id"], "task": task,
-            "tp_time": tp_time, "tp_content": tp_content, "fp": fp, "fn": fn,
+            "tp_time": tp_time, "tp_content": tp_content,
+            "n_unjudged": n_unjudged, "fp": fp, "fn": fn,
             "n_emits": len(emits), "n_gt": len(gtt)}
 
 
@@ -288,24 +581,45 @@ def aggregate(per_sample: list[dict]) -> dict:
     by_task: dict[str, dict] = defaultdict(lambda: defaultdict(float))
     overall = defaultdict(float)
     for s in per_sample:
-        for k in ("tp_time", "tp_content", "fp", "fn", "n_emits", "n_gt"):
-            by_task[s["task"]][k] += s[k]
-            overall[k] += s[k]
+        for k in ("tp_time", "tp_content", "n_unjudged", "fp", "fn",
+                  "n_emits", "n_gt"):
+            by_task[s["task"]][k] += s.get(k, 0)
+            overall[k] += s.get(k, 0)
         by_task[s["task"]]["n"] += 1
         overall["n"] += 1
 
     def block(d):
         tpt, tpc, fp, fn = d["tp_time"], d["tp_content"], d["fp"], d["fn"]
+        unj = d["n_unjudged"]
         tp_p, tp_r, tp_f = _prf(tpt, fp, fn)
         jp, jr, jf = _prf(tpc, fp, fn)          # content-gated (joint)
-        content_acc = (tpc / tpt) if tpt else 0.0
-        return {"n_samples": int(d["n"]), "n_gt": int(d["n_gt"]),
-                "n_emits": int(d["n_emits"]),
-                "time_precision": round(tp_p, 4), "time_recall": round(tp_r, 4),
-                "time_f1": round(tp_f, 4),
-                "joint_precision": round(jp, 4), "joint_recall": round(jr, 4),
-                "joint_f1": round(jf, 4),
-                "content_acc": round(content_acc, 4)}
+        judged = tpt - unj                      # matches with a real verdict
+
+        # WITHHELD, NOT ZERO. With unjudged matches, tp_content is only a lower
+        # bound, so joint_* and content_acc are not the quantities they claim to
+        # be. Publishing a number here is what let a lexical fallback masquerade
+        # as a judged result, so we publish None and keep the lower bound under a
+        # name that says what it is. Timing metrics are always exact.
+        complete = (unj == 0)
+        out = {"n_samples": int(d["n"]), "n_gt": int(d["n_gt"]),
+               "n_emits": int(d["n_emits"]),
+               "time_precision": round(tp_p, 4), "time_recall": round(tp_r, 4),
+               "time_f1": round(tp_f, 4),
+               "n_matched": int(tpt), "n_judged": int(judged),
+               "n_unjudged": int(unj),
+               "content_complete": complete,
+               "content_coverage": round(judged / tpt, 4) if tpt else 0.0,
+               "joint_f1_lb": round(jf, 4),
+               "content_acc_lb": round(tpc / tpt, 4) if tpt else 0.0}
+        if complete:
+            out.update({"joint_precision": round(jp, 4),
+                        "joint_recall": round(jr, 4),
+                        "joint_f1": round(jf, 4),
+                        "content_acc": round(tpc / tpt, 4) if tpt else 0.0})
+        else:
+            out.update({"joint_precision": None, "joint_recall": None,
+                        "joint_f1": None, "content_acc": None})
+        return out
 
     return {"overall": block(overall),
             "per_task": {t: block(d) for t, d in sorted(by_task.items())}}
@@ -331,21 +645,32 @@ def probe_metrics(records: list[dict], *, threshold: float = 0.5,
         pre_ok = float(r["pre_share"] < threshold)
         post_ok = float(r["post_share"] >= threshold)
         paired_ok = float(pre_ok and post_ok)
-        content_ok = float(_content_correct(task, r.get("post_text", ""),
-                                            r["gt_item"], r.get("question", ""), judge))
+        raw_ok = _content_correct(task, r.get("post_text", ""),
+                                  r["gt_item"], r.get("question", ""), judge)
         for d in (by_task[task], overall):
             d["pre_ok"] += pre_ok; d["post_ok"] += post_ok
-            d["paired_ok"] += paired_ok; d["content_ok"] += content_ok; d["n"] += 1
+            d["paired_ok"] += paired_ok; d["n"] += 1
+            if raw_ok is None:
+                d["content_unjudged"] += 1
+            else:
+                d["content_ok"] += float(raw_ok)
+                d["content_n"] += 1
 
     def block(d):
         n = d["n"] or 1
         pre_a, post_a = d["pre_ok"] / n, d["post_ok"] / n
         f1 = 2 * pre_a * post_a / (pre_a + post_a) if (pre_a + post_a) else 0.0
+        unj = int(d["content_unjudged"])
+        cn = int(d["content_n"])
         return {"n": int(d["n"]),
                 "paired_accuracy": round(d["paired_ok"] / n, 4),
                 "pre_accuracy": round(pre_a, 4), "post_accuracy": round(post_a, 4),
                 "pre_post_f1": round(f1, 4),
-                "content_accuracy": round(d["content_ok"] / n, 4)}
+                "n_judged": cn, "n_unjudged": unj,
+                "content_complete": unj == 0,
+                # withheld unless every probe got a real verdict (see aggregate)
+                "content_accuracy": (round(d["content_ok"] / cn, 4)
+                                     if unj == 0 and cn else None)}
 
     return {"overall": block(overall),
             "per_task": {t: block(d) for t, d in sorted(by_task.items())}}
