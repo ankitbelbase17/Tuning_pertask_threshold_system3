@@ -499,16 +499,26 @@ _DEDUP_COUNTING = (_ROLE_DEDUP_COUNTING + _FORMAT_BLOCK_COUNT
 #
 # Task intent: the question names a STATE VARIABLE to track (location, kind of
 # footage, activity, ...). Report every TRANSITION of that variable. Scoring: ±3s
-# temporal match AND the ground-truth `state_to` string must appear VERBATIM
-# (case-insensitive substring) in the answer -> name the new state in the plainest
-# possible words, and name the old one too for a second chance at the substring.
+# temporal match AND the answer, lowercased and unquoted, must equal `state_to`
+# EXACTLY (upstream `utils/online_parser.py` takes the WHOLE payload as the state;
+# see metrics._extract_state) -> the answer is a BARE STATE LABEL, never a sentence.
+#
+# THIS COMMENT USED TO SAY "case-insensitive SUBSTRING", and the ICL below was written
+# to that rule: it told the writer to produce "The setting switched from X to Y." That
+# was true of our old lenient scorer, not of the benchmark. When the scorer was aligned
+# with upstream (commit 3cb8d82) this task went to content_acc = 0.000 on 139/139
+# matched emits in output_full9 — a sentence can never equal a bare state name. The
+# vocabulary is NOT handed to the model (benchmark `states` is ground-truth metadata
+# and dataset.py deliberately does not load it), so the only legitimate source for the
+# exact wording is the task question itself, which enumerates the states in 22% of
+# samples. Hence the two rules below: bare label, and copy the question's wording.
 _ROLE_REALTIME_STATE_MONITOR = (
     "\nYou are the CONTROLLER of a live video monitor. Your task (in the system "
     "instruction above) names ONE thing whose STATE you must track for the whole video "
     "— where the subject is, what kind of footage is being shown, what activity is "
     "under way. You report nothing while the state holds; you report the moment it "
-    "CHANGES, saying what it changed FROM and what it changed TO. There are typically "
-    "3-6 changes in a video.\n"
+    "CHANGES, and what you report is the NAME OF THE NEW STATE — nothing else. There "
+    "are typically 3-6 changes in a video.\n"
 )
 
 _SEMANTICS_REALTIME_STATE_MONITOR = (
@@ -522,14 +532,20 @@ _SEMANTICS_REALTIME_STATE_MONITOR = (
     "naturally, once you carry the new state forward into phase and the two agree. Do "
     "not try to force it back to false: the system watches for the false->true "
     "transition itself and will never double-report the same change.\n"
-    "HOW TO WRITE THE ANSWER — the grader looks for the NAME OF THE NEW STATE inside "
-    "your sentence, so:\n"
-    "  * Name the new state in the PLAINEST, most literal words — the words the video "
-    "itself would use: 'a classroom', 'the kitchen', \"the van's interior\", 'a rocky "
-    "lake shore'. Do NOT dress it up ('a brightly lit room for teaching' scores "
-    "nothing).\n"
-    "  * Name the OLD state too: 'The setting switched from the city street to a "
-    "forest trail.' One sentence, under 15 words.\n"
+    "HOW TO WRITE THE ANSWER — this task is graded by EXACT STRING MATCH against the "
+    "name of the NEW state, so the answer is NOT a sentence:\n"
+    "  * The answer is ONLY THE NAME OF THE NEW STATE, 1-4 words. No verb, no 'The "
+    "setting switched from ... to ...', no mention of the OLD state, no leading 'a' / "
+    "'an' / 'the', no full stop, no quotes. Just the label: forest trail | sitting | "
+    "kitchen | Question 3 | wheel close-up.\n"
+    "  * IF THE TASK SENTENCE LISTS THE POSSIBLE STATES ('...switches between walking, "
+    "standing, or sitting'), the answer MUST be exactly one of those listed states, "
+    "COPIED WORD-FOR-WORD out of the task. Do not re-word, re-order or pluralise it: "
+    "if the task says 'indoor', answering 'indoors' is WRONG.\n"
+    "  * If the task does NOT list them, use the shortest literal label the video "
+    "itself would use — 'kitchen', not 'a brightly lit kitchen with white cabinets'. "
+    "Reuse the SAME label every time that state comes back.\n"
+    "  * answer and phase must be the SAME string.\n"
     "  * Do not add commentary, opinions or guesses about what comes next.\n"
     "Rules: a camera cut back to something you already showed is still a CHANGE if the "
     "state really became different; a slow pan within the same place is NOT a change; "
@@ -545,23 +561,39 @@ _SEMANTICS_REALTIME_STATE_MONITOR = (
     '{"seen":"hiker walking past town shopfronts","have_enough_info":false,"phase":"city street","fps":1.0,"question_for_next":"currently: city street; has the setting changed?"}\n'
     "At 12s still on the street (phase unchanged, question unchanged -> stay short):\n"
     '{"seen":"same street, crossing at a light","have_enough_info":false,"phase":"city street"}\n'
-    "At 19s the shot is now a narrow path under trees -> the state CHANGED:\n"
-    '{"seen":"narrow path under tall trees","have_enough_info":true,"event_time_s":19,"phase":"forest trail","answer":"The setting switched from the city street to a forest trail.","question_for_next":"currently: forest trail; has the setting changed?"}\n'
+    "At 19s the shot is now a narrow path under trees -> the state CHANGED; the answer "
+    "is the NEW state's bare name, not a sentence about the change:\n"
+    '{"seen":"narrow path under tall trees","have_enough_info":true,"event_time_s":19,"phase":"forest trail","answer":"forest trail","question_for_next":"currently: forest trail; has the setting changed?"}\n'
     "At 21s still the same trail, the change already reported -> keep it true with the "
     "SAME answer (the system will not double-alert):\n"
-    '{"seen":"still walking the forest trail","have_enough_info":true,"event_time_s":19,"phase":"forest trail","answer":"The setting switched from the city street to a forest trail."}\n'
+    '{"seen":"still walking the forest trail","have_enough_info":true,"event_time_s":19,"phase":"forest trail","answer":"forest trail"}\n'
     "At 30s the trail is clearly the settled state -> drop to false so the NEXT change "
     "can fire:\n"
     '{"seen":"trail continues through the trees","have_enough_info":false,"phase":"forest trail"}\n'
     "At 52s the trees open onto stones and water -> a NEW change:\n"
-    '{"seen":"open water and stony shoreline","have_enough_info":true,"event_time_s":52,"phase":"rocky lake shore","answer":"The setting switched from the forest trail to a rocky lake shore.","question_for_next":"currently: rocky lake shore; has the setting changed?"}\n'
+    '{"seen":"open water and stony shoreline","have_enough_info":true,"event_time_s":52,"phase":"rocky lake shore","answer":"rocky lake shore","question_for_next":"currently: rocky lake shore; has the setting changed?"}\n'
     "At 58s a two-second insert of the map on his phone, then straight back to the "
     "shore -> a flash, NOT a state change:\n"
     '{"seen":"brief map insert, back to shore","have_enough_info":false,"phase":"rocky lake shore"}\n'
+    "Second worked example, ONE tick only, to show the copy-the-task-wording rule "
+    "(task: 'Monitor Jeffrey's posture and update me when he switches between walking, "
+    "standing, or sitting.'). He was standing; at 88s he lowers himself into a chair. "
+    "The task lists the states, so the answer is that list's word, verbatim — 'sitting', "
+    "NOT 'sitting down', 'seated' or 'Jeffrey switched from standing to sitting.':\n"
+    '{"seen":"Jeffrey lowering himself into a chair","have_enough_info":true,"event_time_s":88,"phase":"sitting","answer":"sitting","question_for_next":"currently: sitting; has his posture changed?"}\n'
 )
 
 _REALTIME_STATE_MONITOR = (_ROLE_REALTIME_STATE_MONITOR + _FORMAT_BLOCK_STATE
                            + _SEMANTICS_REALTIME_STATE_MONITOR)
+
+# Same argument as _ETG_WRITER_PROMPT: the generic writer says "what happened and
+# why", which is a sentence and therefore auto-wrong under exact match on the state
+# name. The probe-gate arm needs its own.
+_RSM_WRITER_PROMPT = (
+    "\nThe tracked state just changed on screen. Output ONLY the NAME OF THE NEW "
+    "STATE — 1-4 words, no verb, no article, no full stop, no mention of the old "
+    "state. If the task sentence lists the possible states, copy the matching one "
+    "WORD-FOR-WORD from that list.")
 
 
 # ---------------------------------------------------------------------------
@@ -775,6 +807,7 @@ TASK_PROMPT_PARTS: dict[str, tuple[str, str, str]] = {
 # ---------------------------------------------------------------------------
 TASK_WRITER_PROMPTS: dict[str, str] = {
     "explicit_target_grounding": _ETG_WRITER_PROMPT,
+    "realtime_state_monitor": _RSM_WRITER_PROMPT,
 }
 
 
