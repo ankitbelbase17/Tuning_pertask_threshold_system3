@@ -134,23 +134,70 @@ class AsyncOmniConfig:
     schema_max_int_tokens: int = 4      # cap on `event_time_s`
     schema_max_tail_tokens: int = 60    # cap on the `more` escape-hatch tail
     hit_threshold: float = 0.5          # P(true) above which the level is TRUE
-    # PER-TASK firing thresholds. The single global 0.5 was wrong for every task
-    # measured: two tasks scored time_f1 0.000 not because the model failed to
-    # perceive, but because p_hit never crossed 0.5 so the gate could never fire.
-    # Fitted offline by auc.py (replay the rising-edge gate over saved p_hit, then
-    # greedy temporal match) on the 2026-07-30 smoke run:
-    #     task                      thr    time_f1@thr   was@0.5
-    #     dedup_counting           0.75       0.632       0.444
-    #     realtime_state_monitor   0.14       0.455       0.133
-    #     semantic_condition_alert 0.85       0.353       0.000
-    #     instant_event_alert      0.12       0.222       0.000
-    # ⚠️ FITTED ON ONLY 3 VIDEOS PER TASK. These are provisional: they must be
-    # re-fitted and validated on held-out videos before ANY reported number.
+    # PER-TASK firing thresholds. The single global 0.5 was wrong for every task:
+    # some tasks scored time_f1 0.000 because p_hit never crossed 0.5 (gate could
+    # never fire), others over-fired 6-8x. A p_hit threshold is only meaningful
+    # per-task because the model's confidence SCALE shifts with how the task is
+    # phrased (see omniprofast/gates.py).
+    #
+    # Re-fitted offline by omniprofast/resweep.py over the FULL run (output_full9,
+    # 932 samples, 160,915 ticks; replay edge/level gate + refractory over saved
+    # p_hit, greedy ±3s match, objective = time_f1). Pooled time_f1:
+    #                                   fit-on-all   held-out(50%)
+    #     old global p_hit>0.5            0.190          -        (10,904 emits)
+    #     best single global              0.254          -
+    #     per-task, ORIGINAL 156-cfg grid 0.316        0.308
+    #     per-task, WIDE 1292-cfg grid    0.334        0.327      <- values below
+    # Held-out moves in step with fit-on-all (+0.019 both), so the wide-grid gain is
+    # REAL, not overfitting; and held-out ≈ fit-on-all (-0.008) means this fit barely
+    # overfits at all — report the HELD-OUT number, it costs almost nothing.
+    # Grid tuning is SATURATED: pushing refractory past 180s gained +0.0006 (noise).
+    #
+    # The F1 surface is FLAT near the optimum (fit-on-all vs held-out picked different
+    # configs yet landed within 0.007 F1). Do not over-trust the exact constants; the
+    # ROBUST finding is the regime:
+    #   one-shot tasks (ETG/IEA/snapshot) -> high thr + very long refractory ("fire once")
+    #   dense tasks (seq_step/narration)  -> LOW thr + short refractory
+    #   counting (dedup/cumulative)       -> very high thr + short refractory
+    # ⚠️ Offline SCREEN (assumes p_hit independent of the gate; firing feeds
+    # `reported` back into the prompt, so it is weakly not) — confirm on GPU.
     task_hit_thresholds: dict = field(default_factory=lambda: {
-        "dedup_counting": 0.75,
-        "realtime_state_monitor": 0.14,
-        "semantic_condition_alert": 0.85,
-        "instant_event_alert": 0.12,
+        "cumulative_counting": 0.925,
+        "dedup_counting": 0.992,
+        "event_narration": 0.10,
+        "explicit_target_grounding": 0.50,
+        "instant_event_alert": 0.45,
+        "realtime_state_monitor": 0.80,
+        "semantic_condition_alert": 0.98,
+        "sequential_step_instruction": 0.01,
+        "snapshot_counting": 0.985,
+    })
+    # Coupled per-task gate mode + refractory (seconds), from the same resweep fit.
+    # mode: "edge" = fire on the rising edge of p_hit>=thr; "level" = fire on every
+    # tick above thr (both honour the refractory debounce). Selected by the adapter
+    # per sample.task alongside task_hit_thresholds. All three knobs are ONE fitted
+    # config — using the threshold without its mode/refractory does not reproduce it.
+    task_gate_modes: dict = field(default_factory=lambda: {
+        "cumulative_counting": "edge",
+        "dedup_counting": "edge",
+        "event_narration": "level",
+        "explicit_target_grounding": "edge",
+        "instant_event_alert": "edge",
+        "realtime_state_monitor": "level",
+        "semantic_condition_alert": "level",
+        "sequential_step_instruction": "level",
+        "snapshot_counting": "edge",
+    })
+    task_refractory_s: dict = field(default_factory=lambda: {
+        "cumulative_counting": 7.0,
+        "dedup_counting": 5.0,
+        "event_narration": 7.0,
+        "explicit_target_grounding": 300.0,
+        "instant_event_alert": 600.0,
+        "realtime_state_monitor": 7.0,
+        "semantic_condition_alert": 10.0,
+        "sequential_step_instruction": 7.0,
+        "snapshot_counting": 600.0,
     })
     more_threshold: float = 0.5         # P(true) above which the tail is decoded
     # Log, every tick, what an UNRESTRICTED argmax would have produced at the
