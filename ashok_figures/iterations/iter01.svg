@@ -1,0 +1,138 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 700" width="1600" height="700" font-family="Inter, 'Helvetica Neue', Arial, sans-serif">
+
+  <defs>
+    <marker id="aGray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,1 L9,5 L0,9 z" fill="#8A8279"/>
+    </marker>
+    <marker id="aInk" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,1 L9,5 L0,9 z" fill="#3A3632"/>
+    </marker>
+    <marker id="aAmber" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,1 L9,5 L0,9 z" fill="#D9902A"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1600" height="700" fill="#FAF8F5"/>
+
+  <!-- ================= LEFT : INPUTS ================= -->
+
+  <text x="70" y="150" font-size="24" font-weight="600" fill="#3A3632">Task</text>
+  <rect x="70" y="166" width="180" height="96" rx="10" fill="#FFFFFF" stroke="#B9B1A6" stroke-width="1.6"/>
+  <g stroke="#DDD6CC" stroke-width="7" stroke-linecap="round">
+    <line x1="90" y1="192" x2="212" y2="192"/>
+    <line x1="90" y1="214" x2="230" y2="214"/>
+    <line x1="90" y1="236" x2="176" y2="236"/>
+  </g>
+
+  <text x="70" y="372" font-size="24" font-weight="600" fill="#3A3632">Video stream</text>
+  <g>
+    <rect x="6" y="392" width="46" height="48" rx="4" fill="#DCE9F1" stroke="#6E9CBB" stroke-width="1.4" opacity="0.35"/>
+    <g fill="#DCE9F1" stroke="#6E9CBB" stroke-width="1.4">
+      <rect x="70"  y="392" width="58" height="48" rx="4"/>
+      <rect x="140" y="392" width="58" height="48" rx="4"/>
+      <rect x="210" y="392" width="58" height="48" rx="4"/>
+      <rect x="280" y="392" width="58" height="48" rx="4"/>
+    </g>
+    <g stroke="#B7D0E0" stroke-width="1">
+      <line x1="89"  y1="392" x2="89"  y2="440"/><line x1="109" y1="392" x2="109" y2="440"/><line x1="70"  y1="416" x2="128" y2="416"/>
+      <line x1="159" y1="392" x2="159" y2="440"/><line x1="179" y1="392" x2="179" y2="440"/><line x1="140" y1="416" x2="198" y2="416"/>
+      <line x1="229" y1="392" x2="229" y2="440"/><line x1="249" y1="392" x2="249" y2="440"/><line x1="210" y1="416" x2="268" y2="416"/>
+      <line x1="299" y1="392" x2="299" y2="440"/><line x1="319" y1="392" x2="319" y2="440"/><line x1="280" y1="416" x2="338" y2="416"/>
+    </g>
+  </g>
+  <text x="70" y="470" font-size="16" font-style="italic" fill="#8A8279">arrives at a constant rate</text>
+
+  <!-- ================= THE BOX ================= -->
+
+  <rect x="360" y="140" width="780" height="420" rx="26" fill="#FDFCFA" stroke="#A8A096" stroke-width="2.2"/>
+
+  <!-- task enters, and shapes the plan -->
+  <path d="M256,212 C360,206 440,212 546,222" fill="none" stroke="#8A8279" stroke-width="2" marker-end="url(#aGray)"/>
+
+  <!-- aperture on the box edge -->
+  <rect x="351" y="366" width="18" height="100" rx="9" fill="#FBE3B8" stroke="#D9902A" stroke-width="2"/>
+
+  <!-- what passed through : kept / pruned / skipped -->
+  <g>
+    <rect x="396" y="392" width="58" height="48" rx="4" fill="#DCE9F1" stroke="#6E9CBB" stroke-width="1.4"/>
+    <g stroke="#B7D0E0" stroke-width="1">
+      <line x1="415" y1="392" x2="415" y2="440"/><line x1="435" y1="392" x2="435" y2="440"/><line x1="396" y1="416" x2="454" y2="416"/>
+    </g>
+
+    <rect x="466" y="392" width="58" height="48" rx="4" fill="#FFFFFF" stroke="#B7D0E0" stroke-width="1.4"/>
+    <g>
+      <rect x="470" y="396" width="14" height="18" fill="#EDF3F7"/>
+      <rect x="487" y="396" width="14" height="18" fill="#9CC3DA"/>
+      <rect x="504" y="396" width="14" height="18" fill="#EDF3F7"/>
+      <rect x="470" y="417" width="14" height="18" fill="#9CC3DA"/>
+      <rect x="487" y="417" width="14" height="18" fill="#EDF3F7"/>
+      <rect x="504" y="417" width="14" height="18" fill="#EDF3F7"/>
+    </g>
+
+    <rect x="536" y="392" width="58" height="48" rx="4" fill="none" stroke="#D8D2C8" stroke-width="1.4" stroke-dasharray="5,4"/>
+  </g>
+  <text x="396" y="470" font-size="16" font-style="italic" fill="#8A8279">only what the plan asked for</text>
+
+  <path d="M602,416 L632,416" fill="none" stroke="#8A8279" stroke-width="2" marker-end="url(#aGray)"/>
+
+  <rect x="640" y="372" width="150" height="88" rx="12" fill="#F1EEE9" stroke="#A8A096" stroke-width="1.6"/>
+  <text x="715" y="424" font-size="21" fill="#3A3632" text-anchor="middle">Encoder</text>
+
+  <path d="M790,416 L822,416" fill="none" stroke="#8A8279" stroke-width="2" marker-end="url(#aGray)"/>
+
+  <rect x="830" y="356" width="250" height="120" rx="14" fill="#FFFFFF" stroke="#3A3632" stroke-width="2.5"/>
+  <text x="955" y="408" font-size="25" font-weight="600" fill="#3A3632" text-anchor="middle">Frozen LLM</text>
+  <text x="955" y="436" font-size="16" font-style="italic" fill="#8A8279" text-anchor="middle">never trained</text>
+
+  <!-- box identity, sitting in the quiet corner -->
+  <text x="392" y="524" font-size="26" font-weight="600" fill="#3A3632">Streaming VLM</text>
+  <text x="392" y="550" font-size="17" font-style="italic" fill="#8A8279">reconfigures itself as it watches</text>
+
+  <!-- ================= THE CONFIG ================= -->
+
+  <g transform="rotate(-1.2 770 234)">
+    <rect x="560" y="170" width="420" height="128" rx="12" fill="#FDF3E0" stroke="#E0A03A" stroke-width="2.5"/>
+    <text x="584" y="206" font-size="23" font-weight="600" fill="#B57411">Config</text>
+    <text x="584" y="240" font-size="18" fill="#5A544C">where to look</text>
+    <text x="584" y="266" font-size="18" fill="#5A544C">how densely to sample</text>
+    <text x="584" y="292" font-size="18" fill="#5A544C">what to ask next</text>
+  </g>
+
+  <!-- taps : the config reconfigures the parts beneath it -->
+  <g stroke="#E0A03A" stroke-width="2.2" fill="none" stroke-dasharray="6,5">
+    <path d="M594,302 C536,340 428,332 368,358" marker-end="url(#aAmber)"/>
+    <path d="M700,304 C706,332 710,344 714,364" marker-end="url(#aAmber)"/>
+    <path d="M886,300 C902,318 918,332 934,346" marker-end="url(#aAmber)"/>
+  </g>
+
+  <!-- the model writes it -->
+  <path d="M1062,360 C1116,320 1114,232 996,226" fill="none" stroke="#E0A03A" stroke-width="3" marker-end="url(#aAmber)"/>
+  <text x="1084" y="304" font-size="17" font-weight="600" fill="#B57411">writes</text>
+
+  <!-- ================= RIGHT : OUTPUT ================= -->
+
+  <path d="M1082,440 C1140,444 1156,450 1196,454" fill="none" stroke="#3A3632" stroke-width="2.4" marker-end="url(#aInk)"/>
+
+  <text x="1210" y="390" font-size="24" font-weight="600" fill="#3A3632">Response</text>
+  <rect x="1210" y="404" width="190" height="96" rx="10" fill="#FFFFFF" stroke="#B9B1A6" stroke-width="1.6"/>
+  <g stroke="#DDD6CC" stroke-width="7" stroke-linecap="round">
+    <line x1="1230" y1="430" x2="1352" y2="430"/>
+    <line x1="1230" y1="452" x2="1372" y2="452"/>
+    <line x1="1230" y1="474" x2="1310" y2="474"/>
+  </g>
+  <text x="1210" y="528" font-size="16" font-style="italic" fill="#8A8279">at the moment it matters</text>
+
+  <!-- ================= TIME ================= -->
+
+  <path d="M60,630 L1508,630" fill="none" stroke="#C9C2B8" stroke-width="2" marker-end="url(#aGray)"/>
+  <g stroke="#C9C2B8" stroke-width="2">
+    <line x1="180" y1="624" x2="180" y2="636"/>
+    <line x1="420" y1="624" x2="420" y2="636"/>
+    <line x1="660" y1="624" x2="660" y2="636"/>
+    <line x1="900" y1="624" x2="900" y2="636"/>
+    <line x1="1140" y1="624" x2="1140" y2="636"/>
+    <line x1="1380" y1="624" x2="1380" y2="636"/>
+  </g>
+  <text x="1522" y="637" font-size="18" fill="#8A8279">time</text>
+
+</svg>

@@ -1,0 +1,67 @@
+\section{Protocol}
+\label{sec:protocol}
+
+\subsection{Metrics, and what we refuse to report}
+
+\textbf{time-F1} is judge-free: emissions are matched to ground-truth events by a
+greedy one-to-one assignment within $\pm 3$\,s, and precision, recall and F1 are
+computed from the pooled $\mathrm{tp}/\mathrm{fp}/\mathrm{fn}$ counts. All pooling
+in this paper is \emph{micro-averaged} over samples, never the mean of per-sample
+ratios; the two differ, and only the former is comparable across tasks with
+different event densities.
+
+\textbf{content-acc} and \textbf{joint-F1} require an LLM judge. When the judge is
+unreachable these are reported as \WITHHELD, never estimated, never replaced by a
+dash that a reader would parse as zero. A lower bound that assumes every unjudged
+match is wrong is reported separately and under a name that says what it is; it is
+not a substitute for the measurement.
+
+Every F1 in this paper travels with $n$, $n_{gt}$ and $n_{\mathrm{emit}}$. A bare
+F1 on a 15-video cell is not interpretable, and several results below turn on
+exactly that point.
+
+\subsection{The fit subset and the two-pass grid}
+
+Thresholds are fitted on a frozen 5\,\% subset: 135 videos, 15 per task, drawn
+all-audio and fixed before any fitting. Pass~1 sweeps a coarse grid of 10--12
+thresholds per task ($0.05 \ldots 0.95$, extended to $0.01$ and $0.02$ for the two
+tasks whose shipped values sit near zero); pass~2 refines around the pass-1 choice.
+Selection ranks by time-F1 --- a deviation from the pre-registered joint-F1,
+forced by the judge being unreachable and recorded as such --- with a $0.02$
+tie-band that prefers the emission volume closest to the truth when the top two
+are within it, so a winner is not manufactured out of emission count alone.
+
+\subsection{The noise floor, and why it governs every claim}
+
+The evaluation is not bit-reproducible: a fixed configuration re-run end to end
+produced time-F1 $0.255$ against $0.051$ on one task. We therefore treat
+differences below $0.03$ in pooled time-F1 as noise, and we say so before
+reporting any comparison rather than after seeing which way it fell.
+
+A 15-video cell holds roughly 36 scoring events at the benchmark's $2.4$ events
+per sample. A gap of $0.02$--$0.03$ between adjacent thresholds is not a real
+difference at that $n$, so a task whose curve is flat or non-monotonic across the
+whole grid is reported as \textsc{flat} and \emph{keeps its shipped value} rather
+than being assigned a fitted one.
+
+\subsection{Reproducibility of a maximum}
+
+The central methodological commitment of this paper is that reporting the argmax
+of a grid is not the same as reporting a fitted parameter. A grid of ten cells
+scored on fifteen videos always has a maximum. Whether that maximum is a
+measurement depends on whether it recurs.
+
+We therefore test every selection by a \emph{paired} bootstrap over videos: each
+draw resamples the frozen video ids with replacement, and every cell of a task is
+re-scored on the identical drawn set, so between-video variance --- which
+dominates, since videos differ far more from one another than thresholds do on any
+one video --- is removed. Each draw then replays the \emph{actual selection rule},
+tie-band included, rather than a bare argmax. Two statistics follow: the
+\textbf{re-selection rate}, the fraction of draws in which the shipped choice wins
+again, against a chance rate of $1/k$ for a $k$-cell grid; and a confidence
+interval on the \textbf{difference} between the selected cell and its best rival.
+
+Resampling is over videos, never over ticks or events. A 400\,s video contributes
+$\sim$400 ticks whose $p_{\mathrm{hit}}$ values are strongly serially correlated
+through one shared KV cache; treating them as independent returns an interval
+several times too narrow.

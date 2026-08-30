@@ -1,0 +1,81 @@
+\documentclass[runningheads]{llncs}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+% WITHHELD is a first-class value in this paper, not a missing one: with no
+% reachable judge, content metrics are withheld rather than guessed, and a dash
+% would read as zero. See EVAL_PROTOCOL.md.
+\newcommand{\WITHHELD}{\textsc{withheld}}
+\newcommand{\PENDING}{\textsc{[pending run]}}
+\begin{document}
+\title{When Should a Streaming Model Speak?\\
+Per-Task Gate Thresholds for Qwen2.5-Omni on OmniPro Online}
+\author{}
+\institute{}
+\maketitle
+
+\begin{abstract}
+\input{/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/paper/sections/abstract.tex}
+
+\end{abstract}
+
+\begin{center}\fbox{\parbox{0.9\linewidth}{\textbf{fig:teaser not yet produced}}}\end{center}
+
+\input{/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/paper/sections/intro.tex}
+
+\input{/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/paper/sections/related.tex}
+
+\input{/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/paper/sections/method.tex}
+
+\input{/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/paper/sections/protocol.tex}
+
+\input{/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/paper/tables/table1.tex}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/figs/fig1_f1_vs_threshold.pdf}
+\caption{F1 against gate threshold, one panel per task. Nine tasks are nine panels, not nine colours on one axis. Panel titles carry $n$ and $n_{gt}$; all panels share one $y$ scale.}
+\label{fig:f1}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/figs/fig2_roc.pdf}
+\caption{ROC of per-tick $p_{hit}$ against the $\pm 3$\,s positive label, with AUC and bootstrap 95\% CI. AUC is threshold-free and therefore unaffected by this fitting: it measures the backbone, while F1 measures the gate.}
+\label{fig:roc}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/figs/fig3_pr_bands.pdf}
+\caption{Per-sample precision and recall against threshold. The band is $\pm 1$ s.d. clipped to $[0,1]$ and is a dispersion statistic, not a confidence interval: per-sample precision and recall are frequently exactly 0 or 1, so the distribution is not Normal. Actual per-sample values are overlaid.}
+\label{fig:bands}
+\end{figure}
+
+\input{/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/paper/sections/results.tex}
+
+\input{/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/paper/tables/table2.tex}
+
+\input{/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/paper/tables/table3.tex}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/figs/fig4_emission_calibration.pdf}
+\caption{Emission calibration: emissions per ground-truth event against threshold, log axis, reference line at 1.}
+\label{fig:calib}
+\end{figure}
+
+\begin{center}\fbox{\parbox{0.9\linewidth}{\textbf{fig:refine not yet produced}}}\end{center}
+
+\input{/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/paper/tables/table4.tex}
+
+\input{/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/paper/sections/discussion.tex}
+
+\input{/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/paper/sections/limitations.tex}
+
+\input{/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/paper/sections/conclusion.tex}
+
+\end{document}

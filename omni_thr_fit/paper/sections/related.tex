@@ -1,0 +1,35 @@
+\section{Related work}
+\label{sec:related}
+
+\paragraph{Proactive and streaming video dialogue.} A line of recent systems asks a
+model not merely to answer questions about a video but to decide \emph{when} to
+speak while the video is still arriving. MMDuet, LiveStar, MiniCPM-o and related
+streaming assistants each couple a perception backbone to some emission policy,
+and each reports aggregate scores on its own evaluation subset. OmniPro Online
+supplies a common 2{,}700-sample benchmark with per-event timing ground truth,
+which is what makes a timing metric such as time-F1 well defined.
+
+We deliberately do not present cross-system numbers as a leaderboard. Published
+figures for these systems are computed on different subsets with different
+matching tolerances and different judges; quoting them beside ours in a single
+column would imply a comparability that does not exist. Where they appear, they
+are footnoted with the subset and scoring they came from.
+
+\paragraph{When to speak, as a threshold.} The dominant treatment of the emission
+decision is a scalar confidence compared against a threshold, frequently tuned per
+task or per dataset. Reported gains from such tuning are usually presented as a
+single number per configuration on the data the tuning was performed on. Our
+contribution is orthogonal to any particular policy: we ask what evidence is
+required before a per-task threshold table can be called a fitted parameter rather
+than a re-description of the sample it was fitted on, and we apply that test to a
+fit of our own.
+
+\paragraph{Confidence calibration versus ranking.} The distinction this paper turns
+on is standard in the calibration literature but rarely applied to streaming
+emission gates: a score can be well spread and still carry no information about
+the quantity being thresholded. Threshold selection can only exploit \emph{ranking}
+--- whether event-adjacent moments score above quiet ones --- and ranking is
+measured by AUC, which is threshold-free and therefore unaffected by any fitting we
+do. We report AUC alongside F1 for exactly this reason: AUC measures whether the
+perception is right, F1 measures whether the gate is tuned, and two systems can be
+indistinguishable in the second while separable in the first.

@@ -14,6 +14,32 @@ harness carries no prompt text either.
 
 (The fixed-gate ablations, multi-GPU replicas, and VisionZip pruning live on the
 `main` branch.)
+
+------------------------------------------------------------------------------
+FORK NOTE (system3_qwem_omni): this checkout swaps the frozen backbone from
+Qwen3-VL-8B-Instruct (vision-only) to Qwen2.5-Omni-7B (vision + audio), per the
+decision in OMNI_EXTENSION.md / OMNI_FEASIBILITY.md. Two things changed as a
+DIRECT consequence, both ablatable via flags below so the old behaviour is one
+flag-flip away, not a fork of a fork:
+  1. `use_audio` — a real audio_tower path (Qwen2_5OmniAudioEncoder), fed
+     SYNCHRONOUSLY from the ingester thread ("Option A": no separate free-
+     running audio thread, so audio can never race ahead of or behind video —
+     see input_ingester.py). Verified against the real transformers 5.12.1
+     Qwen2.5-Omni source, not guessed: `Qwen2_5OmniThinkerForConditionalGeneration`
+     has `.audio_tower` / `.visual` / `.model` (text decoder) / `.lm_head` as
+     four independent top-level attributes, and the text decoder's forward
+     signature is inputs_embeds/past_key_values/position_ids/use_cache/**kwargs
+     — byte-identical in shape to Qwen3VLTextModel's, so `backend.forward()`'s
+     call pattern needed no change, only a new `embed_audio()` producer.
+  2. `tmrope_positions` — real per-token 3D positions (temporal/height/width)
+     instead of Qwen3VLBackend's flat "every axis = the same linear counter"
+     approximation. See backend.py's `Qwen2_5OmniBackend` docstring for the
+     exact formulas, verified against `Qwen2_5OmniThinkerForConditionalGeneration
+     .get_rope_index` in the real modeling file — and for where this
+     implementation is a DELIBERATE, DOCUMENTED simplification of that
+     reference (which assumes a fully-known offline multi-frame video grid;
+     we ingest one frame/chunk at a time, online).
+------------------------------------------------------------------------------
 """
 from dataclasses import dataclass, field
 
@@ -24,7 +50,15 @@ from prompts import (CONTROLLER_PROMPT_GENERIC, GOAL_QUESTION, SYSTEM_PROMPT,
 @dataclass
 class AsyncOmniConfig:
     # ---- model ----
-    model_id: str = "Qwen/Qwen3-VL-8B-Instruct"
+    # was "Qwen/Qwen3-VL-8B-Instruct" (vision-only) on the parent checkout.
+    # FORK: swapped to the omni backbone per OMNI_EXTENSION.md's verdict.
+    # NOTE: the extension doc's #1 pick was MiniCPM-o-4_5 (better token economy,
+    # is the rival paper's own model); THIS fork implements the #3-ranked
+    # Qwen2.5-Omni-7B instead, per explicit request — it is the candidate that
+    # fits the ORIGINAL kv_budget=262144 spec exactly as stated, at the cost of
+    # a shorter 32,768-position horizon (~3 min) than either alternative.
+    model_id: str = "Qwen/Qwen2.5-Omni-7B"
+    backend: str = "qwen2_5_omni"       # "qwen2_5_omni" (this fork) | "qwen3_vl" (parent, for A/B)
     device: str = "cuda"               # primary GPU: ingester + shared KV cache
     # Multi-GPU replicas measured NO decode speedup (the per-tick cost is inherent
     # decode, not GPU contention) -> default single-GPU. Set to "cuda:1"/"cuda:2"
@@ -71,9 +105,65 @@ class AsyncOmniConfig:
     encoder_focus_fps: float = 3.0    # fps ceiling when the controller says "focus"
     encoder_idle_fps: float = 1.0     # fps floor (1-3 fps range; was 0.5)
 
+    # ---- AUDIO (FORK: new in system3_qwem_omni) --------------------------
+    # "Option A" ingestion: no separate free-running audio-encoder thread.
+    # The INGESTER — already the single writer of the primary cache — is also
+    # the ONLY caller of backend.embed_audio(), invoked SYNCHRONOUSLY every
+    # `audio_seconds_per_chunk` of video time. This is a deliberate throughput
+    # trade for a correctness guarantee: because one thread does both jobs in
+    # one control-flow, audio literally cannot be appended out of true-time
+    # order relative to video — there is no race to prevent, because there is
+    # no second producer. See input_ingester.py.
+    use_audio: bool = True
+    audio_sampling_rate: int = 16000   # WhisperFeatureExtractor's expected rate
+    # These two mirror Qwen2_5OmniConfig verbatim (confirmed from the real
+    # transformers 5.12.1 source, not the model card):
+    #   Qwen2_5OmniConfig().position_id_per_seconds == 25
+    #   Qwen2_5OmniConfig().seconds_per_chunk       == 2
+    # i.e. the model's own audio encoder emits exactly 25 tokens/sec (so ONE
+    # audio token IS one temporal-position tick), and the reference model's
+    # own get_rope_index() interleaves audio+video in matched 2-second windows
+    # when both are present. audio_seconds_per_chunk is therefore not a free
+    # parameter — changing it desyncs our ingestion cadence from what the
+    # frozen model was actually trained to expect.
+    audio_position_id_per_seconds: int = 25
+    audio_seconds_per_chunk: float = 2.0
+
+    # ---- TMRoPE (FORK: new in system3_qwem_omni) --------------------------
+    # Qwen3VLBackend (parent checkout) feeds LINEAR positions into all three
+    # mRoPE axes for every token — "shape-correct, ignores geometry" (see
+    # backend.py's module docstring). That is harmless for one modality at a
+    # constant token rate, but once audio (constant 25 tok/s) is interleaved
+    # with vision (variable tokens/frame x fps), a shared "next integer"
+    # counter no longer represents the same real time for both streams.
+    # tmrope_positions=True switches backend.forward() to real per-token 3D
+    # positions: temporal anchored to wall-clock video time (round(vt * 25)
+    # for vision/audio), height/width as the true 2D patch grid for vision
+    # (mirrored to temporal for audio, which has no spatial extent). This is
+    # a DELIBERATE, DOCUMENTED simplification of the reference
+    # get_rope_index — see Qwen2_5OmniBackend's docstring in backend.py for
+    # exactly where and why it diverges from the offline batched algorithm.
+    # Kept as its own flag (default True) so the old linear-hack path stays
+    # available for an A/B, exactly like every other lever in this codebase.
+    tmrope_positions: bool = True
+
     # ---- memory (shared linear KV cache) ----
     kv_budget: int = 262144           # 256K-token context (StreamingLLM eviction
                                       # past this; the system-prompt sink is pinned).
+    # FORK, IMPORTANT: unlike the parent (Qwen3-VL-8B, max_position_embeddings
+    # == kv_budget == 262144, so its position clock never outlives the cache),
+    # Qwen2.5-Omni-7B's trained context is only 32768 -- confirmed from the
+    # real Qwen2_5OmniTextConfig default, not the model card. kv_budget is
+    # left at 262144 anyway (OMNI_FEASIBILITY.md: Qwen2.5-Omni is the ONE
+    # candidate that fits the full spec at that budget) -- which means the
+    # position clock will very plausibly exceed the model's trained RoPE
+    # range LONG BEFORE eviction ever triggers. This is exactly the "every
+    # omni candidate has a shorter RoPE horizon" risk OMNI_EXTENSION.md
+    # section 5.3 flags for the whole omni-extension effort, now concrete for
+    # this specific backend. See the loud (not silent) guard this triggers in
+    # manager.py -- mirroring the existing ROADMAP-1.5 eviction guard's own
+    # pattern exactly, rather than adding a second, differently-shaped one.
+    model_max_position_embeddings: int = 32768
 
     # ---- the CONTROLLER (icl_ingester_writer) ----
     # Self-paced cadence: the controller picks next_check_s each tick; clamp it so
@@ -129,6 +219,18 @@ class AsyncOmniConfig:
     #              gate_low_thr / gate_rearm_s / debounce_s below.
     gate_strategy: str = "hysteresis"
     distinct_sim_thr: float = 0.5   # word-overlap below this = a different occurrence
+    # HOW THE CONTROLLER READS THE SHARED CACHE.
+    #   "snapshot" -- MVCC deep copy every tick (mgr.snapshot_clone()). Safe under
+    #                 any concurrency, and costs a full copy of the cache per tick:
+    #                 144 KB/token, so ~8 GB and hundreds of ms on a 300 s clip.
+    #   "inplace"  -- generate directly on the primary, then truncate the appended
+    #                 tokens away (mgr.borrow_begin/borrow_end). Same prefix, same
+    #                 pos_start/phys_start -> bit-identical logits, zero copy.
+    # "inplace" is only legal when there is provably no concurrent writer, i.e.
+    # deterministic=True (lockstep: the ingester waits on the clock for the whole
+    # tick) and the controller shares the manager's GPU. controller.py refuses it
+    # loudly and falls back to "snapshot" otherwise -- it never silently downgrades.
+    controller_cache_mode: str = "snapshot"
     schema_max_seen_tokens: int = 12    # cap on the `seen` value slot
     schema_max_answer_tokens: int = 32  # cap on the `answer` value slot (hot ticks only)
     schema_max_int_tokens: int = 4      # cap on `event_time_s`
@@ -205,6 +307,9 @@ class AsyncOmniConfig:
     # structure the model did not intend — we must know before trusting this path.
     verify_logit_read: bool = True
     notes_ring: int = 8                 # model-authored notes (bounded ring)
+                                        # UNUSED while `note` is parked — see
+                                        # TODO-7BC in controller.py. Kept (not
+                                        # deleted) so re-enabling is one line.
     # MEMORY (MISSION pillar 7) — the writer's own trace, fed back into the prompt:
     # WHAT I SAW (`seen`, consecutive duplicates collapsed) + WHAT I SAID
     # (`reported`, code-owned so the model cannot fake having answered).
@@ -274,8 +379,9 @@ class AsyncOmniConfig:
 
     # Per-task ICL prompts (override `controller_prompt` when sample.task matches;
     # the adapter selects by task). ALL 9 OmniPro tasks are covered. Text lives in
-    # prompts.py; counting/state tasks additionally carry `count` / `phase`, which
-    # the controller state now persists.
+    # prompts.py. Counting/state tasks USED TO additionally carry `count` / `phase`;
+    # both are parked as of 2026-08-12 (TODO-7BC in controller.py), so every task
+    # now speaks the same field set.
     # Copied per instance so a caller mutating one config cannot corrupt the shared
     # module-level dict.
     task_controller_prompts: dict = field(

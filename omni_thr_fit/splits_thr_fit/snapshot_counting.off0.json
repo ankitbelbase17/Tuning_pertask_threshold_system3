@@ -1,0 +1,31 @@
+{
+ "subset_off": 0,
+ "n": 15,
+ "audio_mix": {
+  "required": 14,
+  "none": 1
+ },
+ "duration_s": {
+  "min": 53.0,
+  "max": 514.7,
+  "sum": 3392.8
+ },
+ "n_gt": 15,
+ "ids": [
+  "snapshot_counting::-QEfaBLGPQk::126",
+  "snapshot_counting::1_SqWC582dw::176",
+  "snapshot_counting::40SL-m4u-LQ::241",
+  "snapshot_counting::7sePL9jdSm4::149",
+  "snapshot_counting::BY5mLsNhXS4::96",
+  "snapshot_counting::DxxMPyeBLvc::48",
+  "snapshot_counting::HAFLLtAcRKY::153",
+  "snapshot_counting::JS-7WQLMkXE::43",
+  "snapshot_counting::LFelGo9gA_I::170",
+  "snapshot_counting::PnU1PlgQaUY::101",
+  "snapshot_counting::SB7nuM34CWg::254",
+  "snapshot_counting::Uaa-Mz84vC8::97",
+  "snapshot_counting::W1UUL7_bElQ::133",
+  "snapshot_counting::X6Spq62kq8E::25",
+  "snapshot_counting::Yw5_IfvHueo::91"
+ ]
+}

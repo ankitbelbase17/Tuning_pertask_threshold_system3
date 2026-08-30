@@ -1,0 +1,99 @@
+\section{Results}
+\label{sec:results}
+
+\subsection{Pass 1: every task yields a winner}
+
+The pass-1 grid completed in full: 1{,}410 sample-evaluations over 94 cells, every
+cell scored on its complete 15-video set. The selection rule of
+Section~\ref{sec:protocol} returned a threshold for all nine tasks
+(Table~\ref{tab:thresholds}). Taken at face value this is a successful per-task
+fit, and Figure~\ref{fig:f1} shows the nine threshold curves it was read off.
+
+\subsection{The fits do not survive resampling}
+
+Table~\ref{tab:thresholds} reports, beside each selected threshold, the two
+statistics defined in Section~\ref{sec:protocol}. Across 2{,}000 paired bootstrap
+draws:
+
+\begin{itemize}
+\item \textbf{Every task's $\Delta$time-F1 against its best rival has a 95\,\%
+      interval containing zero.} No selected threshold is distinguishable from the
+      best alternative in its own grid.
+\item \textbf{Re-selection rates are 25--61\,\%} against chance rates of 8--10\,\%.
+      The curves are therefore not pure noise --- the argmax is not uniform over
+      the grid --- but they are far from identifying a unique operating point.
+\item \texttt{semantic\_condition\_alert} re-selects at \textbf{6\,\%} against an
+      8\,\% chance rate: its fitted value reproduces \emph{less} often than a cell
+      drawn at random, and the bootstrap prefers $0.15$ (33\,\%) over the selected
+      $0.25$.
+\end{itemize}
+
+Two entries in the threshold table are not fits at all, and are reported as such
+rather than carried into the final configuration:
+
+\paragraph{\texttt{instant\_event\_alert} scores time-F1 $=0.000$ at all ten
+thresholds.} Its apparent 100\,\% re-selection is a ten-way tie broken
+deterministically by the selection rule, not agreement between draws. The rule
+correctly flags the task \textsc{flat} and retains its shipped value. The system
+never places a single emission within $\pm 3$\,s of a ground-truth event on this
+task at any gate setting.
+
+\paragraph{\texttt{explicit\_target\_grounding} alternates $0.065$, $0.000$,
+$0.061$, $0.000$ across the grid.} With 15 emissions against 16 ground-truth events,
+$\mathrm{F1}=2\,\mathrm{tp}/31$, so those values are \emph{one matched event, or
+zero}. The whole curve is a single coin flip per cell, and its interval is
+correspondingly the widest observed, $[-0.207,+0.182]$.
+
+\subsection{Why: the gating score does not rank events}
+
+Figure~\ref{fig:roc} reports per-task ROC for $p_{\mathrm{hit}}$ against the
+$\pm 3$\,s positive label. AUC is $0.431$--$0.551$ and every 95\,\% interval
+contains $0.5$. Three innocent explanations are excluded:
+
+\begin{itemize}
+\item \textbf{Not a clock offset.} Sweeping the tick clock over $\pm 10$\,s in
+      2\,s steps leaves AUC within $0.39$--$0.55$ with no peak anywhere; a genuine
+      misalignment would produce one.
+\item \textbf{Not too tight a tolerance.} Re-running the label at $\pm 10$\,s
+      leaves the result unchanged.
+\item \textbf{Not a degenerate score.} $p_{\mathrm{hit}}$ takes 232--284 distinct
+      values spanning $0.000$--$0.997$ with an interquartile range of $0.2$--$0.7$.
+      It is well spread; it simply does not track \emph{when}.
+\end{itemize}
+
+\texttt{semantic\_condition\_alert} is below chance and falls monotonically as the
+offset goes positive ($0.487$ at $-10$\,s to $0.389$ at $+10$\,s): its confidence is
+systematically \emph{lower} near an event.
+
+Figure~\ref{fig:bands} confirms this through an independent path. Per-sample
+precision is flat across the entire grid on every task ($0.11$--$0.25$ depending on
+task, with no trend), while recall falls monotonically. Firing less often buys no
+precision --- which is what a ranking statistic at chance predicts, and which no
+threshold can repair.
+
+\subsection{The gate has one identifiable degree of freedom}
+
+Table~\ref{tab:ablation} pools all nine tasks. The fitted per-task arm scores
+highest in absolute terms ($0.2544$), but its paired advantage over a single global
+threshold is $+0.0075$ with a 95\,\% interval of $[-0.011,+0.027]$. This is the
+\emph{in-sample} comparison: the nine thresholds were fitted on these very videos
+and hold nine free parameters against the global arm's one, and they still do not
+separate.
+
+The global threshold, by contrast, is identified. Re-running the entire single-global
+sweep inside every bootstrap draw, $0.15$ wins $94\,\%$ of them against a $10\,\%$
+chance rate (next best $0.55$, at $2\,\%$). The shipped per-task table is
+significantly \emph{worse} than a flat $0.15$ ($-0.0354$, interval excluding zero),
+driven by recall: $0.356$ against $0.601$. Since the shipped gate in fact fired at a
+fixed global $0.5$, moving that single operating point is the one intervention in
+this study with a stable, reproducible effect.
+
+\subsection{Held-out evaluation}
+
+The claims above are measured on the 135-video fit subset and are therefore
+in-sample for the fitted arm. The complete 2{,}700-sample evaluation, the
+fit-disjoint rescore, and the per-task breakdown are \PENDING; Tables~\ref{tab:full}
+and~\ref{tab:pertask} are reserved for them. We record here, in advance of that run,
+the prediction that its pooled time-F1 under the fitted per-task thresholds will
+land within the $0.03$ noise floor of the same run under the shipped thresholds. If
+that prediction fails, the fit is real and this section is wrong.

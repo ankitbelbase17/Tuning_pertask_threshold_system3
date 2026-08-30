@@ -1,0 +1,52 @@
+{
+  "overall": {
+    "n_samples": 5,
+    "n_gt": 16,
+    "n_emits": 62,
+    "time_precision": 0.0968,
+    "time_recall": 0.375,
+    "time_f1": 0.1538,
+    "n_matched": 6,
+    "n_judged": 6,
+    "n_unjudged": 0,
+    "content_complete": true,
+    "content_coverage": 1.0,
+    "joint_f1_lb": 0.0256,
+    "content_acc_lb": 0.1667,
+    "joint_precision": 0.0161,
+    "joint_recall": 0.0625,
+    "joint_f1": 0.0256,
+    "content_acc": 0.1667,
+    "num_tasks": 1,
+    "macro_time_f1": 0.1538,
+    "macro_time_f1_n": 1,
+    "macro_content_accuracy": 0.1667,
+    "content_scored_task_count": 1,
+    "macro_joint_f1": 0.0256,
+    "joint_task_count": 1,
+    "macro_content_acc_lb": 0.1667,
+    "macro_joint_f1_lb": 0.0256
+  },
+  "per_task": {
+    "dedup_counting": {
+      "n_samples": 5,
+      "n_gt": 16,
+      "n_emits": 62,
+      "time_precision": 0.0968,
+      "time_recall": 0.375,
+      "time_f1": 0.1538,
+      "n_matched": 6,
+      "n_judged": 6,
+      "n_unjudged": 0,
+      "content_complete": true,
+      "content_coverage": 1.0,
+      "joint_f1_lb": 0.0256,
+      "content_acc_lb": 0.1667,
+      "joint_precision": 0.0161,
+      "joint_recall": 0.0625,
+      "joint_f1": 0.0256,
+      "content_acc": 0.1667
+    }
+  },
+  "n": 5
+}

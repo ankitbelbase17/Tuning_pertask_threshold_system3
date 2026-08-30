@@ -19,6 +19,22 @@ completed every tick due at <= vt (clock.get_next_check() > vt) before feeding
 the next frame. Combined with the encoder's blocking put + fixed fps + greedy
 decode, the whole walk is frame-indexed: every tick sees exactly frames [0..vt],
 identically on every run — the async snapshot race is gone.
+
+------------------------------------------------------------------------------
+AUDIO, "OPTION A" (FORK: system3_qwem_omni). There is deliberately NO separate
+free-running audio-encoder thread. A second independent producer with its own
+latency profile (audio ~160ms/chunk vs. vision's per-frame variable cost) can
+append out of true-time order relative to video with no correctness guardrail
+short of a nontrivial 2-way timestamp merge -- see the design discussion this
+fork implements. Instead: THIS thread -- already the single writer of the
+primary cache -- is also the ONLY caller of backend.embed_audio(), invoked
+SYNCHRONOUSLY every cfg.audio_seconds_per_chunk of video time, right in the
+same control flow as frame ingestion. Correctness is free (one thread, one
+sequence of steps, nothing to race); the cost is that ~160ms lands on the
+per-tick critical path rather than being hidden in a parallel thread. That
+trade is deliberate, not an oversight -- see OMNI_FEASIBILITY.md sec 5 for the
+latency measurement it's based on, and cfg.use_audio to disable it.
+------------------------------------------------------------------------------
 """
 import queue
 import time
@@ -28,6 +44,25 @@ from util import log
 
 def input_ingester_thread(cfg, mgr, vis_q, ctrl, stop, prof=None, clock=None,
                           feed_done=None, writer_q=None, evaluator=None):
+    use_audio = cfg.use_audio and hasattr(mgr.b, "embed_audio")
+    if cfg.use_audio and not hasattr(mgr.b, "embed_audio"):
+        # LOUD, not silent (project standing rule): if audio was asked for,
+        # a backend that cannot provide it must not quietly run vision-only.
+        raise RuntimeError(
+            f"cfg.use_audio=True but backend {type(mgr.b).__name__} has no "
+            f"embed_audio() -- set cfg.use_audio=False for an explicit "
+            f"vision-only A/B, or use cfg.backend='qwen2_5_omni'.")
+    audio_reader = None
+    next_chunk_end_vt = cfg.audio_seconds_per_chunk
+    last_chunk_end_vt = 0.0
+    if use_audio:
+        from audio_io import AudioChunkReader
+        audio_reader = AudioChunkReader(cfg.video_path, sample_rate=cfg.audio_sampling_rate)
+        mgr.chunk_anchor_vt = 0.0
+        log("ingester", 0.0, f"audio ON: chunk={cfg.audio_seconds_per_chunk}s "
+                             f"rate={cfg.audio_position_id_per_seconds}/s "
+                             f"has_audio_track={audio_reader.has_audio}")
+
     system_prompt = cfg.system_prompt.replace("{instruction}", cfg.instruction)
     # ICL IN THE SINK (cfg.icl_in_sink) — PRIVILEGE THE PRESENT.
     # The task ICL is CONSTANT, but it was being spliced fresh after the video
@@ -50,14 +85,16 @@ def input_ingester_thread(cfg, mgr, vis_q, ctrl, stop, prof=None, clock=None,
     n_frames = 0
     armed = True
     last_trigger_vt = -1e9
+    last_vt = 0.0                                # FORK: for the final partial-chunk flush below
 
     try:
         while not stop.is_set() or not vis_q.empty():
             try:
-                vt, embeds = vis_q.get(timeout=0.5)
+                vt, embeds, grid_hw = vis_q.get(timeout=0.5)
             except queue.Empty:
                 continue
             n_frames += 1
+            last_vt = vt
             if prof is not None:
                 prof.observe("visq_depth", vis_q.qsize())
                 prof.incr("frames_ingested")     # frames the ingester actually wrote to cache
@@ -66,11 +103,33 @@ def input_ingester_thread(cfg, mgr, vis_q, ctrl, stop, prof=None, clock=None,
             # so the model has a real-time signal, not just token order)
             if cfg.timestamp_tokens:
                 mgr.ingest(mgr.b.embed_text(cfg.timestamp_fmt.format(t=vt)))
-            mgr.ingest(embeds)
+            if use_audio and cfg.tmrope_positions:
+                mgr.ingest(embeds, token_kind="vision", real_seconds=vt, grid_hw=grid_hw)
+            else:
+                mgr.ingest(embeds)
 
             dropped = mgr.evict()                # bounded memory
             if dropped:
                 log("ingester.evict", vt, f"evicted {dropped} KV tokens (budget={cfg.kv_budget})")
+
+            # ---- AUDIO: synchronous, chunk-boundary-triggered (Option A) -----
+            # Fires once every cfg.audio_seconds_per_chunk of VIDEO time, driven
+            # by the vision clock crossing the boundary -- never by a separate
+            # audio-side clock, so it is always ingested causally after the
+            # video content it co-occurs with, never ahead of it.
+            if use_audio and vt >= next_chunk_end_vt:
+                t0, t1 = last_chunk_end_vt, next_chunk_end_vt
+                waveform = audio_reader.read(t0, t1)
+                a_embeds = mgr.b.embed_audio(waveform)
+                if prof is not None:
+                    prof.observe("audio_tokens_per_chunk", a_embeds.shape[1])
+                mgr.ingest(a_embeds, token_kind="audio", real_seconds=t0)
+                log("ingester.audio", vt, f"chunk [{t0:.1f},{t1:.1f})s -> "
+                                          f"{a_embeds.shape[1]} audio tokens, "
+                                          f"chunk_anchor_pos now {mgr.chunk_anchor_pos}")
+                last_chunk_end_vt = next_chunk_end_vt
+                next_chunk_end_vt += cfg.audio_seconds_per_chunk
+                mgr.chunk_anchor_vt = last_chunk_end_vt   # open the NEXT chunk's window
 
             # ---- PROBE-GATE: one forward pass, Schmitt/hysteresis edge, fire writer
             if probe_mode and n_frames % cfg.goal_gate_every == 0:
@@ -118,6 +177,20 @@ def input_ingester_thread(cfg, mgr, vis_q, ctrl, stop, prof=None, clock=None,
                         log("ingester", vt, "LOCKSTEP TIMEOUT waiting on controller — continuing")
                         break
     finally:
+        # FORK: flush whatever's left of the final, necessarily-partial audio
+        # chunk (last_chunk_end_vt .. last_vt) -- otherwise the last <2s of
+        # audio is silently dropped every single run, not just at EOF edge
+        # cases. Silent != acceptable per this project's own standing rule.
+        if use_audio and last_vt > last_chunk_end_vt:
+            try:
+                waveform = audio_reader.read(last_chunk_end_vt, last_vt)
+                a_embeds = mgr.b.embed_audio(waveform)
+                mgr.ingest(a_embeds, token_kind="audio", real_seconds=last_chunk_end_vt)
+                log("ingester.audio", last_vt,
+                    f"FINAL partial chunk [{last_chunk_end_vt:.1f},{last_vt:.1f})s -> "
+                    f"{a_embeds.shape[1]} audio tokens")
+            except Exception as e:
+                log("ingester.audio", last_vt, f"final chunk flush FAILED: {e!r}")
         if feed_done is not None:
             feed_done.set()                      # tell the controller the feed is drained
     stop.set()

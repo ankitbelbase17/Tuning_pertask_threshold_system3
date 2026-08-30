@@ -117,9 +117,25 @@ def _extract_count(text: str):
 
 
 def _extract_position(text: str):
+    """Byte-for-byte upstream (utils/online_parser.py::_extract_region):
+    prefer an explicit `Position: <region>` anchor, else longest-match scan over
+    the nine HYPHENATED labels.
+
+    We used to also accept the space-separated form ("bottom center" ->
+    bottom-center). Upstream does not: it scans only hyphenated names, so
+    "bottom center" matches the bare "center" and scores as a different cell.
+    Our leniency inflated explicit_target_grounding relative to the benchmark's
+    own scorer, so it is gone. Also note upstream returns None for "top left"
+    (no bare "left" region), where we used to return top-left.
+    """
     t = (text or "").lower()
-    for p in _POSITIONS:
-        if p in t or p.replace("-", " ") in t:
+    m = re.search(r"position\s*:\s*([\w\-]+)", t)
+    if m:
+        cand = m.group(1).strip()
+        if cand in _POSITIONS:
+            return cand
+    for p in _POSITIONS:                     # already sorted longest-first
+        if p in t:
             return p
     return None
 
@@ -624,7 +640,17 @@ def score_sample(pred: dict, tolerance: float = 3.0,
         elif ok:
             tp_content += 1
 
+    # audio_dependency + the timing block ride along so a caller can regroup the
+    # per-sample scores (by audio class, by task, gross) and build the
+    # wall-clock-vs-video-length table without re-reading the predictions file.
     return {"id": pred["id"], "task": task,
+            "audio_dependency": pred.get("audio_dependency", "unknown"),
+            "video_id": pred.get("video_id"),
+            "wall_s": pred.get("wall_s"),
+            "video_len_s": pred.get("video_len_s"),
+            "eval_len_s": pred.get("eval_len_s"),
+            "realtime_factor": pred.get("realtime_factor"),
+            "emit_latency_s": pred.get("emit_latency_s"),
             "tp_time": tp_time, "tp_content": tp_content,
             "n_unjudged": n_unjudged, "fp": fp, "fn": fn,
             "n_emits": len(emits), "n_gt": len(gtt)}
@@ -698,8 +724,37 @@ def aggregate(per_sample: list[dict]) -> dict:
                         "joint_f1": None, "content_acc": None})
         return out
 
-    return {"overall": block(overall),
-            "per_task": {t: block(d) for t, d in sorted(by_task.items())}}
+    per_task = {t: block(d) for t, d in sorted(by_task.items())}
+    ov = block(overall)
+
+    # THE HEADLINE NUMBER IS A MACRO AVERAGE OVER TASKS, NOT A MICRO POOL.
+    # scripts/compute_online_metrics.py::_macro_overall averages each task's
+    # time_f1 / content_accuracy / joint_f1 with equal weight. Our `overall` block
+    # pools tp/fp/fn across every sample, which weights a task by how many emits
+    # and ground-truth events it happens to have -- dedup_counting alone is a third
+    # of our emits, so a micro overall is largely dedup's score wearing the name
+    # "OVERALL". Both are reported; `macro_*` is the one comparable to the paper's
+    # table, `overall` stays micro for continuity with our own history.
+    # Tasks whose metric is withheld (None) are EXCLUDED from the macro mean, and
+    # the count is reported so a partial average can never be mistaken for a full
+    # one -- same policy as upstream.
+    def _macro(key):
+        vals = [b[key] for b in per_task.values() if b.get(key) is not None]
+        return (round(sum(vals) / len(vals), 4) if vals else None), len(vals)
+
+    mt, nt = _macro("time_f1")
+    mc, nc = _macro("content_acc")
+    mj, nj = _macro("joint_f1")
+    mc_lb, _ = _macro("content_acc_lb")
+    mj_lb, _ = _macro("joint_f1_lb")
+    ov.update({
+        "num_tasks": len(per_task),
+        "macro_time_f1": mt, "macro_time_f1_n": nt,
+        "macro_content_accuracy": mc, "content_scored_task_count": nc,
+        "macro_joint_f1": mj, "joint_task_count": nj,
+        "macro_content_acc_lb": mc_lb, "macro_joint_f1_lb": mj_lb,
+    })
+    return {"overall": ov, "per_task": per_task}
 
 
 # ---------------------------------------------------------------------------

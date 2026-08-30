@@ -7,3 +7,35 @@ output_full9: 616 samples | backend=openai mode=openai model=gpt-5-mini | cache=
   judged 100/480 (new=100 failed=0)
   judged 125/480 (new=125 failed=0)
   judged 150/480 (new=150 failed=0)
+  judged 175/480 (new=175 failed=0)
+  judged 200/480 (new=200 failed=0)
+  judged 225/480 (new=225 failed=0)
+  judged 250/480 (new=250 failed=0)
+  judged 275/480 (new=275 failed=0)
+  judged 300/480 (new=300 failed=0)
+  judged 325/480 (new=325 failed=0)
+  judged 350/480 (new=350 failed=0)
+  judged 375/480 (new=375 failed=0)
+  judged 400/480 (new=400 failed=0)
+  judged 425/480 (new=425 failed=0)
+  judged 450/480 (new=450 failed=0)
+  judged 475/480 (new=475 failed=0)
+
+judged 480 new | 0 still failing after retries
+
+=== after judging (output_full9) ===
+task                           n    GT  emits    tF1   cover      cAcc       jF1
+--------------------------------------------------------------------------------
+cumulative_counting           66   324   1816  0.235  100.0%     0.287     0.081
+dedup_counting               182   720   5481  0.178  100.0%     0.470     0.092
+event_narration               58   263   1972  0.161  100.0%     0.306     0.055
+explicit_target_grounding      6     7    127  0.090  100.0%     0.333     0.032
+instant_event_alert           26    36    716  0.077  100.0%     1.000     0.077
+realtime_state_monitor        96   418   2657  0.193  100.0%     0.000     0.000
+semantic_condition_alert      22    68    345  0.242  100.0%     1.000     0.242
+sequential_step_instruction  113   608   1524  0.365  100.0%     0.458     0.208
+snapshot_counting             47    47   1673  0.051  100.0%     0.386     0.020
+--------------------------------------------------------------------------------
+OVERALL                      616  2491  16311  0.191  100.0%     0.369     0.080
+
+wrote output_full9/online_metrics_judged.json

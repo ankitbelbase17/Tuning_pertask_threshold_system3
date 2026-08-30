@@ -1,0 +1,32 @@
+{
+ "subset_off": 1,
+ "n": 15,
+ "audio_mix": {
+  "none": 4,
+  "required": 9,
+  "helpful": 2
+ },
+ "duration_s": {
+  "min": 37.1,
+  "max": 459.2,
+  "sum": 2616.1
+ },
+ "n_gt": 74,
+ "ids": [
+  "cumulative_counting::-ZvLZrWsFAc::3",
+  "cumulative_counting::1__ERVgs9Tc::23",
+  "cumulative_counting::40by4TniPds::39",
+  "cumulative_counting::9gj6UpHyRNQ::61",
+  "cumulative_counting::DHCc_ndOfjs::81",
+  "cumulative_counting::GV94WLtL1nI::102",
+  "cumulative_counting::IquGEf1w-Us::119",
+  "cumulative_counting::MSfDVu3i9mE::139",
+  "cumulative_counting::SPRdPbLHMfg::161",
+  "cumulative_counting::WU1-jSwNySQ::278",
+  "cumulative_counting::ZA8BslrJ0IQ::296",
+  "cumulative_counting::bsMWDyBpDsM::250",
+  "cumulative_counting::knQCHTdP6L8::268",
+  "cumulative_counting::mvl5ZOIy_sM::230",
+  "cumulative_counting::rbCdwUk0nTM::209"
+ ]
+}

@@ -1,0 +1,69 @@
+\section{Method}
+\label{sec:method}
+
+\subsection{The streaming system}
+
+The system is a three-thread proactive pipeline over a single shared KV cache. An
+\emph{ingester} decodes video at 1\,fps and audio in 2\,s chunks and appends both
+to the cache. A \emph{controller} wakes on every tick, and a \emph{writer} decodes
+an utterance whenever the controller decides to speak. The backbone is
+Qwen2.5-Omni-7B; the same harness previously ran a vision-only Qwen3-VL-8B, and
+the pipeline is unchanged apart from the backbone and the audio path.
+
+At each tick the controller poses a boolean question to the model and reads
+$p_{\mathrm{hit}} = P(\texttt{true})$ directly off the logits at the answer slot.
+This costs one forward pass and \emph{zero} decode steps, which is what makes a
+per-tick gate affordable: the expensive answer decode happens only when the gate
+fires. The consequence for cost is that a low threshold is substantially more
+expensive than a high one, because it admits more decodes --- measured at
+$\mathrm{xRT}=2.72$ at threshold $0.05$ against a quiet-path cost of
+$0.3$\,s per tick with zero generated tokens.
+
+\subsection{The gate is three coupled knobs, not one}
+
+The decision to speak is governed by three parameters that cannot be fitted
+independently:
+
+\begin{itemize}
+\item \textbf{\texttt{hit\_threshold}} --- the level $p_{\mathrm{hit}}$ must reach.
+\item \textbf{\texttt{gate\_mode}} --- \emph{level} (fire whenever above) or
+      \emph{edge} (fire only on a rising crossing).
+\item \textbf{\texttt{refractory\_s}} --- the minimum silence after an emission.
+\end{itemize}
+
+The coupling is not incidental. Under \emph{edge} mode with a long refractory, a
+single spurious early crossing can consume a video's entire emission budget, so
+the cost of a mis-set threshold scales with the refractory. A threshold reported
+without its mode and refractory does not reproduce.
+
+\subsection{Two defects in the shipped gate, and their repair}
+
+Auditing the shipped configuration before fitting anything revealed that the
+quantity we intended to fit was not the quantity the system used.
+
+\paragraph{The threshold was inert.} Under the shipped
+\texttt{gate\_strategy="hysteresis"}, the fire test was
+$p_{\mathrm{hit}} \ge \texttt{gate\_high\_thr}$, a fixed global $0.5$;
+\texttt{hit\_threshold} only decided whether an answer was subsequently decoded,
+and \texttt{gate\_mode} and \texttt{refractory\_s} were read nowhere at all.
+Across a completed 2{,}700-sample run (581{,}403 ticks, 50{,}433 fires) not one
+fire occurred below $p_{\mathrm{hit}}=0.500$. Every task configured at or under
+$0.5$ was therefore running at $0.5$. We add a \texttt{"fitted"} strategy in which
+all three knobs are live, and report the shipped behaviour honestly as
+\emph{a fixed global $0.5$} rather than as the per-task table that was nominally
+configured.
+
+\paragraph{The first tick was a spurious rising edge.} $p_{\mathrm{hit}}$ is high
+on the first tick of every video: the model answers the boolean from the prompt
+before it has seen anything ($\ge 0.05$ for 98--100\,\% of samples in every task,
+median $0.34$--$0.64$). Seeding the edge detector with
+$\texttt{prev\_above}=\textsc{false}$ made that tick a rising edge. For a task with
+a long refractory this consumed the video's only emission: every
+\texttt{instant\_event\_alert} sample emitted once, at $1.0$\,s, against ground
+truth at 26--98\,s. The fix is definitional rather than a tuned guard --- an edge
+requires a predecessor, so $\texttt{prev\_above}$ starts undefined and the first
+tick can never be a crossing. Offline best time-F1 rose $0.0535 \to 0.0900$ on
+\texttt{snapshot\_counting} and $0.0636 \to 0.0751$ on
+\texttt{instant\_event\_alert}, while short-refractory tasks moved by $\pm 0.001$.
+That the size of the effect tracks the refractory is the practical demonstration
+that the three knobs are one object.

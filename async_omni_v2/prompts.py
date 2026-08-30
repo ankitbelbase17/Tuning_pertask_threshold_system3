@@ -243,15 +243,23 @@ _FORMAT_FIELDS_CORE_B = (
     '  question_for_next : a short note-to-self to verify on the next turn; else ""\n'
 )
 
-_FORMAT_FIELD_COUNT = (
-    "  count             : an integer accumulator — the running total SO FAR. Carry it "
-    "forward on every tick and raise it by exactly 1 when you report a new item\n"
-)
-
-_FORMAT_FIELD_PHASE = (
-    "  phase             : 1-4 plain words naming the state the video is in RIGHT NOW. "
-    "Carry it forward on every tick; change it only when the state really changes\n"
-)
+# PARKED 2026-08-12 — `count` and `phase` are no longer taught to the model. The
+# full rationale and the re-enable conditions are TODO-7BC in controller.py; the
+# short version is that neither field has a CONSUMER, so every token spent
+# emitting them was spent for nothing. Text kept verbatim so re-enabling is a
+# matter of uncommenting, not rewriting.
+#
+# _FORMAT_FIELD_COUNT = (
+#     "  count             : an integer accumulator — the running total SO FAR. Carry it "
+#     "forward on every tick and raise it by exactly 1 when you report a new item\n"
+# )
+#
+# _FORMAT_FIELD_PHASE = (
+#     "  phase             : 1-4 plain words naming the state the video is in RIGHT NOW. "
+#     "Carry it forward on every tick; change it only when the state really changes\n"
+# )
+_FORMAT_FIELD_COUNT = ""
+_FORMAT_FIELD_PHASE = ""
 
 _FORMAT_GATE = (
     "YOU DO NOT DECIDE WHEN TO ALERT — the system does. It alerts the user only when "
@@ -299,7 +307,7 @@ _ROLE_SNAPSHOT_COUNTING = (
 _SEMANTICS_SNAPSHOT_COUNTING = (
     "What have_enough_info means here: true while the trigger condition is visibly "
     "true on screen AND you can see the things to be counted; false before it and "
-    "after it is gone. Before the trigger, keep count at 0 and keep looking.\n"
+    "after it is gone. Before the trigger, there is nothing to report yet — keep looking.\n"
     "HOW TO WRITE THE ANSWER — this is scored by pulling the FIRST NUMBER out of your "
     "sentence:\n"
     "  * The answer MUST BEGIN with the count written as a DIGIT: '5 prices are ...'\n"
@@ -318,20 +326,20 @@ _SEMANTICS_SNAPSHOT_COUNTING = (
     "Every output starts with seen + have_enough_info; other fields appear only when "
     "they change:\n"
     "At 4s dough is being mixed — the trigger has not happened, nothing to count yet:\n"
-    '{"seen":"baker mixing dough in a bowl","have_enough_info":false,"count":0,"fps":1.0,"question_for_next":"Has the tray come out of the oven yet?"}\n'
+    '{"seen":"baker mixing dough in a bowl","have_enough_info":false,"fps":1.0,"question_for_next":"Has the tray come out of the oven yet?"}\n'
     "At 21s he is shaping the pastries — still no trigger (question unchanged -> omit it):\n"
-    '{"seen":"hands rolling croissant shapes","have_enough_info":false,"count":0}\n'
+    '{"seen":"hands rolling croissant shapes","have_enough_info":false}\n'
     "At 33s the tray goes INTO the oven — close, so look more often:\n"
-    '{"seen":"tray slid into the hot oven","have_enough_info":false,"count":0,"fps":3.0,"next_check_s":0.5}\n'
+    '{"seen":"tray slid into the hot oven","have_enough_info":false,"fps":3.0,"next_check_s":0.5}\n'
     "At 46s he pulls the tray out; the croissants are clearly separated on it -> "
     "TRIGGER; count them and read the time off the marker:\n"
-    '{"seen":"baker lifting tray out of oven","have_enough_info":true,"event_time_s":46,"count":8,"answer":"8 croissants are on the tray the baker has just taken out of the oven."}\n'
+    '{"seen":"baker lifting tray out of oven","have_enough_info":true,"event_time_s":46,"answer":"8 croissants are on the tray the baker has just taken out of the oven."}\n'
     "At 48s the same tray is still in his hands -> STILL the same trigger; re-count, "
     "keep the same number and the same event_time_s (the system will not double-alert):\n"
-    '{"seen":"same tray still held up","have_enough_info":true,"event_time_s":46,"count":8,"answer":"8 croissants are on the tray the baker has just taken out of the oven."}\n'
+    '{"seen":"same tray still held up","have_enough_info":true,"event_time_s":46,"answer":"8 croissants are on the tray the baker has just taken out of the oven."}\n'
     "At 55s the tray is on the counter and the camera has moved to the packing boxes "
     "-> the trigger moment is over:\n"
-    '{"seen":"empty counter and packing boxes","have_enough_info":false,"count":8,"fps":1.0,"next_check_s":1.5}\n'
+    '{"seen":"empty counter and packing boxes","have_enough_info":false,"fps":1.0,"next_check_s":1.5}\n'
 )
 
 _SNAPSHOT_COUNTING = (_ROLE_SNAPSHOT_COUNTING + _FORMAT_BLOCK_COUNT
@@ -363,8 +371,8 @@ _SEMANTICS_CUMULATIVE_COUNTING = (
     "HOW YOU REMEMBER THE COUNT: you cannot see your own earlier outputs — only the "
     "'Already reported' list below. So on every tick, work it out from that list: the "
     "number of lines already reported is your current total, and the NEXT occurrence "
-    "you see is that number PLUS ONE. Restate the total in count each tick, and keep a "
-    "reminder in question_for_next, e.g. 'total so far 2; watch for a 3rd pour'.\n"
+    "you see is that number PLUS ONE. Keep the running total in question_for_next "
+    "each tick, e.g. 'total so far 2; watch for a 3rd pour'.\n"
     "What have_enough_info means here: true FOR AS LONG AS an occurrence is visibly "
     "happening on screen right now — the whole time, not just its first instant. False "
     "whenever no occurrence is on screen. Do not try to drop back to false in order to "
@@ -388,25 +396,25 @@ _SEMANTICS_CUMULATIVE_COUNTING = (
     "output starts with seen + have_enough_info; other fields appear only when they "
     "change:\n"
     "At 6s the grinder is running — nothing counted yet:\n"
-    '{"seen":"barista grinding coffee beans","have_enough_info":false,"count":0,"fps":1.0,"question_for_next":"total so far 0; has a milk pour started?"}\n'
+    '{"seen":"barista grinding coffee beans","have_enough_info":false,"fps":1.0,"question_for_next":"total so far 0; has a milk pour started?"}\n'
     "At 18s a shot is extracting into a cup — still not a pour:\n"
-    '{"seen":"espresso extracting into a cup","have_enough_info":false,"count":0}\n'
+    '{"seen":"espresso extracting into a cup","have_enough_info":false}\n'
     "At 24s he tips the jug and pours milk into the cup -> FIRST occurrence (nothing "
     "in 'Already reported' yet, so the total is 1):\n"
-    '{"seen":"milk poured from jug into cup","have_enough_info":true,"event_time_s":24,"count":1,"answer":"1 pour so far — the barista pours steamed milk into the first cup.","question_for_next":"total so far 1; watch for a 2nd pour"}\n'
+    '{"seen":"milk poured from jug into cup","have_enough_info":true,"event_time_s":24,"answer":"1 pour so far — the barista pours steamed milk into the first cup.","question_for_next":"total so far 1; watch for a 2nd pour"}\n'
     "At 25s he is still pouring the SAME cup -> still the same occurrence; keep the "
     "same total, time and answer (the system will not double-alert):\n"
-    '{"seen":"still pouring the same cup","have_enough_info":true,"event_time_s":24,"count":1,"answer":"1 pour so far — the barista pours steamed milk into the first cup."}\n'
+    '{"seen":"still pouring the same cup","have_enough_info":true,"event_time_s":24,"answer":"1 pour so far — the barista pours steamed milk into the first cup."}\n'
     "At 27s the cup is on the saucer, pour finished -> drop to false so the next pour "
     "can be reported:\n"
-    '{"seen":"finished cup placed on saucer","have_enough_info":false,"count":1}\n'
+    '{"seen":"finished cup placed on saucer","have_enough_info":false}\n'
     "At 41s he pours milk into a second cup -> NEW occurrence; 'Already reported' has "
     "1 line, so the total is 2:\n"
-    '{"seen":"milk poured into a second cup","have_enough_info":true,"event_time_s":41,"count":2,"answer":"2 pours so far — he pours milk into a second cup for the next order.","question_for_next":"total so far 2; watch for a 3rd pour"}\n'
+    '{"seen":"milk poured into a second cup","have_enough_info":true,"event_time_s":41,"answer":"2 pours so far — he pours milk into a second cup for the next order.","question_for_next":"total so far 2; watch for a 3rd pour"}\n'
     "At 44s he is wiping the steam wand -> occurrence over:\n"
-    '{"seen":"barista wiping the steam wand","have_enough_info":false,"count":2}\n'
+    '{"seen":"barista wiping the steam wand","have_enough_info":false}\n'
     "At 70s a third pour begins -> report it with the total 3:\n"
-    '{"seen":"milk poured into a third cup","have_enough_info":true,"event_time_s":70,"count":3,"answer":"3 pours so far — he pours milk into a third cup for a waiting customer.","question_for_next":"total so far 3; watch for a 4th pour"}\n'
+    '{"seen":"milk poured into a third cup","have_enough_info":true,"event_time_s":70,"answer":"3 pours so far — he pours milk into a third cup for a waiting customer.","question_for_next":"total so far 3; watch for a 4th pour"}\n'
 )
 
 _CUMULATIVE_COUNTING = (_ROLE_CUMULATIVE_COUNTING + _FORMAT_BLOCK_COUNT
@@ -441,8 +449,8 @@ _SEMANTICS_DEDUP_COUNTING = (
     "each line names one thing you have already counted. Before reporting, check the "
     "thing on screen against every line. If it matches one, it is a REPEAT -> "
     "have_enough_info stays false. If it matches none, it is NEW -> the total is the "
-    "number of lines plus one. Restate it in count and mirror it into "
-    "question_for_next, e.g. 'counted so far: beagle, labrador (2)'.\n"
+    "number of lines plus one. Keep it in question_for_next, e.g. "
+    "'counted so far: beagle, labrador (2)'.\n"
     "What have_enough_info means here: true FOR AS LONG AS something you have NEVER "
     "counted is clearly featured on screen. Stay true the whole time it is featured. "
     "False when it is gone, or when everything on screen is already in your list. Do "
@@ -467,23 +475,23 @@ _SEMANTICS_DEDUP_COUNTING = (
     "dogs are shown more than once. Every output starts with seen + have_enough_info; "
     "other fields appear only when they change:\n"
     "At 5s a caretaker walks down the aisle, no single dog featured:\n"
-    '{"seen":"caretaker walking down kennel aisle","have_enough_info":false,"count":0,"fps":1.0,"question_for_next":"counted so far: none (0)"}\n'
+    '{"seen":"caretaker walking down kennel aisle","have_enough_info":false,"fps":1.0,"question_for_next":"counted so far: none (0)"}\n'
     "At 9s the shot cuts to a brown beagle alone in the frame -> NEW (nothing in "
     "'Already reported'), so the total is 1:\n"
-    '{"seen":"brown beagle alone in close-up","have_enough_info":true,"event_time_s":9,"count":1,"answer":"1 different dog so far — a brown beagle with long ears featured alone.","question_for_next":"counted so far: brown beagle (1)"}\n'
+    '{"seen":"brown beagle alone in close-up","have_enough_info":true,"event_time_s":9,"answer":"1 different dog so far — a brown beagle with long ears featured alone.","question_for_next":"counted so far: brown beagle (1)"}\n'
     "At 11s the same beagle is still in frame from a lower angle -> the SAME first "
     "appearance; keep the same total, time and answer (the system will not "
     "double-alert):\n"
-    '{"seen":"same beagle, lower camera angle","have_enough_info":true,"event_time_s":9,"count":1,"answer":"1 different dog so far — a brown beagle with long ears featured alone."}\n'
+    '{"seen":"same beagle, lower camera angle","have_enough_info":true,"event_time_s":9,"answer":"1 different dog so far — a brown beagle with long ears featured alone."}\n'
     "At 14s back to the aisle, no dog featured -> false:\n"
-    '{"seen":"empty aisle between the kennels","have_enough_info":false,"count":1}\n'
+    '{"seen":"empty aisle between the kennels","have_enough_info":false}\n'
     "At 22s a black labrador is featured alone -> not in the list -> NEW, total 2:\n"
-    '{"seen":"black labrador alone in close-up","have_enough_info":true,"event_time_s":22,"count":2,"answer":"2 different dogs so far — a black labrador lying alone against the kennel door.","question_for_next":"counted so far: brown beagle, black labrador (2)"}\n'
+    '{"seen":"black labrador alone in close-up","have_enough_info":true,"event_time_s":22,"answer":"2 different dogs so far — a black labrador lying alone against the kennel door.","question_for_next":"counted so far: brown beagle, black labrador (2)"}\n'
     "At 35s the BROWN BEAGLE is on screen again -> it is already on the list -> this "
     "is a REPEAT; do NOT count it and do NOT report it:\n"
-    '{"seen":"the brown beagle again, already counted","have_enough_info":false,"count":2}\n'
+    '{"seen":"the brown beagle again, already counted","have_enough_info":false}\n'
     "At 48s a white terrier is featured alone -> NEW, total 3:\n"
-    '{"seen":"white terrier alone on a blanket","have_enough_info":true,"event_time_s":48,"count":3,"answer":"3 different dogs so far — a small white terrier sitting alone on a blanket.","question_for_next":"counted so far: beagle, labrador, terrier (3)"}\n'
+    '{"seen":"white terrier alone on a blanket","have_enough_info":true,"event_time_s":48,"answer":"3 different dogs so far — a small white terrier sitting alone on a blanket.","question_for_next":"counted so far: beagle, labrador, terrier (3)"}\n'
 )
 
 _DEDUP_COUNTING = (_ROLE_DEDUP_COUNTING + _FORMAT_BLOCK_COUNT
@@ -521,15 +529,28 @@ _ROLE_REALTIME_STATE_MONITOR = (
     "are typically 3-6 changes in a video.\n"
 )
 
+# PARKED-WITH-`phase` 2026-08-12 (TODO-7BC). This block previously hung the whole
+# state-memory rule on the `phase` field: "restate it in phase on EVERY tick",
+# and have_enough_info was defined as screen-differs-from-`phase`. With the field
+# parked those sentences would instruct the model to fill a slot the format no
+# longer declares, so the SAME rule is now carried by the two channels that do
+# have consumers: the 'Already reported' list (which the prompt already called
+# the durable memory) and question_for_next (spliced into the next tick's
+# prompt by controller.py). The behaviour asked for is unchanged; only the
+# carrier is. Original wording: `git show HEAD:async_omni_v2/prompts.py`.
+# NOTE this is the one place where parking a field is NOT score-neutral —
+# realtime_state_monitor's have_enough_info rule is re-expressed here, so this
+# task's numbers can move. Re-measure it before comparing against older runs.
 _SEMANTICS_REALTIME_STATE_MONITOR = (
-    "HOW YOU REMEMBER THE CURRENT STATE: restate it in phase on EVERY tick, including "
-    "quiet ticks — that is what makes the next change detectable. Your durable memory "
-    "is the 'Already reported' list below: the state you named most recently in it is "
-    "the state you are currently in. Mirror it into question_for_next as well, e.g. "
-    "'currently: forest trail; has the setting changed?'.\n"
+    "HOW YOU REMEMBER THE CURRENT STATE: name it in question_for_next on EVERY tick, "
+    "including quiet ticks — that is what makes the next change detectable. Write it as "
+    "'currently: forest trail; has the setting changed?'. Your durable memory is the "
+    "'Already reported' list below: the state you named most recently in it is the "
+    "state you are currently in.\n"
     "What have_enough_info means here: true FOR AS LONG AS the state you can SEE on "
-    "screen differs from phase (the state you last recorded). It becomes false again "
-    "naturally, once you carry the new state forward into phase and the two agree. Do "
+    "screen differs from the state you last recorded (the one in your question_for_next "
+    "and at the end of 'Already reported'). It becomes false again naturally, once you "
+    "carry the new state forward and the two agree. Do "
     "not try to force it back to false: the system watches for the false->true "
     "transition itself and will never double-report the same change.\n"
     "HOW TO WRITE THE ANSWER — this task is graded by EXACT STRING MATCH against the "
@@ -545,8 +566,7 @@ _SEMANTICS_REALTIME_STATE_MONITOR = (
     "  * If the task does NOT list them, use the shortest literal label the video "
     "itself would use — 'kitchen', not 'a brightly lit kitchen with white cabinets'. "
     "Reuse the SAME label every time that state comes back.\n"
-    "  * answer and phase must be the SAME string.\n"
-    "  * Do not add commentary, opinions or guesses about what comes next.\n"
+        "  * Do not add commentary, opinions or guesses about what comes next.\n"
     "Rules: a camera cut back to something you already showed is still a CHANGE if the "
     "state really became different; a slow pan within the same place is NOT a change; "
     "a brief flash or insert that immediately reverts is NOT a change — if unsure, "
@@ -558,29 +578,29 @@ _SEMANTICS_REALTIME_STATE_MONITOR = (
     "change:\n"
     "At 4s the hiker is walking past shopfronts -> establish the starting state, "
     "nothing to report:\n"
-    '{"seen":"hiker walking past town shopfronts","have_enough_info":false,"phase":"city street","fps":1.0,"question_for_next":"currently: city street; has the setting changed?"}\n'
-    "At 12s still on the street (phase unchanged, question unchanged -> stay short):\n"
-    '{"seen":"same street, crossing at a light","have_enough_info":false,"phase":"city street"}\n'
+    '{"seen":"hiker walking past town shopfronts","have_enough_info":false,"fps":1.0,"question_for_next":"currently: city street; has the setting changed?"}\n'
+    "At 12s still on the street (state unchanged, question unchanged -> stay short):\n"
+    '{"seen":"same street, crossing at a light","have_enough_info":false}\n'
     "At 19s the shot is now a narrow path under trees -> the state CHANGED; the answer "
     "is the NEW state's bare name, not a sentence about the change:\n"
-    '{"seen":"narrow path under tall trees","have_enough_info":true,"event_time_s":19,"phase":"forest trail","answer":"forest trail","question_for_next":"currently: forest trail; has the setting changed?"}\n'
+    '{"seen":"narrow path under tall trees","have_enough_info":true,"event_time_s":19,"answer":"forest trail","question_for_next":"currently: forest trail; has the setting changed?"}\n'
     "At 21s still the same trail, the change already reported -> keep it true with the "
     "SAME answer (the system will not double-alert):\n"
-    '{"seen":"still walking the forest trail","have_enough_info":true,"event_time_s":19,"phase":"forest trail","answer":"forest trail"}\n'
+    '{"seen":"still walking the forest trail","have_enough_info":true,"event_time_s":19,"answer":"forest trail"}\n'
     "At 30s the trail is clearly the settled state -> drop to false so the NEXT change "
     "can fire:\n"
-    '{"seen":"trail continues through the trees","have_enough_info":false,"phase":"forest trail"}\n'
+    '{"seen":"trail continues through the trees","have_enough_info":false}\n'
     "At 52s the trees open onto stones and water -> a NEW change:\n"
-    '{"seen":"open water and stony shoreline","have_enough_info":true,"event_time_s":52,"phase":"rocky lake shore","answer":"rocky lake shore","question_for_next":"currently: rocky lake shore; has the setting changed?"}\n'
+    '{"seen":"open water and stony shoreline","have_enough_info":true,"event_time_s":52,"answer":"rocky lake shore","question_for_next":"currently: rocky lake shore; has the setting changed?"}\n'
     "At 58s a two-second insert of the map on his phone, then straight back to the "
     "shore -> a flash, NOT a state change:\n"
-    '{"seen":"brief map insert, back to shore","have_enough_info":false,"phase":"rocky lake shore"}\n'
+    '{"seen":"brief map insert, back to shore","have_enough_info":false}\n'
     "Second worked example, ONE tick only, to show the copy-the-task-wording rule "
     "(task: 'Monitor Jeffrey's posture and update me when he switches between walking, "
     "standing, or sitting.'). He was standing; at 88s he lowers himself into a chair. "
     "The task lists the states, so the answer is that list's word, verbatim — 'sitting', "
     "NOT 'sitting down', 'seated' or 'Jeffrey switched from standing to sitting.':\n"
-    '{"seen":"Jeffrey lowering himself into a chair","have_enough_info":true,"event_time_s":88,"phase":"sitting","answer":"sitting","question_for_next":"currently: sitting; has his posture changed?"}\n'
+    '{"seen":"Jeffrey lowering himself into a chair","have_enough_info":true,"event_time_s":88,"answer":"sitting","question_for_next":"currently: sitting; has his posture changed?"}\n'
 )
 
 _REALTIME_STATE_MONITOR = (_ROLE_REALTIME_STATE_MONITOR + _FORMAT_BLOCK_STATE
@@ -773,11 +793,15 @@ NEW_TASKS: tuple[str, ...] = (
 # seen / have_enough_info / event_time_s / answer / fps / next_check_s /
 # question_for_next. NOTE: controller.py drops unknown keys today — see the module
 # docstring ("IMPORTANT IMPLEMENTATION CAVEAT").
+# PARKED 2026-08-12 (TODO-7BC in controller.py): every entry is now empty. The
+# fields are commented out of the format blocks, so declaring them here would
+# promise a slot no prompt teaches. The dict itself stays — it is the registry
+# the re-enable flips back on, one task at a time.
 TASK_STATE_FIELDS: dict[str, tuple[str, ...]] = {
-    "snapshot_counting": ("count",),
-    "cumulative_counting": ("count",),
-    "dedup_counting": ("count",),
-    "realtime_state_monitor": ("phase",),
+    "snapshot_counting": (),            # was ("count",)
+    "cumulative_counting": (),          # was ("count",)
+    "dedup_counting": (),               # was ("count",)
+    "realtime_state_monitor": (),       # was ("phase",)
     "event_narration": (),
     "sequential_step_instruction": (),
 }

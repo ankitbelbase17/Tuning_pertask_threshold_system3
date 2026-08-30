@@ -1,0 +1,32 @@
+{
+ "subset_off": 0,
+ "n": 15,
+ "audio_mix": {
+  "required": 7,
+  "helpful": 2,
+  "none": 6
+ },
+ "duration_s": {
+  "min": 45.7,
+  "max": 510.4,
+  "sum": 2626.7
+ },
+ "n_gt": 73,
+ "ids": [
+  "realtime_state_monitor::-PzoRugR-nk::25",
+  "realtime_state_monitor::1NEm6ScZkz0::284",
+  "realtime_state_monitor::2cSIAapg7rU::157",
+  "realtime_state_monitor::4bveRsmZyXI::235",
+  "realtime_state_monitor::8-rZjTmOcdU::169",
+  "realtime_state_monitor::BcFpM4upfxo::14",
+  "realtime_state_monitor::DL-cZQ4E318::104",
+  "realtime_state_monitor::L1ZkHoirlmo::199",
+  "realtime_state_monitor::PZB-IvTq1u8::85",
+  "realtime_state_monitor::UqCRnhHPaF0::200",
+  "realtime_state_monitor::Xum6znImE18::67",
+  "realtime_state_monitor::lT1wTF2LJHs::60",
+  "realtime_state_monitor::oEqor1rscMY::123",
+  "realtime_state_monitor::qH7vE-Jpiz0::215",
+  "realtime_state_monitor::urG3lSOOcW0::253"
+ ]
+}

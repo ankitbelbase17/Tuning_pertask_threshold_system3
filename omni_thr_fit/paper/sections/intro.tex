@@ -1,0 +1,55 @@
+\section{Introduction}
+\label{sec:intro}
+
+A proactive streaming assistant watches a video as it arrives and must decide, at
+every moment, whether to speak. Almost universally that decision is implemented as
+a scalar confidence compared against a threshold, and almost as universally the
+threshold is tuned per task, because different tasks plainly want different
+eagerness: an alert that fires once per video is not the same object as a running
+commentary. Tuning nine thresholds for nine tasks and reporting the resulting gain
+is a standard move.
+
+This paper performs that fit carefully for Qwen2.5-Omni-7B on OmniPro Online, and
+reports that it does not work --- along with the measurements that establish
+\emph{why} it does not, and the one intervention on the same gate that does.
+
+We make three contributions.
+
+\paragraph{An audit that the fitted quantity is the used quantity.} Before fitting,
+we found that the shipped gate ignored the parameter we intended to fit: its fire
+test was a fixed global $0.5$, and the per-task threshold table, the gate mode and
+the refractory period were inert. We also found that $p_{\mathrm{hit}}$ is high on
+the first tick of every video --- the model answers the gating question from the
+prompt before it has seen any of the video --- which under an edge-triggered gate
+with a long refractory consumed an entire video's emission budget at $t=1.0$\,s.
+Both are repaired before any number in this paper is measured. We report them
+because a fit of an inert parameter is the failure mode that a well-run grid search
+is least able to detect on its own.
+
+\paragraph{A test of whether a fitted threshold is a measurement.} A grid of ten
+cells scored on fifteen videos always has a maximum. We test each selection by a
+paired bootstrap over videos that replays the actual selection rule, and report a
+re-selection rate against chance alongside a confidence interval on the difference
+from the best rival. Under this test no task's fitted threshold beats its own best
+alternative outside noise, and the fits re-select themselves 25--61\,\% of the time
+--- one of them at 6\,\%, below its 8\,\% chance rate. Two apparent fits dissolve
+entirely on inspection: one task scores exactly $0.000$ at all ten thresholds, and
+another's entire threshold curve is one matched event, or zero, out of sixteen.
+
+\paragraph{A mechanism, and a positive result.} The reason is measurable rather
+than conjectural: $p_{\mathrm{hit}}$ does not rank event-adjacent ticks above quiet
+ones. Per-task AUC is $0.431$--$0.551$ with every 95\,\% interval containing $0.5$,
+and this survives a $\pm 10$\,s sweep of the tick clock, a widened $\pm 10$\,s
+tolerance, and a check that the score is not degenerate (232--284 distinct values
+spanning $0.000$--$0.997$). A threshold applied to a score that cannot say
+\emph{when} can only buy emission \emph{volume} --- and volume has exactly one
+useful setting. Pooled over 135 videos the single global operating point is
+identified and stable, re-selected in 94\,\% of resamples, and moving it from the
+shipped gate's effective $0.5$ is the one change here with a reproducible effect.
+Split nine ways over fifteen videos each, the same quantity is not identifiable at
+all.
+
+The result is therefore not that thresholds do not matter. It is that this gate has
+one identifiable degree of freedom rather than nine, and that the difference
+between those two statements is invisible to any protocol that reports an argmax
+without asking whether it recurs.

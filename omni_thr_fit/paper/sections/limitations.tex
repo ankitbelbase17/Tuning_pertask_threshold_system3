@@ -1,0 +1,40 @@
+\section{Limitations}
+\label{sec:limitations}
+
+\paragraph{The fit subset is small, and the negative results are bounded by it.}
+Thresholds are fitted on 15 videos per task. The AUC confidence intervals
+straddle $0.5$ and the per-task $\Delta$F1 intervals straddle zero; the claim these
+support is \emph{indistinguishable from chance at this $n$}, never \emph{proven to
+be chance}. The same audits are re-run on the full 2{,}700-sample evaluation, where
+$n=300$ per task, and that is where the claim should be read at full strength.
+
+\paragraph{Two arms of the ablation are approximations.} \texttt{shipped\_per\_task}
+uses values such as $0.992$ and $0.985$ that no cell was ever run at, and $0.5$ is
+not a grid point either --- the grid steps $0.45 \to 0.55$, so the
+\emph{global 0.5} row is in fact measured at $0.45$. Each substitution and its
+distance is recorded, and these rows must be read as approximations. Only the
+\emph{best single global} and \emph{fitted per-task} rows are exact.
+
+\paragraph{The best single global threshold is itself an argmax.} We test it the
+same way we test the per-task fits --- re-running the sweep inside every bootstrap
+draw --- and it survives at a 94\,\% re-selection rate. That is evidence of
+stability on this subset, not a guarantee that $0.15$ transfers; the held-out
+evaluation is the arbiter.
+
+\paragraph{Content metrics are withheld, not measured.} The judge was unreachable
+for these runs, so content-acc and joint-F1 are \WITHHELD\ throughout. Selection
+ran on time-F1, a documented deviation from the pre-registered joint-F1. It is
+possible that a threshold which is indistinguishable in timing is separable in
+content quality; that possibility is untested here, and it is the single largest
+gap in this study.
+
+\paragraph{One backbone, one benchmark.} All results are for Qwen2.5-Omni-7B on
+OmniPro Online. The claim that a per-task threshold table is unidentifiable at this
+sample size is a claim about the interaction of this score's ranking quality with
+this benchmark's per-task sample count. A backbone whose $p_{\mathrm{hit}}$ ranked
+events well would plausibly support per-task fitting on the same data.
+
+\paragraph{The evaluation is not bit-reproducible.} Run-to-run variance on a fixed
+configuration reached time-F1 $0.255$ versus $0.051$ on one task. Every comparison
+here is made against a $0.03$ noise floor declared in advance, but individual cell
+values should not be read to more precision than that floor allows.

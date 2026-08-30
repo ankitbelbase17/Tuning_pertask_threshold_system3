@@ -1,0 +1,167 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 720" width="1600" height="720" font-family="Inter, 'Helvetica Neue', Arial, sans-serif">
+
+  <defs>
+    <marker id="aGray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M0,1.5 L9,5 L0,8.5 z" fill="#9A9289"/>
+    </marker>
+    <marker id="aInk" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M0,1.5 L9,5 L0,8.5 z" fill="#2B2926"/>
+    </marker>
+    <marker id="aAmber" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M0,1.5 L9,5 L0,8.5 z" fill="#D9902A"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1600" height="720" fill="#FBFAF7"/>
+
+  <!-- ============ THE REPROGRAMMABLE BOX ============ -->
+  <rect x="380" y="60" width="840" height="460" rx="10" fill="#FEFDFB" stroke="#9A9289" stroke-width="1.8"/>
+  <text x="404" y="96" font-size="13" letter-spacing="2.2" fill="#9A9289">STREAMING VLM</text>
+
+  <!-- ============ LEFT : TASK ============ -->
+  <line x1="56" y1="72" x2="56" y2="128" stroke="#C9C2B8" stroke-width="2"/>
+  <text x="70" y="90" font-size="13" letter-spacing="2.2" fill="#9A9289">TASK</text>
+  <text x="70" y="120" font-size="18" fill="#2B2926">Tell me when a player scores.</text>
+  <path d="M348,114 C500,108 650,112 790,120" fill="none" stroke="#9A9289" stroke-width="1.6" marker-end="url(#aGray)"/>
+
+  <!-- ============ LEFT : VIDEO STREAM ============ -->
+  <text x="60" y="236" font-size="13" letter-spacing="2.2" fill="#9A9289">VIDEO STREAM</text>
+  <g>
+    <rect x="12" y="256" width="34" height="44" rx="3" fill="#D7E6EF" stroke="#7FA6C0" stroke-width="1.2" opacity="0.3"/>
+    <g fill="#D7E6EF" stroke="#7FA6C0" stroke-width="1.2">
+      <rect x="60"  y="256" width="40" height="44" rx="3"/>
+      <rect x="108" y="256" width="40" height="44" rx="3"/>
+      <rect x="156" y="256" width="40" height="44" rx="3"/>
+      <rect x="204" y="256" width="40" height="44" rx="3"/>
+      <rect x="252" y="256" width="40" height="44" rx="3"/>
+      <rect x="300" y="256" width="40" height="44" rx="3"/>
+    </g>
+    <g stroke="#B4CFE0" stroke-width="0.9">
+      <line x1="73"  y1="256" x2="73"  y2="300"/><line x1="87"  y1="256" x2="87"  y2="300"/><line x1="60"  y1="278" x2="100" y2="278"/>
+      <line x1="121" y1="256" x2="121" y2="300"/><line x1="135" y1="256" x2="135" y2="300"/><line x1="108" y1="278" x2="148" y2="278"/>
+      <line x1="169" y1="256" x2="169" y2="300"/><line x1="183" y1="256" x2="183" y2="300"/><line x1="156" y1="278" x2="196" y2="278"/>
+      <line x1="217" y1="256" x2="217" y2="300"/><line x1="231" y1="256" x2="231" y2="300"/><line x1="204" y1="278" x2="244" y2="278"/>
+      <line x1="265" y1="256" x2="265" y2="300"/><line x1="279" y1="256" x2="279" y2="300"/><line x1="252" y1="278" x2="292" y2="278"/>
+      <line x1="313" y1="256" x2="313" y2="300"/><line x1="327" y1="256" x2="327" y2="300"/><line x1="300" y1="278" x2="340" y2="278"/>
+    </g>
+  </g>
+  <text x="60" y="324" font-size="14" font-style="italic" fill="#9A9289">arrives at a constant rate</text>
+
+  <!-- ============ APERTURE ============ -->
+  <rect x="371" y="246" width="16" height="90" rx="3" fill="#FBEFD8" stroke="#D9902A" stroke-width="1.8"/>
+
+  <!-- what got through : kept / pruned / skipped -->
+  <g>
+    <rect x="406" y="256" width="40" height="44" rx="3" fill="#D7E6EF" stroke="#7FA6C0" stroke-width="1.2"/>
+    <g stroke="#B4CFE0" stroke-width="0.9">
+      <line x1="419" y1="256" x2="419" y2="300"/><line x1="433" y1="256" x2="433" y2="300"/><line x1="406" y1="278" x2="446" y2="278"/>
+    </g>
+    <rect x="462" y="256" width="40" height="44" rx="3" fill="#FFFFFF" stroke="#B4CFE0" stroke-width="1.2"/>
+    <g>
+      <rect x="465" y="259" width="10" height="18" fill="#EFF5F9"/>
+      <rect x="477" y="259" width="10" height="18" fill="#89B4CE"/>
+      <rect x="489" y="259" width="10" height="18" fill="#EFF5F9"/>
+      <rect x="465" y="279" width="10" height="18" fill="#89B4CE"/>
+      <rect x="477" y="279" width="10" height="18" fill="#EFF5F9"/>
+      <rect x="489" y="279" width="10" height="18" fill="#EFF5F9"/>
+    </g>
+    <rect x="518" y="256" width="40" height="44" rx="3" fill="none" stroke="#D8D2C8" stroke-width="1.2" stroke-dasharray="4,3"/>
+  </g>
+  <text x="406" y="324" font-size="14" font-style="italic" fill="#9A9289">only what the plan asked for</text>
+
+  <path d="M566,278 L590,278" fill="none" stroke="#9A9289" stroke-width="1.6" marker-end="url(#aGray)"/>
+
+  <!-- ============ ENCODER ============ -->
+  <rect x="600" y="246" width="130" height="68" rx="6" fill="#F2EFEA" stroke="#9A9289" stroke-width="1.4"/>
+  <text x="659" y="286" font-size="18" fill="#2B2926" text-anchor="middle">Encoder</text>
+  <g transform="translate(714,262)" stroke="#94A7B5" stroke-width="1.3" stroke-linecap="round">
+    <line x1="0" y1="-7" x2="0" y2="7"/><line x1="-6.1" y1="-3.5" x2="6.1" y2="3.5"/><line x1="-6.1" y1="3.5" x2="6.1" y2="-3.5"/>
+  </g>
+
+  <!-- ============ CONFIG (sits directly above its author) ============ -->
+  <rect x="800" y="86" width="390" height="124" rx="8" fill="#FBEFD8" stroke="#D9902A" stroke-width="2"/>
+  <text x="822" y="116" font-size="13" letter-spacing="2.2" fill="#A96C0E">CONFIG</text>
+  <g font-family="'DejaVu Sans Mono', 'SF Mono', Menlo, monospace" font-size="15" fill="#4A453F">
+    <text x="822" y="146">look:      penalty area</text>
+    <text x="822" y="172">sample:    3 fps</text>
+    <text x="822" y="198">keep:      last 30s verbatim</text>
+  </g>
+
+  <!-- taps : everything inside is set by the config -->
+  <g stroke="#D9902A" stroke-width="1.8" fill="none" stroke-dasharray="5,4">
+    <path d="M824,214 C700,244 500,232 392,250" marker-end="url(#aAmber)"/>
+    <path d="M852,214 C800,226 704,232 664,240" marker-end="url(#aAmber)"/>
+    <path d="M900,214 L900,392" marker-end="url(#aAmber)"/>
+    <path d="M1000,214 L1000,252" marker-end="url(#aAmber)"/>
+  </g>
+
+  <!-- ============ THINKING LLM ============ -->
+  <rect x="960" y="256" width="230" height="94" rx="8" fill="#FFFFFF" stroke="#2B2926" stroke-width="2.2"/>
+  <text x="1069" y="300" font-size="21" font-weight="600" fill="#2B2926" text-anchor="middle">Thinking LLM</text>
+  <g transform="translate(1166,274)" stroke="#94A7B5" stroke-width="1.3" stroke-linecap="round">
+    <line x1="0" y1="-7" x2="0" y2="7"/><line x1="-6.1" y1="-3.5" x2="6.1" y2="3.5"/><line x1="-6.1" y1="3.5" x2="6.1" y2="-3.5"/>
+  </g>
+
+  <!-- it writes the config -->
+  <path d="M1120,254 L1120,216" fill="none" stroke="#D9902A" stroke-width="2.6" marker-end="url(#aAmber)"/>
+  <text x="1132" y="240" font-size="15" font-weight="600" fill="#A96C0E">writes</text>
+
+  <!-- ============ KV CACHE, INSIDE THE BOX ============ -->
+  <text x="640" y="386" font-size="13" letter-spacing="2.2" fill="#9A9289">KV CACHE</text>
+  <g>
+    <rect x="640" y="400" width="32" height="44" rx="2" fill="#E2DCD3" stroke="#C9C2B8" stroke-width="1"/>
+    <rect x="678" y="400" width="32" height="44" rx="2" fill="#E2DCD3" stroke="#C9C2B8" stroke-width="1"/>
+    <rect x="716" y="400" width="32" height="44" rx="2" fill="#E2DCD3" stroke="#C9C2B8" stroke-width="1"/>
+    <rect x="754" y="400" width="32" height="44" rx="2" fill="#E2DCD3" stroke="#C9C2B8" stroke-width="1"/>
+  </g>
+  <g fill="#B4CFE0">
+    <rect x="810" y="400" width="6" height="44"/><rect x="821" y="400" width="6" height="44"/>
+    <rect x="832" y="400" width="6" height="44"/><rect x="843" y="400" width="6" height="44"/>
+    <rect x="854" y="400" width="6" height="44"/><rect x="865" y="400" width="6" height="44"/>
+    <rect x="876" y="400" width="6" height="44"/><rect x="887" y="400" width="6" height="44"/>
+    <rect x="898" y="400" width="6" height="44"/><rect x="909" y="400" width="6" height="44"/>
+    <rect x="920" y="400" width="6" height="44"/><rect x="931" y="400" width="6" height="44"/>
+    <rect x="942" y="400" width="6" height="44"/><rect x="953" y="400" width="6" height="44"/>
+    <rect x="964" y="400" width="6" height="44"/><rect x="975" y="400" width="6" height="44"/>
+    <rect x="986" y="400" width="6" height="44"/><rect x="997" y="400" width="6" height="44"/>
+    <rect x="1008" y="400" width="6" height="44"/><rect x="1019" y="400" width="6" height="44"/>
+    <rect x="1030" y="400" width="6" height="44"/><rect x="1041" y="400" width="6" height="44"/>
+    <rect x="1052" y="400" width="6" height="44"/><rect x="1063" y="400" width="6" height="44"/>
+    <rect x="1074" y="400" width="6" height="44"/><rect x="1085" y="400" width="6" height="44"/>
+    <rect x="1096" y="400" width="6" height="44"/><rect x="1107" y="400" width="6" height="44"/>
+    <rect x="1118" y="400" width="6" height="44"/><rect x="1129" y="400" width="6" height="44"/>
+    <rect x="1140" y="400" width="6" height="44"/><rect x="1151" y="400" width="6" height="44"/>
+    <rect x="1162" y="400" width="6" height="44"/><rect x="1173" y="400" width="6" height="44"/>
+  </g>
+  <text x="640" y="462" font-size="12" letter-spacing="1.2" fill="#9A9289">COMPACTED</text>
+  <text x="810" y="462" font-size="12" letter-spacing="1.2" fill="#9A9289">VERBATIM</text>
+  <text x="640" y="492" font-size="14" font-style="italic" fill="#9A9289">the config decides what to keep, what to compact, what to drop</text>
+
+  <!-- thinking llm reads the cache -->
+  <path d="M1069,396 L1069,356" fill="none" stroke="#9A9289" stroke-width="1.6" marker-end="url(#aGray)"/>
+  <text x="1082" y="380" font-size="14" fill="#9A9289">reads</text>
+
+  <!-- ============ INGEST LLM : OUTSIDE THE BOX ============ -->
+  <path d="M620,316 C596,400 540,500 502,552" fill="none" stroke="#9A9289" stroke-width="1.6" marker-end="url(#aGray)"/>
+  <rect x="406" y="560" width="176" height="72" rx="8" fill="#FFFFFF" stroke="#2B2926" stroke-width="1.8"/>
+  <text x="484" y="604" font-size="19" font-weight="600" fill="#2B2926" text-anchor="middle">Ingest LLM</text>
+  <g transform="translate(560,578)" stroke="#94A7B5" stroke-width="1.3" stroke-linecap="round">
+    <line x1="0" y1="-7" x2="0" y2="7"/><line x1="-6.1" y1="-3.5" x2="6.1" y2="3.5"/><line x1="-6.1" y1="3.5" x2="6.1" y2="-3.5"/>
+  </g>
+  <path d="M584,592 C620,570 622,480 636,432" fill="none" stroke="#9A9289" stroke-width="1.6" marker-end="url(#aGray)"/>
+  <text x="406" y="660" font-size="14" font-style="italic" fill="#9A9289">outside the box — nothing here is reconfigured</text>
+
+  <!-- ============ RIGHT : RESPONSE ============ -->
+  <path d="M1190,300 C1216,302 1230,304 1248,306" fill="none" stroke="#2B2926" stroke-width="2" marker-end="url(#aInk)"/>
+  <line x1="1264" y1="260" x2="1264" y2="316" stroke="#C9C2B8" stroke-width="2"/>
+  <text x="1278" y="278" font-size="13" letter-spacing="2.2" fill="#9A9289">RESPONSE</text>
+  <text x="1278" y="308" font-size="18" fill="#2B2926">0:42 — a goal was scored.</text>
+  <text x="1278" y="334" font-size="14" font-style="italic" fill="#9A9289">spoken the moment it matters</text>
+
+  <!-- ============ LEGEND ============ -->
+  <g transform="translate(70,650)" stroke="#94A7B5" stroke-width="1.3" stroke-linecap="round">
+    <line x1="0" y1="-7" x2="0" y2="7"/><line x1="-6.1" y1="-3.5" x2="6.1" y2="3.5"/><line x1="-6.1" y1="3.5" x2="6.1" y2="-3.5"/>
+  </g>
+  <text x="88" y="655" font-size="14" font-style="italic" fill="#9A9289">every component is frozen — nothing is ever trained</text>
+
+</svg>

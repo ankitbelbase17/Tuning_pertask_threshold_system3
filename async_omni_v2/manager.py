@@ -52,6 +52,20 @@ class KVCacheManager:
         self.next_pos = 0                 # logical RoPE clock
         self.sink = 0                     # protected prefix length (system prompt)
         self._lock = threading.Lock()     # guards PRIMARY mutations + snapshot
+        # (label, phys0, pos0) while a reader is generating IN PLACE on the
+        # primary; None otherwise. See borrow_begin().
+        self._borrowed = None
+
+        # ---- TMRoPE chunk anchor (FORK: system3_qwem_omni) -----------------
+        # "start_idx" in the reference Qwen2_5Omni.get_rope_index, walked
+        # forward incrementally instead of computed from a fully-known
+        # sequence -- see backend.tmrope_position_ids's module docstring for
+        # the full derivation. Reset only at an audio-chunk boundary (i.e. by
+        # ingest(token_kind="audio")), so every vision frame ingested while
+        # one ~2s audio window is still open shares the same coordinate
+        # system as the audio that will close it.
+        self.chunk_anchor_pos = 0
+        self.chunk_anchor_vt = 0.0
 
     # ---- profiling helper ----
     def _rec(self, label, dur, wait):
@@ -62,9 +76,59 @@ class KVCacheManager:
     def _len(self):
         return self.cache.get_seq_length()
 
-    def _forward_primary(self, embeds):
+    def _forward_primary(self, embeds, token_kind="text", real_seconds=None, grid_hw=None):
         # ingest/seed only build the KV cache; they never read logits -> skip the
         # lm_head (want_logits=False) so every frame prefill is a bit cheaper.
+        #
+        # FORK (system3_qwem_omni): when TMRoPE is on and this chunk carries
+        # real-world timing (vision/audio), build actual 3D positions instead
+        # of letting backend.forward() fall back to the flat-linear default.
+        # token_kind="text" (the default -- every call site EXCEPT the new
+        # audio/vision ones in input_ingester.py is unaffected) always takes
+        # the old path.
+        position_ids = None
+        if getattr(self.b.cfg, "tmrope_positions", False) and token_kind != "text":
+            from backend import tmrope_position_ids
+            L = embeds.shape[1]
+            local_seconds = 0.0 if real_seconds is None else (real_seconds - self.chunk_anchor_vt)
+            position_ids, new_anchor = tmrope_position_ids(
+                token_kind, L, self.chunk_anchor_pos, local_seconds=local_seconds,
+                grid_hw=grid_hw, per_second=self.b.cfg.audio_position_id_per_seconds,
+                device=self.b.device)
+            _, self.cache = self.b.forward(
+                embeds, self.cache, pos_start=self.next_pos, phys_start=self._len(),
+                want_logits=False, position_ids=position_ids)
+            # audio always advances the running counter AND closes the chunk
+            # (next frame opens a fresh coordinate window); vision advances
+            # only "one past this frame's own tick" -- more frames may still
+            # land in the SAME open chunk. See tmrope_position_ids docstring.
+            self.next_pos = new_anchor
+            # LOUD, NOT SILENT (config.py's model_max_position_embeddings
+            # comment explains why this fires much sooner on this backend
+            # than the parent's identically-shaped eviction guard below):
+            # the position clock can exceed the model's TRAINED RoPE range
+            # long before kv_budget forces an eviction. A frozen model asked
+            # to attend past its trained positions does not error -- it just
+            # degrades, silently, which is precisely the failure mode this
+            # project's own LEARNINGS.md spent two weeks hunting instances of.
+            max_pos = getattr(self.b.cfg, "model_max_position_embeddings", None)
+            if max_pos and self.next_pos > max_pos and not getattr(self, "_rope_warned", False):
+                self._rope_warned = True
+                print(f"[manager] WARNING: position clock ({self.next_pos}) has exceeded "
+                      f"model_max_position_embeddings ({max_pos}). The model is now "
+                      f"attending at RoPE positions it was never trained on. This is "
+                      f"NOT a crash -- generation will continue and look plausible --  "
+                      f"but results from this point in the stream onward are suspect. "
+                      f"See config.py's model_max_position_embeddings comment / "
+                      f"OMNI_EXTENSION.md sec 5.3 (ROADMAP 1.5 position re-basing is "
+                      f"the real fix, not implemented here).", flush=True)
+            if token_kind == "audio":
+                self.chunk_anchor_pos = new_anchor
+                # chunk_anchor_vt is set by the caller (input_ingester.py)
+                # right before the NEXT chunk's first frame, not here --
+                # the manager does not track wall-clock time on its own.
+            return None
+
         _, self.cache = self.b.forward(
             embeds, self.cache, pos_start=self.next_pos, phys_start=self._len(),
             want_logits=False)
@@ -133,13 +197,21 @@ class KVCacheManager:
         self._rec("seed", t2 - t1, t1 - t0)
         return self.sink
 
-    def ingest(self, embeds):
-        """Append projected visual (or text) tokens to the primary cache.
-        ONLY the orchestrator thread calls this -> single-writer, no conflict."""
+    def ingest(self, embeds, token_kind="text", real_seconds=None, grid_hw=None):
+        """Append projected visual / audio (or text) tokens to the primary
+        cache. ONLY the ingester thread calls this -> single-writer, no
+        conflict.
+
+        token_kind/real_seconds/grid_hw (FORK: system3_qwem_omni, all
+        optional, default preserves the old text-only behaviour exactly):
+        see backend.tmrope_position_ids. token_kind="audio" additionally
+        closes the current TMRoPE chunk (see _forward_primary)."""
         t0 = time.time()
+        self._assert_not_borrowed("ingest")
         with self._lock:
             t1 = time.time()
-            self._forward_primary(embeds)
+            self._forward_primary(embeds, token_kind=token_kind,
+                                  real_seconds=real_seconds, grid_hw=grid_hw)
             if self._sync:
                 torch.cuda.synchronize()
             t2 = time.time()
@@ -147,6 +219,9 @@ class KVCacheManager:
 
     def evict(self):
         t0 = time.time()
+        # eviction re-lays the physical window, so a borrow's saved phys0 would no
+        # longer mean what it meant. Never evict mid-borrow.
+        self._assert_not_borrowed("evict")
         with self._lock:
             t1 = time.time()
             dropped = self._evict_locked()
@@ -162,6 +237,7 @@ class KVCacheManager:
         the probe (truncate + restore the logical clock) so it leaves no trace."""
         from proactivity import yes_share
         t0 = time.time()
+        self._assert_not_borrowed("probe")
         with self._lock:
             t1 = time.time()
             phys0, pos0 = self._len(), self.next_pos
@@ -177,11 +253,75 @@ class KVCacheManager:
         self._rec(label, t2 - t1, t1 - t0)
         return share
 
+    # ---- IN-PLACE READ (the snapshot-free path) -------------------------------
+    # `probe()` above already proves the mechanism: splice onto the PRIMARY, read,
+    # truncate back. borrow_begin/borrow_end is the same trick opened up so a
+    # caller can run a whole multi-token generation between the two, instead of a
+    # single forward. It exists because snapshot_clone() copies the ENTIRE cache
+    # every tick -- 144 KB/token, so ~8 GB on a 300 s clip -- purely to protect the
+    # reader from a concurrent writer.
+    #
+    # WHEN THAT PROTECTION IS WORTH NOTHING: in lockstep (cfg.deterministic=True,
+    # which is every benchmark number -- MISSION §6) the ingester is parked in
+    # `while clock.get_next_check() <= vt: sleep(0.002)` for the whole duration of
+    # a controller tick. There is no concurrent writer to protect against. The copy
+    # is pure cost.
+    #
+    # We do NOT hold the lock across the generation. Holding it for the 2-4 s of a
+    # tick would make a free-running ingester block on the cache, which breaks
+    # INVARIANT 2. Instead the borrow is DECLARED: `_borrowed` is set, and every
+    # primary mutation refuses loudly while it is. A silent corruption (an ingested
+    # frame landing inside the borrow, then being truncated away by borrow_end)
+    # becomes an immediate, named exception.
+    def borrow_begin(self, label="borrow"):
+        """Lend the PRIMARY cache to a reader. Returns (pos, phys) to generate at.
+
+        The reader appends to `self.cache` exactly as it would to a clone, using
+        the same pos_start/phys_start -- identical prefix, identical positions,
+        therefore identical logits. `borrow_end()` erases every appended token."""
+        t0 = time.time()
+        with self._lock:
+            if self._borrowed is not None:
+                raise RuntimeError(
+                    f"borrow_begin({label}) while cache is already borrowed by "
+                    f"{self._borrowed[0]!r} -- two readers cannot share the primary")
+            self._borrowed = (label, self._len(), self.next_pos)
+        self._rec(f"{label}.begin", 0.0, time.time() - t0)
+        return self._borrowed[2], self._borrowed[1]      # (pos, phys)
+
+    def borrow_end(self):
+        """Erase the borrow: truncate back to the pre-borrow length and restore the
+        logical clock. Idempotent -- safe to call when nothing is borrowed."""
+        if self._borrowed is None:
+            return
+        label, phys0, pos0 = self._borrowed
+        t0 = time.time()
+        with self._lock:
+            t1 = time.time()
+            self._truncate(phys0)
+            self.next_pos = pos0
+            if self._sync:
+                torch.cuda.synchronize()
+            t2 = time.time()
+            self._borrowed = None
+        self._rec(f"{label}.end", t2 - t1, t1 - t0)
+
+    def _assert_not_borrowed(self, op):
+        if self._borrowed is not None:
+            raise RuntimeError(
+                f"{op}() on the primary cache while it is borrowed by "
+                f"{self._borrowed[0]!r}. In lockstep this cannot happen (the "
+                f"ingester waits on the clock); if you see it, the caller is "
+                f"running free and must use snapshot_clone() instead.")
+
     def snapshot_clone(self):
         """MVCC read snapshot: return an INDEPENDENT clone of the primary cache
         plus its logical position + physical length. The caller (writer) then
         generates on the clone holding no lock, fully concurrent with the
-        orchestrator's ongoing mutations of the primary."""
+        orchestrator's ongoing mutations of the primary.
+
+        Costs a full deep copy of the cache on EVERY call. See borrow_begin() for
+        the snapshot-free path used when there is provably no concurrent writer."""
         t0 = time.time()
         with self._lock:
             t1 = time.time()

@@ -1,0 +1,63 @@
+\section{Discussion}
+\label{sec:discussion}
+
+\subsection{One degree of freedom, not nine}
+
+The three measurements in this paper are one mechanism observed three ways. AUC
+says $p_{\mathrm{hit}}$ cannot rank moments within a video. Per-sample precision
+being flat across the entire threshold grid, while recall falls monotonically, is
+the same fact expressed in the metric we optimise: firing less often buys no
+precision, which is exactly what a ranking statistic at chance predicts. And the
+selection audit says that what remains --- a shallow, noisy dependence of F1 on
+emission volume --- is not enough to identify nine separate operating points from
+fifteen videos each.
+
+What makes the result more than a null is that the same quantity \emph{is}
+identifiable when the data are pooled. The single global threshold re-selects at
+94\,\% against a 10\,\% chance rate, while the per-task fits sit at 25--61\,\%.
+Nothing about the tasks changed between those two numbers; only the number of
+videos backing each estimate did. This is a statistical power statement, not a
+claim that the tasks are secretly identical --- their curves do differ, they are
+simply each estimated too noisily to rank.
+
+\subsection{Why a per-task table is the tempting wrong answer}
+
+Per-task thresholds are attractive because the tasks genuinely differ in emission
+rate, and because a per-task table always fits the fitting set better than a single
+value. Our fitted arm does score highest in Table~\ref{tab:ablation}. It is only
+when the comparison is made \emph{paired}, against the best single global
+threshold, that the advantage turns out to be $+0.0075$ with an interval from
+$-0.011$ to $+0.027$ --- and that comparison is in-sample, where nine free
+parameters are given every advantage over one and still fail to separate. A study
+that stopped at the four point estimates would have reported a per-task gain in
+good faith.
+
+\subsection{What would have to be true for per-task fitting to work}
+
+The obstruction is ranking quality, not grid resolution, and this distinction has a
+practical consequence: widening or refining the grid cannot help, because no
+threshold recovers information the score does not carry. Two things would change
+the answer. First, a gating score that actually ranks event-adjacent ticks above
+quiet ones --- AUC meaningfully above $0.5$ --- would make precision respond to the
+threshold, and per-task optima would become separable. Second, more videos per task
+would shrink the per-task intervals; our own pooled result is the existence proof
+that the estimator works given enough data. The two are not independent: the number
+of videos needed scales with how weakly the score ranks.
+
+\subsection{Implications for how streaming gates are reported}
+
+We would draw a general methodological point from a specific negative result. A
+per-task threshold table is a set of fitted parameters, and it should be held to
+the standard applied to fitted parameters: a demonstration that the values recur
+under resampling, and a comparison against the simplest model that could explain
+the same data --- here, one global threshold. Both tests are cheap, since they
+re-use the runs already performed and cost no additional GPU time. Neither is
+standard practice, and in this study each of them independently overturns the
+conclusion that the point estimates alone would have supported.
+
+Finally, the two defects in Section~\ref{sec:method} deserve emphasis beyond this
+system. The inert threshold would not have been visible in any aggregate metric:
+the system ran, emitted, and scored plausibly, and the fitted values were simply
+being ignored. It was found by checking that no fire had ever occurred below the
+global constant, which is a check on the mechanism rather than on the result. A
+grid search cannot detect that the parameter it is sweeping is disconnected.

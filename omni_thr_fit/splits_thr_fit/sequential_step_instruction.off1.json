@@ -1,0 +1,32 @@
+{
+ "subset_off": 1,
+ "n": 15,
+ "audio_mix": {
+  "required": 10,
+  "helpful": 4,
+  "none": 1
+ },
+ "duration_s": {
+  "min": 36.6,
+  "max": 419.8,
+  "sum": 2565.1
+ },
+ "n_gt": 90,
+ "ids": [
+  "sequential_step_instruction::-vhwlGY6CGg::54",
+  "sequential_step_instruction::56268gczO80::141",
+  "sequential_step_instruction::Aq2yEWPFSl0::204",
+  "sequential_step_instruction::G3d98rj9xtM::90",
+  "sequential_step_instruction::JIXrV9roz2A::113",
+  "sequential_step_instruction::M3vT4tUpPwo::246",
+  "sequential_step_instruction::Pk8EVCUK5vI::240",
+  "sequential_step_instruction::U90bY96_ins::51",
+  "sequential_step_instruction::YgvsTAPkwEc::35",
+  "sequential_step_instruction::c3amn_LhgQE::262",
+  "sequential_step_instruction::hBRg2LWU0lM::272",
+  "sequential_step_instruction::lGL-HKQt16Y::124",
+  "sequential_step_instruction::o86p0cKwjUw::265",
+  "sequential_step_instruction::t56ryWrnWbc::216",
+  "sequential_step_instruction::wgM8wag2AfI::297"
+ ]
+}

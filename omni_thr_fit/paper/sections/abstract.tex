@@ -1,0 +1,23 @@
+A proactive streaming assistant must decide, at every moment, whether to speak,
+and that decision is almost always a scalar confidence compared against a
+per-task threshold. We fit such a threshold table for Qwen2.5-Omni-7B on OmniPro Online and
+report that it cannot be identified from the available data --- together with the
+measurements that establish why, and the one change to the same gate that does
+work. Auditing first, we find the shipped gate ignored its own threshold table
+(firing on a fixed global constant) and treated the first tick of every video as a
+rising edge, consuming an entire video's emission budget before any content
+arrived; both are repaired before measurement. We then test each fitted threshold
+by a paired bootstrap over videos that replays the actual selection rule. No task's
+selection beats its best rival outside noise, selections recur in only 25--61\,\% of
+resamples, and one recurs at 6\,\% against an 8\,\% chance rate. The cause is that
+the gating score does not rank event-adjacent ticks above quiet ones: per-task AUC
+is 0.431--0.551 with every interval covering chance, and this survives sweeping the
+tick clock over $\pm 10$\,s, widening the matching tolerance, and confirming the
+score is well spread over 232--284 distinct values. A threshold on such a score buys
+emission volume only --- and volume has a single useful setting, which pooled over
+all tasks is recovered stably in 94\,\% of resamples while nine per-task values are
+not recovered at all. We argue that a per-task threshold table is a set of fitted
+parameters and should be held to the corresponding standard: a resampling check
+that the values recur, and a comparison against one global threshold. Both re-use
+existing runs at no additional compute cost, and here each independently reverses
+the conclusion the point estimates would have supported.

@@ -28,6 +28,54 @@ import torch
 
 from util import log
 
+# =============================================================================
+# TODO-7BC — bring back `note`, `count`, `phase` (PARKED 2026-08-12)
+# =============================================================================
+# All three are commented out, here and in prompts.py. This is a PARK, not a
+# deletion: each one is the mechanism for a pillar we still claim, and the
+# measurement says the mechanism was never actually wired, NOT that the idea is
+# wrong. Deleting them would quietly delete three claims from §7.
+#
+# WHY EACH SHOULD EVENTUALLY ADD VALUE, and what has to change first:
+#
+# `note` — pillar 7b, the append-only trace ("the essence of what it thought at
+#   each moment"). The value: the controller's only durable memory today is
+#   `reported`, i.e. what it SAID. A thought it had but did not speak is lost, so
+#   it cannot carry a suspicion across ticks ("someone is approaching the door")
+#   and re-decides from scratch every time. That is the memory 7b is for.
+#   Blocker: fill rate 0/199,909. The consumer (the "NOTES YOU KEPT" prompt
+#   block) exists; NO PROMPT EVER TEACHES THE FIELD — `note` appears in no
+#   format block in prompts.py. It never had a fair test. Before re-enabling:
+#   teach it in the format block, then measure fill; a field the model is never
+#   told about is not evidence about whether the model wants it.
+#
+# `count` — the running total for the three counting tasks. The value: those
+#   tasks are scored on an integer the model must carry ACROSS ticks, and today
+#   it re-derives that integer from `reported` text on every tick. A real
+#   accumulator is the difference between counting and re-counting.
+#   Blocker: WRITE-ONLY. 16.2% fill and the only reader is a log line, so the
+#   model's carried count cannot influence the answer it emits. Before
+#   re-enabling: write the consumer FIRST — feed the accumulator into the prompt
+#   (and/or into answer construction) — then re-enable the field. Fill rate was
+#   never the problem here; the missing half was the read.
+#
+# `phase` — the current-state label for realtime_state_monitor. The value: that
+#   task is "tell me when the state CHANGES", which is undefined without a
+#   memory of the state you last reported. `phase` is that memory, and the
+#   prompt built the whole have_enough_info rule on comparing screen vs `phase`.
+#   Blocker: two, and both are structural. (1) No consumer — init only, not even
+#   logged, so the comparison the prompt describes happens only inside the
+#   model's head. (2) It lives in the `more` tail, gated on p_more >= 0.5, so a
+#   field the prompt says to restate on EVERY tick is reachable ~2.3% of ticks.
+#   Before re-enabling: move it out of the tail (it is 1-4 words on one task, so
+#   a task-conditional schema slot is affordable) AND wire the comparison in
+#   code, rather than asking the model to remember its own last answer.
+#
+# The common lesson, and the reason all three are parked together: on every one
+# of them we shipped the WRITE and never shipped the READ. Re-enable one at a
+# time, consumer first, and measure fill + effect per field — MISSION §10 Todo.
+# =============================================================================
+
 
 def _sample(logits, prev_ids, cfg, gen=None):
     """Sample one token id using the controller preset: repetition_penalty +
@@ -158,7 +206,7 @@ def _schema_tick(b, cfg, gen, step, prompt, ids_bool):
                  force ,"answer":"       SAMPLE text
         force  ","more":
         READ   P(true)            escape hatch; if true, free-decode the tail
-                                  (fps / next_check_s / note / count / phase)
+                                  (fps / next_check_s)   # note/count/phase: PARKED
 
     Prefill of k tokens costs ONE forward; decoding k tokens costs k forwards.
     So every forced token is ~free. A quiet tick drops from 35 sequential decodes
@@ -275,6 +323,26 @@ def controller_thread(cfg, mgr, ctrl, clock, stop, prof=None, evaluator=None, wb
         gen = torch.Generator().manual_seed(int(cfg.writer_seed))
     log("controller", 0.0, "model-scheduled proactivity ON (pure-generative control loop)")
 
+    # ---- snapshot vs in-place (cfg.controller_cache_mode) ---------------------
+    # "inplace" removes the per-tick deep copy of the KV cache. It is only sound
+    # when nothing else can mutate the primary while we generate, and when the
+    # primary is on OUR device. Both conditions are checked here and a failure
+    # DOWNGRADES LOUDLY -- a silent fallback would make a latency/memory result
+    # unattributable, and a silent non-fallback would corrupt the cache.
+    use_inplace = (cfg.controller_cache_mode == "inplace")
+    if use_inplace and not cfg.deterministic:
+        log("controller", 0.0, "WARNING: controller_cache_mode=inplace requires "
+                               "deterministic=True (lockstep) -- a free-running "
+                               "ingester would append inside the borrow. Falling "
+                               "back to snapshot.")
+        use_inplace = False
+    if use_inplace and cross_gpu:
+        log("controller", 0.0, "WARNING: controller_cache_mode=inplace cannot cross "
+                               "GPUs (the primary lives on the manager's device). "
+                               "Falling back to snapshot.")
+        use_inplace = False
+    log("controller", 0.0, f"cache_mode={'inplace' if use_inplace else 'snapshot'}")
+
     next_check_vt = cfg.probe_min_s           # skip the empty-cache tick at t=0
     reported = []                              # conversation history: (vt, answer) already emitted
     pending_q = ""                             # question_for_next: what to verify on the next tick
@@ -282,14 +350,26 @@ def controller_thread(cfg, mgr, ctrl, clock, stop, prof=None, evaluator=None, wb
     # that CHANGE each tick (a compact JSON diff), so it rarely decodes the string
     # fields -> much less latency. Transient fields (have_enough_info/answer/seen/
     # event_time_s) RESET to default every tick and must be re-asserted.
-    # count/phase are PERSISTENT task accumulators (MISSION.md pillar 7c). They must
-    # exist here or the merge below (`if key in state`) silently DISCARDS them —
-    # which is what happened to every count/phase the model ever emitted.
+    #
+    # ┌── PARKED 2026-08-12: `count`, `phase`, `note` ──────────────────────────┐
+    # count/phase WERE persistent task accumulators (MISSION.md pillar 7c); note
+    # was the model-authored trace (pillar 7b). All three are commented out here
+    # and in prompts.py, deliberately and reversibly. See TODO-7BC below for what
+    # they were for and what has to be true before they come back.
+    #
+    # Measured on output_full9 (199,909 ticks, MISSION §10): `note` 0.00% fill —
+    # never emitted once; `phase` 0.54% overall / 2.3% on the ONE task that uses
+    # it; `count` 16.2%. And on the read side all three have NO consumer: `count`
+    # is init + one log line, `phase` is init only, `note` has a consumer whose
+    # producer never fires. They are paid for in tail-decode tokens and return
+    # nothing. Parking them removes the only fields in the schema that are pure
+    # cost — it cannot change any score, because nothing reads them.
+    # └─────────────────────────────────────────────────────────────────────────┘
     state = {"fps": cfg.encoder_idle_fps, "next_check_s": cfg.probe_default_s,
              "have_enough_info": False, "new_event": False, "answer": "",
-             "question_for_next": "", "seen": "", "event_time_s": None,
-             "count": 0, "phase": ""}
-    notes = []                                 # model-authored notes (bounded ring)
+             "question_for_next": "", "seen": "", "event_time_s": None}
+    #        "count": 0, "phase": ""}          # PARKED — see TODO-7BC
+    # notes = []                               # PARKED — bounded ring, pillar 7b
     seen_trace = []                            # (vt, seen) — the perception trace;
                                                # consecutive duplicates collapsed
     # true/false must be SINGLE tokens for the logit read; verified for Qwen3-VL
@@ -327,231 +407,302 @@ def controller_thread(cfg, mgr, ctrl, clock, stop, prof=None, evaluator=None, wb
             continue
 
         t0 = time.time()
-        cache, pos, phys = mgr.snapshot_clone()
-        if cross_gpu:
-            cache = _cache_to(cache, b.device)
+        # ---- READ THE SHARED CACHE ------------------------------------------
+        # Two paths, identical arithmetic (see cfg.controller_cache_mode):
+        #   inplace  -> generate on the PRIMARY at (next_pos, len), erase after.
+        #   snapshot -> deep-copy the primary and generate on the copy.
+        # Both start the generation at the same pos_start/phys_start over the same
+        # key/value prefix, so the logits are the same numbers; only the copy is
+        # skipped. The try/finally below is load-bearing: if a tick raises, the
+        # borrow MUST still be erased or the primary keeps the controller's own
+        # prompt tokens and every later frame is conditioned on them.
+        if use_inplace:
+            pos, phys = mgr.borrow_begin("ctrl.borrow")
+            cache = mgr.cache
+        else:
+            cache, pos, phys = mgr.snapshot_clone()
+            if cross_gpu:
+                cache = _cache_to(cache, b.device)
+        try:
 
-        def step(embeds):
-            nonlocal pos, phys, cache
-            logits, cache = b.forward(embeds, cache, pos_start=pos, phys_start=phys)
-            pos += embeds.shape[1]
-            phys += embeds.shape[1]
-            return logits
+            def step(embeds):
+                nonlocal pos, phys, cache
+                logits, cache = b.forward(embeds, cache, pos_start=pos, phys_start=phys)
+                if use_inplace:
+                    # forward() may hand back a different cache object; the manager
+                    # must keep pointing at the one that actually grew, or
+                    # borrow_end() would truncate a stale object and leave the
+                    # controller's tokens in the primary.
+                    mgr.cache = cache
+                pos += embeds.shape[1]
+                phys += embeds.shape[1]
+                return logits
 
-        # Build the controller prompt: task ICL + (optional) deferred check +
-        # CONVERSATION HISTORY of what has already been reported, so the model can
-        # set new_event=false for repeats and only fire on genuinely new details.
-        # With icl_in_sink the ICL was already seeded into the pinned sink by the
-        # ingester, so DON'T splice it again here — re-splicing would both duplicate
-        # it and re-insert the 1400-token wall between the newest frame and the
-        # generation point, which is exactly what we are removing.
-        prompt = "" if cfg.icl_in_sink else cfg.controller_prompt.rstrip()
-        if pending_q:
-            prompt += (f"\nYou previously asked yourself: '{pending_q}'. "
-                       f"Judge it now from the MOST RECENT frames.")
-        # timestamped history: a LATER onset is a new event, not a repeat of these
-        # ---- MEMORY (MISSION pillar 7): the writer's own trace, fed back in ----
-        # Two halves, both timestamped and append-only:
-        #   WHAT I SAW  -- the `seen` trace. Until now `seen` was reset and thrown
-        #                  away every tick, so the controller had no idea what it
-        #                  had already looked at. Consecutive duplicates are
-        #                  collapsed (the log showed the same scene repeated 3-4
-        #                  ticks running), so this reads as a scene-CHANGE history
-        #                  and stays cheap.
-        #   WHAT I SAID -- `reported`, code-owned. The model must never be able to
-        #                  write this: if it could, it could hallucinate having
-        #                  already answered and dedup would silently fail open.
-        # Both are bounded rings -> per-tick prompt cost is O(1), not O(stream).
-        # This is what makes dedup and accumulation possible at all.
-        # ⚠️ FROZEN-PERCEPTION BUG (measured 2026-07-30). Feeding the `seen` trace
-        # back here froze the perception channel: 20 of 58 videos emitted exactly ONE
-        # byte-identical scene description for the WHOLE video (578 ticks, 100%), and
-        # 31 of 58 emitted <=2 distinct descriptions ever. Failure-mode breakdown over
-        # 87 GT triggers: PERCEPTION 81.6%, JUDGMENT 3.4%. A null model using only the
-        # timestamp — no pixels at all — BEAT p_hit on 3 of 4 tasks.
-        #
-        # Mechanism: the last `seen` line sits a few tokens before the `{"seen":"` slot
-        # the model must now fill. Under greedy decode with a 12-token cap, copying the
-        # adjacent line is the cheapest continuation — and once copied, "repeats
-        # collapsed" makes the trace shorter and the copy even more attractive. A
-        # self-reinforcing induction loop. The memory feature caused it.
-        #
-        # Default OFF while we re-measure. ONE VARIABLE: leave `now_anchor` off too.
-        if cfg.seen_trace_in_prompt:
-            if seen_trace:
-                trace = "".join(f"  @{svt:.0f}s {s}\n" for svt, s in seen_trace)
+            # Build the controller prompt: task ICL + (optional) deferred check +
+            # CONVERSATION HISTORY of what has already been reported, so the model can
+            # set new_event=false for repeats and only fire on genuinely new details.
+            # With icl_in_sink the ICL was already seeded into the pinned sink by the
+            # ingester, so DON'T splice it again here — re-splicing would both duplicate
+            # it and re-insert the 1400-token wall between the newest frame and the
+            # generation point, which is exactly what we are removing.
+            prompt = "" if cfg.icl_in_sink else cfg.controller_prompt.rstrip()
+            if pending_q:
+                prompt += (f"\nYou previously asked yourself: '{pending_q}'. "
+                           f"Judge it now from the MOST RECENT frames.")
+            # timestamped history: a LATER onset is a new event, not a repeat of these
+            # ---- MEMORY (MISSION pillar 7): the writer's own trace, fed back in ----
+            # Two halves, both timestamped and append-only:
+            #   WHAT I SAW  -- the `seen` trace. Until now `seen` was reset and thrown
+            #                  away every tick, so the controller had no idea what it
+            #                  had already looked at. Consecutive duplicates are
+            #                  collapsed (the log showed the same scene repeated 3-4
+            #                  ticks running), so this reads as a scene-CHANGE history
+            #                  and stays cheap.
+            #   WHAT I SAID -- `reported`, code-owned. The model must never be able to
+            #                  write this: if it could, it could hallucinate having
+            #                  already answered and dedup would silently fail open.
+            # Both are bounded rings -> per-tick prompt cost is O(1), not O(stream).
+            # This is what makes dedup and accumulation possible at all.
+            # ⚠️ FROZEN-PERCEPTION BUG (measured 2026-07-30). Feeding the `seen` trace
+            # back here froze the perception channel: 20 of 58 videos emitted exactly ONE
+            # byte-identical scene description for the WHOLE video (578 ticks, 100%), and
+            # 31 of 58 emitted <=2 distinct descriptions ever. Failure-mode breakdown over
+            # 87 GT triggers: PERCEPTION 81.6%, JUDGMENT 3.4%. A null model using only the
+            # timestamp — no pixels at all — BEAT p_hit on 3 of 4 tasks.
+            #
+            # Mechanism: the last `seen` line sits a few tokens before the `{"seen":"` slot
+            # the model must now fill. Under greedy decode with a 12-token cap, copying the
+            # adjacent line is the cheapest continuation — and once copied, "repeats
+            # collapsed" makes the trace shorter and the copy even more attractive. A
+            # self-reinforcing induction loop. The memory feature caused it.
+            #
+            # Default OFF while we re-measure. ONE VARIABLE: leave `now_anchor` off too.
+            if cfg.seen_trace_in_prompt:
+                if seen_trace:
+                    trace = "".join(f"  @{svt:.0f}s {s}\n" for svt, s in seen_trace)
+                else:
+                    trace = "  (nothing yet)\n"
+                prompt += ("\n\nWHAT YOU HAVE SEEN so far (your own observations, newest last; "
+                           "repeats collapsed):\n" + trace)
+            convo = "".join(f"  @{rvt:.0f}s {a}\n" for rvt, a in reported) or "  (nothing yet)\n"
+            prompt += ("\nWHAT YOU HAVE ALREADY TOLD THE USER (past occurrences with their "
+                       "times; a fresh onset at a later time is a NEW event — it is only a "
+                       "repeat while the SAME occurrence is still on screen):\n" + convo)
+            # PARKED — see TODO-7BC. This consumer works; its producer never fired
+            # (0/199,909 ticks), because no prompt ever taught the `note` field.
+            # if notes:
+            #     prompt += ("\nNOTES YOU KEPT:\n"
+            #                + "".join(f"  @{nvt:.0f}s {n}\n" for nvt, n in notes))
+            # Optional PRESENT anchor — the second candidate cause of frozen perception:
+            # nothing in the prompt says what time it is NOW or that `seen` must describe
+            # the LATEST frame rather than any frame in the cache. Kept OFF by default so
+            # it is tested as its own variable, not confounded with seen_trace_in_prompt.
+            if cfg.now_anchor:
+                prompt += (f"\n\nIt is now {vt:.0f}s. Describe ONLY what is on screen in the "
+                           f"MOST RECENT frame, not what you saw earlier.")
+            prompt += "\nNow emit ONLY your control JSON for the current stream:\n"
+
+            # PRIME the decoder with an open brace: Qwen3-VL is an instruct model and,
+            # spliced as raw text onto the cache (no assistant-turn markers), it would
+            # otherwise emit EOS immediately at the splice point. Starting mid-object
+            # forces it to complete the JSON. We reconstruct raw = "{" + generated.
+            meta = {}
+            t_dec0 = time.time()
+            if use_schema:
+                # SCHEMA WALK: code forces every key/punctuation, model fills only the
+                # value slots, booleans come from a logit read. The model can no longer
+                # emit fps/next_check_s on the default path -> the diff is a diff.
+                diff, meta = _schema_tick(b, cfg, gen, step, prompt, ids_bool)
+                ids = [None] * meta.get("n_decode", 0)   # count only, for telemetry
+                raw = json.dumps(diff, separators=(",", ":"))
             else:
-                trace = "  (nothing yet)\n"
-            prompt += ("\n\nWHAT YOU HAVE SEEN so far (your own observations, newest last; "
-                       "repeats collapsed):\n" + trace)
-        convo = "".join(f"  @{rvt:.0f}s {a}\n" for rvt, a in reported) or "  (nothing yet)\n"
-        prompt += ("\nWHAT YOU HAVE ALREADY TOLD THE USER (past occurrences with their "
-                   "times; a fresh onset at a later time is a NEW event — it is only a "
-                   "repeat while the SAME occurrence is still on screen):\n" + convo)
-        if notes:
-            prompt += ("\nNOTES YOU KEPT:\n"
-                       + "".join(f"  @{nvt:.0f}s {n}\n" for nvt, n in notes))
-        # Optional PRESENT anchor — the second candidate cause of frozen perception:
-        # nothing in the prompt says what time it is NOW or that `seen` must describe
-        # the LATEST frame rather than any frame in the cache. Kept OFF by default so
-        # it is tested as its own variable, not confounded with seen_trace_in_prompt.
-        if cfg.now_anchor:
-            prompt += (f"\n\nIt is now {vt:.0f}s. Describe ONLY what is on screen in the "
-                       f"MOST RECENT frame, not what you saw earlier.")
-        prompt += "\nNow emit ONLY your control JSON for the current stream:\n"
+                logits = step(b.embed_text(prompt + "{"))
+                ids = []
+                for _ in range(cfg.controller_max_tokens):
+                    # MASK EOS: as an instruct model spliced raw onto the cache, Qwen often
+                    # samples the end token as the very first token (-> empty output). We
+                    # stop on the closing "}" ourselves, so EOS is never wanted here.
+                    logits[b.eos_id] = float("-inf")
+                    tok_id = _sample(logits, ids, cfg, gen)
+                    ids.append(tok_id)
+                    if "}" in b.tok.decode([tok_id]):     # first close -> flat object done
+                        break
+                    logits = step(b.embed_token(tok_id))
+                raw = "{" + b.decode(ids)
+                diff = _extract_json(raw)             # the model's DIFF (partial dict); {} = no change
+            decode_s = time.time() - t_dec0
+            if prof is not None:
+                prof.observe("ctrl_decode_s", decode_s)
+                if ids:
+                    prof.observe("ctrl_decode_ms_per_tok", 1000 * decode_s / len(ids))
+                if "p_hit" in meta:
+                    prof.observe("ctrl_p_hit", meta["p_hit"])
+                    prof.incr("ctrl_argmax_agrees" if meta.get("argmax_agrees")
+                              else "ctrl_argmax_disagrees")
+            gen_s = time.time() - t0
 
-        # PRIME the decoder with an open brace: Qwen3-VL is an instruct model and,
-        # spliced as raw text onto the cache (no assistant-turn markers), it would
-        # otherwise emit EOS immediately at the splice point. Starting mid-object
-        # forces it to complete the JSON. We reconstruct raw = "{" + generated.
-        meta = {}
-        t_dec0 = time.time()
-        if use_schema:
-            # SCHEMA WALK: code forces every key/punctuation, model fills only the
-            # value slots, booleans come from a logit read. The model can no longer
-            # emit fps/next_check_s on the default path -> the diff is a diff.
-            diff, meta = _schema_tick(b, cfg, gen, step, prompt, ids_bool)
-            ids = [None] * meta.get("n_decode", 0)   # count only, for telemetry
-            raw = json.dumps(diff, separators=(",", ":"))
-        else:
-            logits = step(b.embed_text(prompt + "{"))
-            ids = []
-            for _ in range(cfg.controller_max_tokens):
-                # MASK EOS: as an instruct model spliced raw onto the cache, Qwen often
-                # samples the end token as the very first token (-> empty output). We
-                # stop on the closing "}" ourselves, so EOS is never wanted here.
-                logits[b.eos_id] = float("-inf")
-                tok_id = _sample(logits, ids, cfg, gen)
-                ids.append(tok_id)
-                if "}" in b.tok.decode([tok_id]):     # first close -> flat object done
-                    break
-                logits = step(b.embed_token(tok_id))
-            raw = "{" + b.decode(ids)
-            diff = _extract_json(raw)             # the model's DIFF (partial dict); {} = no change
-        decode_s = time.time() - t_dec0
-        if prof is not None:
-            prof.observe("ctrl_decode_s", decode_s)
-            if ids:
-                prof.observe("ctrl_decode_ms_per_tok", 1000 * decode_s / len(ids))
-            if "p_hit" in meta:
-                prof.observe("ctrl_p_hit", meta["p_hit"])
-                prof.incr("ctrl_argmax_agrees" if meta.get("argmax_agrees")
-                          else "ctrl_argmax_disagrees")
-        gen_s = time.time() - t0
+            # ---- apply the DIFF onto the persistent config ----
+            # reset the transient fields first (they only hold this tick), then merge
+            # whatever the model re-stated; persistent fields (fps/next_check_s/question)
+            # survive.
+            state["have_enough_info"] = False
+            state["answer"] = ""
+            state["seen"] = ""
+            state["event_time_s"] = None
+            for k, v in diff.items():
+                key = "question_for_next" if k == "question" else k   # accept legacy key
+                # PARKED — see TODO-7BC. The append-never-rewrite rule below is the
+                # part worth keeping when `note` comes back: MEMORY IS A LOG, NOT A
+                # DOCUMENT. A memory the model rewrites each tick costs tokens
+                # proportional to its length, so tick latency would grow with watch
+                # time — backwards for an unbounded stream. The bounded ring keeps
+                # per-tick cost O(1).
+                # if key == "note":
+                #     if str(v).strip():
+                #         notes.append((vt, str(v).strip()))
+                #         del notes[:-cfg.notes_ring]
+                # elif key in state:
+                #
+                # `count` / `phase` are no longer in `state`, so this line now drops
+                # them the way it drops any unknown key. That is the parking
+                # mechanism, and it is the SAME silent-discard bug fixed in the
+                # comment at the state dict above — deliberate this time, not an
+                # accident. Re-adding the keys to `state` re-enables the merge.
+                if key in state:
+                    state[key] = v
 
-        # ---- apply the DIFF onto the persistent config ----
-        # reset the transient fields first (they only hold this tick), then merge
-        # whatever the model re-stated; persistent fields (fps/next_check_s/question)
-        # survive.
-        state["have_enough_info"] = False
-        state["answer"] = ""
-        state["seen"] = ""
-        state["event_time_s"] = None
-        for k, v in diff.items():
-            key = "question_for_next" if k == "question" else k   # accept legacy key
-            if key == "note":
-                # MEMORY IS A LOG, NOT A DOCUMENT: append, never rewrite. A memory
-                # the model rewrites each tick costs tokens proportional to its
-                # length, so tick latency would grow with watch time — backwards
-                # for an unbounded stream. Bounded ring keeps per-tick cost O(1).
-                if str(v).strip():
-                    notes.append((vt, str(v).strip()))
-                    del notes[:-cfg.notes_ring]
-            elif key in state:
-                state[key] = v
+            fps = _clamp(state["fps"], cfg.encoder_idle_fps, cfg.encoder_focus_fps,
+                         cfg.encoder_idle_fps)
+            ctrl.set_fps(fps)
+            nxt = _clamp(state["next_check_s"], cfg.probe_min_s, cfg.probe_max_s,
+                         cfg.probe_default_s)
+            next_check_vt = vt + nxt
 
-        fps = _clamp(state["fps"], cfg.encoder_idle_fps, cfg.encoder_focus_fps,
-                     cfg.encoder_idle_fps)
-        ctrl.set_fps(fps)
-        nxt = _clamp(state["next_check_s"], cfg.probe_min_s, cfg.probe_max_s,
-                     cfg.probe_default_s)
-        next_check_vt = vt + nxt
+            level = bool(state["have_enough_info"])   # "condition satisfied NOW"
+            answer = (state["answer"] or "").strip()
+            pending_q = (state.get("question_for_next") or "").strip()
 
-        level = bool(state["have_enough_info"])   # "condition satisfied NOW"
-        answer = (state["answer"] or "").strip()
-        pending_q = (state.get("question_for_next") or "").strip()
+            # MEMORY: record what we just saw. Collapse consecutive duplicates so the
+            # trace is a scene-CHANGE history rather than one line per tick, then keep
+            # only the last `seen_trace_ring` entries so the prompt cost stays O(1).
+            seen_now = (state["seen"] or "").strip()
+            if seen_now and (not seen_trace or seen_trace[-1][1] != seen_now):
+                seen_trace.append((vt, seen_now))
+                del seen_trace[:-cfg.seen_trace_ring]
 
-        # MEMORY: record what we just saw. Collapse consecutive duplicates so the
-        # trace is a scene-CHANGE history rather than one line per tick, then keep
-        # only the last `seen_trace_ring` entries so the prompt cost stays O(1).
-        seen_now = (state["seen"] or "").strip()
-        if seen_now and (not seen_trace or seen_trace[-1][1] != seen_now):
-            seen_trace.append((vt, seen_now))
-            del seen_trace[:-cfg.seen_trace_ring]
-
-        # ---- FIRE DECISION -------------------------------------------------
-        # "edge"       : rising edge of the boolean level (original).
-        # "hysteresis" : Schmitt gate on the CONTINUOUS p_hit — only possible now
-        #   that the logit read gives a real number instead of a bit. This is the
-        #   tuned "hyst2b" from the probe-gate arm (EXPERIENCE.md), which lifted
-        #   joint_f1 0.149 -> 0.206 there. Aimed at PRECISION: measured 0.112, i.e.
-        #   89% of emits were false positives (206 emits for 84 GT).
-        #     fire   when armed AND p_hit >= high AND debounce elapsed
-        #     re-arm when p_hit < low  OR  rearm_s elapsed since the last fire
-        # A single threshold cannot do this: it re-fires on every jitter across the
-        # line, which is what the raw level did.
-        rising = level and not prev_level
-        distinct = (level and prev_level and answer and reported
-                    and _word_sim(answer, reported[-1][1]) < cfg.distinct_sim_thr)
-        p_hit = meta.get("p_hit")
-        if cfg.gate_strategy == "hysteresis" and p_hit is not None:
-            if not armed and (p_hit < cfg.gate_low_thr
-                              or (cfg.gate_rearm_s > 0
-                                  and (vt - last_fire_vt) >= cfg.gate_rearm_s)):
-                armed = True
-            fire = bool(answer) and armed and p_hit >= cfg.gate_high_thr \
-                and (vt - last_fire_vt) > cfg.debounce_s
+            # ---- FIRE DECISION -------------------------------------------------
+            # "edge"       : rising edge of the boolean level (original).
+            # "hysteresis" : Schmitt gate on the CONTINUOUS p_hit — only possible now
+            #   that the logit read gives a real number instead of a bit. This is the
+            #   tuned "hyst2b" from the probe-gate arm (EXPERIENCE.md), which lifted
+            #   joint_f1 0.149 -> 0.206 there. Aimed at PRECISION: measured 0.112, i.e.
+            #   89% of emits were false positives (206 emits for 84 GT).
+            #     fire   when armed AND p_hit >= high AND debounce elapsed
+            #     re-arm when p_hit < low  OR  rearm_s elapsed since the last fire
+            # A single threshold cannot do this: it re-fires on every jitter across the
+            # line, which is what the raw level did.
+            rising = level and not prev_level
+            distinct = (level and prev_level and answer and reported
+                        and _word_sim(answer, reported[-1][1]) < cfg.distinct_sim_thr)
+            p_hit = meta.get("p_hit")
+            if cfg.gate_strategy == "hysteresis" and p_hit is not None:
+                if not armed and (p_hit < cfg.gate_low_thr
+                                  or (cfg.gate_rearm_s > 0
+                                      and (vt - last_fire_vt) >= cfg.gate_rearm_s)):
+                    armed = True
+                fire = bool(answer) and armed and p_hit >= cfg.gate_high_thr \
+                    and (vt - last_fire_vt) > cfg.debounce_s
+                if fire:
+                    armed = False
+            else:
+                fire = bool(answer) and (rising or distinct)
             if fire:
-                armed = False
-        else:
-            fire = bool(answer) and (rising or distinct)
-        if fire:
-            last_fire_vt = vt
+                last_fire_vt = vt
 
-        # log EVERY tick's raw diff so all responses are inspectable in the log file
-        vid = cfg.video_id or "?"
-        log("ctrl.raw", vt, f"[{vid}] " + (raw.strip()[:240] if diff else f"NO-DIFF raw={raw[:120]!r}"))
-        # p_hit is the CONTINUOUS confidence from the logit read; agree= is the
-        # verification that a free decode would have produced the same boolean.
-        extra = ""
-        if meta:
-            extra = (f" p_hit={meta.get('p_hit', float('nan')):.3f}"
-                     f" p_more={meta.get('p_more', float('nan')):.3f}")
-            if cfg.verify_logit_read and "argmax_agrees" in meta:
-                extra += (f" agree={meta['argmax_agrees']}"
-                          f" argmax={meta['argmax_tok']!r}")
-        log("ctrl.gate", vt, f"[{vid}] fps={fps:.1f} level={level} rise={rising} "
-                             f"new_occ={distinct} fire={fire} next={nxt:.1f}s "
-                             f"gen={gen_s:.1f}s ntok={len(ids)} q={pending_q!r}"
-                             f"{extra} count={state['count']} notes={len(notes)}")
+            # log EVERY tick's raw diff so all responses are inspectable in the log file
+            #
+            # NO CAP. This was `raw.strip()[:240]`, which silently cut 8.5% of ticks
+            # (16,995 of 199,909 in output_full9 -- 100% of them landing EXACTLY at
+            # the cap, which is how we know it was truncation and not the model).
+            # The cut was selective: it ate the LONGEST emissions, and the longest
+            # emissions are precisely the ticks that used the `more` tail
+            # (fps/next_check_s/note/count/phase), so every tail-field measurement
+            # taken off these logs was biased low -- 57% of event_narration ticks,
+            # 20% of sequential_step_instruction. The SYSTEM was never affected: the
+            # full diff is applied to `state` above regardless. Only our ability to
+            # see it afterwards was clipped.
+            #
+            # Newlines are ESCAPED, not dropped. Every consumer of these logs
+            # (fields.py, auc.py, compliance.py) reads one tick per line, so a raw
+            # newline from the free-decode path would silently split one record into
+            # two. Escaping keeps the log both lossless and one-line-per-tick. Only
+            # literal CR/LF are touched: in schema mode `raw` is json.dumps output,
+            # which already encodes newlines as the two characters \ and n, so this
+            # leaves schema-mode lines byte-for-byte parseable by json.loads.
+            vid = cfg.video_id or "?"
+            _raw = raw.strip() if diff else f"NO-DIFF raw={raw!r}"
+            log("ctrl.raw", vt,
+                f"[{vid}] " + _raw.replace("\r", "\\r").replace("\n", "\\n"))
+            # p_hit is the CONTINUOUS confidence from the logit read; agree= is the
+            # verification that a free decode would have produced the same boolean.
+            extra = ""
+            if meta:
+                extra = (f" p_hit={meta.get('p_hit', float('nan')):.3f}"
+                         f" p_more={meta.get('p_more', float('nan')):.3f}")
+                if cfg.verify_logit_read and "argmax_agrees" in meta:
+                    extra += (f" agree={meta['argmax_agrees']}"
+                              f" argmax={meta['argmax_tok']!r}")
+            # count=/notes= dropped from this line with the fields (TODO-7BC). NOTE
+            # for whoever re-enables them: fields.py and auc.py parse ctrl.gate
+            # positionally-by-key, so putting them back must keep `key=value` form.
+            log("ctrl.gate", vt, f"[{vid}] fps={fps:.1f} level={level} rise={rising} "
+                                 f"new_occ={distinct} fire={fire} next={nxt:.1f}s "
+                                 f"gen={gen_s:.1f}s ntok={len(ids)} q={pending_q!r}"
+                                 f"{extra}")
 
-        if fire:
-            # the onset may predate this tick; if the model read the event time off
-            # the in-context "time Xs" markers, record that (clamped to recent past)
-            t_rec = vt
-            try:
-                ev = state.get("event_time_s")
-                if ev is not None:
-                    t_rec = min(vt, max(vt - 10.0, float(ev)))
-            except (TypeError, ValueError):
-                pass
-            reported.append((t_rec, answer))
-            if evaluator is not None:
-                evaluator.record_trigger(t_rec, 1.0)
-                evaluator.record_write(t_rec, answer, gen_s)
-            log("CONTROLLER", vt, f"[{vid}] \U0001F4E2 @{t_rec:.1f}s  {answer!r}")
+            if fire:
+                # the onset may predate this tick; if the model read the event time off
+                # the in-context "time Xs" markers, record that (clamped to recent past)
+                t_rec = vt
+                try:
+                    ev = state.get("event_time_s")
+                    if ev is not None:
+                        t_rec = min(vt, max(vt - 10.0, float(ev)))
+                except (TypeError, ValueError):
+                    pass
+                reported.append((t_rec, answer))
+                if evaluator is not None:
+                    evaluator.record_trigger(t_rec, 1.0)
+                    evaluator.record_write(t_rec, answer, gen_s)
+                log("CONTROLLER", vt, f"[{vid}] \U0001F4E2 @{t_rec:.1f}s  {answer!r}")
 
-        # latch the level ONLY when backed by an answer: a bare true (no answer)
-        # must not swallow the edge — the next answered tick can still fire.
-        if not level:
-            prev_level = False
-        elif answer:
-            prev_level = True
-        if prof is not None:
-            prof.observe("controller_gen_s", gen_s)
-            prof.observe("controller_tokens", len(ids))
-        # LOCKSTEP: publish only now, after the fire + history update completed —
-        # the waiting ingester may feed the next frame from this instant on.
-        clock.set_next_check(next_check_vt)
+            # latch the level ONLY when backed by an answer: a bare true (no answer)
+            # must not swallow the edge — the next answered tick can still fire.
+            if not level:
+                prev_level = False
+            elif answer:
+                prev_level = True
+            if prof is not None:
+                prof.observe("controller_gen_s", gen_s)
+                prof.observe("controller_tokens", len(ids))
+            # RESTORE BEFORE RELEASE. set_next_check() frees the waiting ingester,
+            # and the ingester's first act is mgr.ingest() -- so the primary must
+            # already be restored at that instant. Publishing first left a window a
+            # few statements wide in which the ingester wrote into a STILL-BORROWED
+            # cache: measured 3 and 13 RuntimeErrors across two 18-sample arms
+            # (2026-08-13). Each one killed the ingester THREAD, so the video stopped
+            # being fed and the rest of that sample went silent -- one arm lost two
+            # whole tasks and half its emits. The guard turned what would have been a
+            # silent KV-cache corruption into a loud crash; this ordering is what
+            # makes the "no concurrent writer in lockstep" premise actually true.
+            if use_inplace:
+                mgr.borrow_end()
+            clock.set_next_check(next_check_vt)
+        finally:
+            # erase the controller's splice from the primary. Idempotent (so the
+            # release above is not repeated work) and a no-op in snapshot mode. This
+            # stays for the EXCEPTION path, where the tick never reached the release.
+            if use_inplace:
+                mgr.borrow_end()
 
     log("controller", 0.0, "controller stopped")

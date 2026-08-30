@@ -1,0 +1,9 @@
+[login] chain start Fri Aug 28 07:52:51 PM CEST 2026 on clariden-ln004, gen=90min lane_base=100
+[login] gen 1: 0/1410 samples, cells 0/94, using GPUs [0,2,3]
+[login] STOP_LOGIN -- terminating gen 1 lanes
+[login] gen 1 finished 19:56:51
+[login] STOP_LOGIN present -- standing down
+bin/login_chain.sh: line 94: 64081 Terminated              CUDA_VISIBLE_DEVICES=$gpu nohup bash "$THR_ROOT/bin/worker.sh" "$LANE" "$DEADLINE" "${LOGIN_MAX_DUR:-300}" >> "$THR_ROOT/logs/login_lane_${LANE}.out" 2>&1
+bin/login_chain.sh: line 94: 68290 Terminated              CUDA_VISIBLE_DEVICES=$gpu nohup bash "$THR_ROOT/bin/worker.sh" "$LANE" "$DEADLINE" "${LOGIN_MAX_DUR:-300}" >> "$THR_ROOT/logs/login_lane_${LANE}.out" 2>&1
+bin/login_chain.sh: line 94: 72454 Terminated              CUDA_VISIBLE_DEVICES=$gpu nohup bash "$THR_ROOT/bin/worker.sh" "$LANE" "$DEADLINE" "${LOGIN_MAX_DUR:-300}" >> "$THR_ROOT/logs/login_lane_${LANE}.out" 2>&1
+[login] chain exit Fri Aug 28 07:56:51 PM CEST 2026

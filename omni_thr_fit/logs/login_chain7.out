@@ -1,0 +1,15 @@
+[login] chain start Sun Aug 30 05:53:18 AM CEST 2026 on clariden-ln004, gen=90min lane_base=100
+[login] gen 1: GPU allowlist [0,3] -> usable [0,3]
+[login] gen 1: 0/675 samples, cells 0/45, using GPUs [0,3]
+[login] gen 1 finished 07:22:59
+[login] gen 2: GPU allowlist [0,3] -> usable [0,3]
+[login] gen 2: 234/675 samples, cells 0/45, using GPUs [0,3]
+[login] gen 2 finished 08:52:40
+[login] gen 3: GPU allowlist [0,3] -> usable [0,3]
+[login] gen 3: 453/675 samples, cells 1/45, using GPUs [0,3]
+[login] gen 3 finished 10:22:22
+[login] gen 4: GPU allowlist [0,3] -> usable [0,3]
+[login] gen 4: 539/675 samples, cells 2/45, using GPUs [0,3]
+[login] gen 4 finished 11:52:04
+[login] gen 5: GPU allowlist [0,3] -> usable [0,3]
+[login] gen 5: 567/675 samples, cells 13/45, using GPUs [0,3]

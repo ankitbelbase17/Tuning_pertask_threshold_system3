@@ -1,0 +1,36 @@
+[login] chain start Sat Aug 29 07:21:09 PM CEST 2026 on clariden-ln002, gen=90min lane_base=100
+[login] gen 1: GPU allowlist [0,3] -> usable [0,3]
+[login] gen 1: 1297/1410 samples, cells 49/94, using GPUs [0,3]
+[login] gen 1 finished 20:50:50
+[login] gen 2: GPU allowlist [0,3] -> usable [0,3]
+[login] gen 2: 1324/1410 samples, cells 52/94, using GPUs [0,3]
+[login] gen 2 finished 22:20:32
+[login] gen 3: GPU allowlist [0,3] -> usable [0,3]
+[login] gen 3: 1351/1410 samples, cells 64/94, using GPUs [0,3]
+[login] gen 3 finished 23:50:13
+[login] gen 4: GPU allowlist [0,3] -> usable [0,3]
+[login] gen 4: 1372/1410 samples, cells 66/94, using GPUs [0,3]
+[login] gen 4 finished 01:19:55
+[login] gen 5: GPU allowlist [0,3] -> usable [0,3]
+[login] gen 5: 1384/1410 samples, cells 72/94, using GPUs [0,3]
+[login] gen 5 finished 02:49:36
+[login] gen 6: GPU allowlist [0,3] -> usable [0,3]
+[login] gen 6: 1395/1410 samples, cells 79/94, using GPUs [0,3]
+[login] gen 6 finished 04:10:20
+[login] gen 7: GPU allowlist [0,3] -> usable [0,3]
+[login] gen 7: 1408/1410 samples, cells 92/94, using GPUs [0,3]
+[login] gen 7 finished 04:13:02
+[login] gen 8: GPU allowlist [0,3] -> usable [0,3]
+[login] gen 8: 1408/1410 samples, cells 92/94, using GPUs [0,3]
+[login] gen 8 finished 04:16:42
+[login] gen 9: GPU allowlist [0,3] -> usable [0,3]
+[login] gen 9: 1408/1410 samples, cells 92/94, using GPUs [0,3]
+[login] gen 9 finished 04:19:23
+[login] gen 10: GPU allowlist [0,3] -> usable [0,3]
+[login] gen 10: 1408/1410 samples, cells 92/94, using GPUs [0,3]
+[login] gen 10 finished 04:23:03
+[login] gen 11: GPU allowlist [0,3] -> usable [0,3]
+[login] gen 11: 1408/1410 samples, cells 92/94, using GPUs [0,3]
+[login] gen 11 finished 04:24:45
+[login] worklist COMPLETE (1410/1410) -- standing down
+[login] chain exit Sun Aug 30 04:24:47 AM CEST 2026

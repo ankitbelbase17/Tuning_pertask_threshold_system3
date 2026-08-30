@@ -1,0 +1,25 @@
+[smoke] task=semantic_condition_alert gpu=3 repo=/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/repo
+[smoke] 3, NVIDIA GH200 120GB, 70767 MiB
+[smoke] === threshold 0.05 -> /iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/smoke/thr_0.05 ===
+bin/smoke.sh: line 28: 197454 Terminated              CUDA_VISIBLE_DEVICES=$GPU OMNIPRO_HIT_THRESHOLD=$THR timeout 3600 "$PY" -u evaluate.py --tasks "$TASK" --audio all --limit 2 --shortest --max_seconds 45 --benchmark_json "$OMNIPRO_BENCHMARK_JSON" --dataset_dir "$OMNIPRO_DATASET_DIR" --no_resume --out "$D" > "$D/run.log" 2>&1
+[smoke] thr=0.05 rc=143  NO-FILE
+[smoke]   gate in force: (not logged)
+[smoke]   fires: 1 / ticks: 8
+[smoke] === threshold 0.95 -> /iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/smoke/thr_0.95 ===
+[smoke] thr=0.95 rc=0  2 emits over 2 samples
+[smoke]   gate in force: (not logged)
+[smoke]   fires: 2 / ticks: 60
+
+[smoke] ===== VERDICT =====
+  thr=0.05  NO PREDICTIONS -- smoke FAILED
+  thr=0.95  n_sample=2  n_emit=2  xRT=3.88
+OMNIPRO_BENCHMARK_JSON" --dataset_dir "$OMNIPRO_DATASET_DIR" --no_resume --out "$D" > "$D/run.log" 2>&1
+[smoke] thr=0.95 rc=135  NO-FILE
+[smoke]   gate in force: (not logged)
+[smoke]   fires: 0
+0 / ticks: 0
+0
+
+[smoke] ===== VERDICT =====
+  thr=0.05  NO PREDICTIONS -- smoke FAILED
+  thr=0.95  NO PREDICTIONS -- smoke FAILED

@@ -53,7 +53,12 @@ def encoder_thread(cfg, backend, vis_q, ctrl, stop, prof=None):
 
         img = frame.to_image()
         t = time.time()
-        embeds = backend.embed_frame(img)        # ViT + projector (GPU)
+        # FORK (system3_qwem_omni): embed_frame now also returns the
+        # post-merge patch grid (rows, cols) -- needed downstream by
+        # tmrope_position_ids when cfg.tmrope_positions is on. Every backend
+        # returns SOME grid_hw (harmless if unused), so this call site is
+        # identical regardless of which backend is loaded.
+        embeds, grid_hw = backend.embed_frame(img)  # ViT + projector (GPU)
         if torch.cuda.is_available():
             torch.cuda.synchronize()
         if not printed_tok:                      # one-time: real tokens/frame
@@ -71,10 +76,10 @@ def encoder_thread(cfg, backend, vis_q, ctrl, stop, prof=None):
             prof.incr("frames_emitted")
 
         if cfg.deterministic:
-            vis_q.put((vt, embeds))              # block: process EVERY frame -> reproducible
+            vis_q.put((vt, embeds, grid_hw))     # block: process EVERY frame -> reproducible
         else:
             try:
-                vis_q.put_nowait((vt, embeds))
+                vis_q.put_nowait((vt, embeds, grid_hw))
             except queue.Full:
                 try:
                     vis_q.get_nowait()           # drop oldest (bounded latency)
@@ -82,7 +87,7 @@ def encoder_thread(cfg, backend, vis_q, ctrl, stop, prof=None):
                         prof.incr("frames_dropped")
                 except queue.Empty:
                     pass
-                vis_q.put_nowait((vt, embeds))
+                vis_q.put_nowait((vt, embeds, grid_hw))
     container.close()
     stop.set()
     log("encoder", cfg.max_seconds, "video stream ended")

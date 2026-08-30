@@ -1,0 +1,27 @@
+\section{Conclusion}
+\label{sec:conclusion}
+
+We set out to fit per-task emission thresholds for a proactive streaming
+assistant and report the gain. The fit completed, returned a threshold for every
+task, and would have supported that report. It does not survive being asked whether
+it recurs: no task's selected threshold beats its own best rival outside noise,
+the selections re-appear in only 25--61\,\% of bootstrap resamples, and nine fitted
+thresholds together fail to beat a single global one even in-sample.
+
+The mechanism is measured rather than inferred. The gating score does not rank
+event-adjacent moments above quiet ones --- AUC $0.431$--$0.551$, every interval
+covering chance, robust to clock offset, tolerance and degeneracy checks --- so a
+threshold on it can only purchase emission volume. Volume has one useful setting,
+and pooled over 135 videos that setting is recovered stably, at a 94\,\%
+re-selection rate, while the same quantity split nine ways is not recoverable at
+all.
+
+The practical recommendation for this system is therefore a single global operating
+point rather than a per-task table, and the shipped per-task values --- inherited
+from a vision-only backbone --- are measurably worse than a flat threshold. The
+methodological recommendation is more general: a per-task threshold table is a set
+of fitted parameters and should be reported as one, with a resampling check that
+the values recur and a comparison against the simplest model that explains the same
+data. Both tests re-use runs already performed and cost no additional compute. In
+this study each of them, independently, reverses the conclusion the point estimates
+alone would have supported.

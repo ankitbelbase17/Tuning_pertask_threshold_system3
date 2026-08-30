@@ -19,6 +19,7 @@ Emissions are captured via the evaluator hook the controller already invokes
 from __future__ import annotations
 
 import dataclasses
+import os
 import queue
 import sys
 import threading
@@ -68,7 +69,7 @@ class CaptureEvaluator:
 class System5Runner:
     def __init__(self):
         from config import AsyncOmniConfig
-        from backend import Qwen3VLBackend
+        from backend import Qwen3VLBackend, Qwen2_5OmniBackend
         from manager import KVCacheManager
         from vision_stream import encoder_thread
         from input_ingester import input_ingester_thread
@@ -102,13 +103,30 @@ class System5Runner:
             f"{' | controller on '+cfg.writer_device if has_ctrl else ''}"
             f"{' | encoder on '+cfg.encoder_device if has_enc else ''}", tag="runner")
 
-        self.backend = Qwen3VLBackend(cfg, role=primary_role)          # ingester + shared cache
+        # FORK (system3_qwem_omni): honour cfg.backend the SAME way run.py:61 does,
+        # instead of hardcoding the parent's vision-only class. Previously this
+        # adapter always built Qwen3VLBackend while config.py's model_id had
+        # already been switched to Qwen/Qwen2.5-Omni-7B, so the OmniPro eval was
+        # feeding omni weights into Qwen3VLForConditionalGeneration -- it was not
+        # evaluating the omni model at all. OMNIPRO_BACKEND overrides for A/B.
+        BACKENDS = {"qwen2_5_omni": Qwen2_5OmniBackend, "qwen3_vl": Qwen3VLBackend}
+        bname = os.environ.get("OMNIPRO_BACKEND", cfg.backend)
+        if bname not in BACKENDS:
+            raise SystemExit(f"OMNIPRO_BACKEND/cfg.backend must be one of "
+                             f"{list(BACKENDS)}, got {bname!r}")
+        BK = BACKENDS[bname]
+        log(f"backend={bname} ({BK.__name__}) model_id={cfg.model_id} "
+            f"use_audio={getattr(cfg,'use_audio',False)} "
+            f"tmrope={getattr(cfg,'tmrope_positions',False)}", tag="runner")
+        self.backend_name = bname
+
+        self.backend = BK(cfg, role=primary_role)          # ingester + shared cache
         self.encoder_backend = self.backend
         if has_enc:
-            self.encoder_backend = Qwen3VLBackend(_dc.replace(cfg, device=cfg.encoder_device), role="vision")
+            self.encoder_backend = BK(_dc.replace(cfg, device=cfg.encoder_device), role="vision")
         self.controller_backend = self.backend
         if has_ctrl:
-            self.controller_backend = Qwen3VLBackend(_dc.replace(cfg, device=cfg.writer_device), role="language")
+            self.controller_backend = BK(_dc.replace(cfg, device=cfg.writer_device), role="language")
         log("backends loaded; icl_ingester_writer pipeline (3 threads, shared cache).",
             tag="runner")
 
@@ -139,10 +157,26 @@ class System5Runner:
             sample.task, self.base_cfg.hit_threshold)
         if os.environ.get("OMNIPRO_HIT_THRESHOLD"):
             hit_threshold = float(os.environ["OMNIPRO_HIT_THRESHOLD"])
+        # A/B switch for the KV-cache read path: OMNIPRO_CACHE_MODE=snapshot|inplace.
+        # "inplace" drops the per-tick deep copy of the cache. It must produce
+        # BYTE-IDENTICAL output to "snapshot" -- see test_inplace.py, which asserts
+        # exactly that -- so this is a memory/latency switch, never an accuracy one.
+        cache_mode = os.environ.get("OMNIPRO_CACHE_MODE",
+                                    self.base_cfg.controller_cache_mode)
+        # A/B switch for the sampler: OMNIPRO_WRITER_GREEDY=1 forces argmax.
+        # Seeded multinomial sampling is the leading suspect for the run-to-run
+        # divergence that broke the ab_inplace null control (MISSION S6/S11): a
+        # near-tie resolved differently by bf16 kernel jitter changes one token,
+        # and the stream diverges from there. This knob is what tests that.
+        _g = os.environ.get("OMNIPRO_WRITER_GREEDY")
+        writer_greedy = (_g not in (None, "", "0", "false", "False")
+                         if _g is not None else self.base_cfg.writer_greedy)
         cfg = dataclasses.replace(
             self.base_cfg,
             decode_mode=decode_mode,
             hit_threshold=hit_threshold,
+            controller_cache_mode=cache_mode,
+            writer_greedy=writer_greedy,
             # signal-quality sweep knobs (all change the forward pass, so none can
             # be screened offline the way gate strategies can)
             seen_mode=os.environ.get("OMNIPRO_SEEN_MODE", self.base_cfg.seen_mode),

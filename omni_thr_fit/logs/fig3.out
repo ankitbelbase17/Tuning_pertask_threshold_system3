@@ -1,0 +1,2 @@
+[judge] google-genai judge active: model=gemini-3-flash
+  fig3: figs/fig3_pr_bands.pdf

@@ -1,0 +1,217 @@
+{
+  "pass": "p1",
+  "n_tasks": 9,
+  "n_videos_total": 135,
+  "common_grid": [
+    0.05,
+    0.15,
+    0.25,
+    0.35,
+    0.45,
+    0.55,
+    0.65,
+    0.75,
+    0.85,
+    0.95
+  ],
+  "single_global_sweep": {
+    "0.05": 0.2288,
+    "0.15": 0.2469,
+    "0.25": 0.2256,
+    "0.35": 0.2258,
+    "0.45": 0.2271,
+    "0.55": 0.2279,
+    "0.65": 0.2176,
+    "0.75": 0.19,
+    "0.85": 0.1709,
+    "0.95": 0.0709
+  },
+  "best_single_global_thr": 0.15,
+  "arms": {
+    "global_0.5": {
+      "time_p": 0.1421,
+      "time_r": 0.565,
+      "time_f1": 0.2271,
+      "thresholds": {
+        "instant_event_alert": 0.45,
+        "semantic_condition_alert": 0.45,
+        "explicit_target_grounding": 0.45,
+        "snapshot_counting": 0.45,
+        "cumulative_counting": 0.45,
+        "dedup_counting": 0.45,
+        "realtime_state_monitor": 0.45,
+        "event_narration": 0.45,
+        "sequential_step_instruction": 0.45
+      },
+      "off_grid": {
+        "instant_event_alert": {
+          "requested": 0.5,
+          "used": 0.45,
+          "abs_error": 0.05
+        },
+        "semantic_condition_alert": {
+          "requested": 0.5,
+          "used": 0.45,
+          "abs_error": 0.05
+        },
+        "explicit_target_grounding": {
+          "requested": 0.5,
+          "used": 0.45,
+          "abs_error": 0.05
+        },
+        "snapshot_counting": {
+          "requested": 0.5,
+          "used": 0.45,
+          "abs_error": 0.05
+        },
+        "cumulative_counting": {
+          "requested": 0.5,
+          "used": 0.45,
+          "abs_error": 0.05
+        },
+        "dedup_counting": {
+          "requested": 0.5,
+          "used": 0.45,
+          "abs_error": 0.05
+        },
+        "realtime_state_monitor": {
+          "requested": 0.5,
+          "used": 0.45,
+          "abs_error": 0.05
+        },
+        "event_narration": {
+          "requested": 0.5,
+          "used": 0.45,
+          "abs_error": 0.05
+        },
+        "sequential_step_instruction": {
+          "requested": 0.5,
+          "used": 0.45,
+          "abs_error": 0.05
+        }
+      },
+      "delta_vs_best_single_global": {
+        "point": -0.0198,
+        "ci95": [
+          -0.0389,
+          -0.0026
+        ],
+        "p_le_0": 0.987
+      }
+    },
+    "shipped_per_task": {
+      "time_p": 0.1505,
+      "time_r": 0.3561,
+      "time_f1": 0.2115,
+      "thresholds": {
+        "instant_event_alert": 0.45,
+        "semantic_condition_alert": 0.95,
+        "explicit_target_grounding": 0.45,
+        "snapshot_counting": 0.95,
+        "cumulative_counting": 0.95,
+        "dedup_counting": 0.95,
+        "realtime_state_monitor": 0.85,
+        "event_narration": 0.15,
+        "sequential_step_instruction": 0.01
+      },
+      "off_grid": {
+        "semantic_condition_alert": {
+          "requested": 0.98,
+          "used": 0.95,
+          "abs_error": 0.03
+        },
+        "explicit_target_grounding": {
+          "requested": 0.5,
+          "used": 0.45,
+          "abs_error": 0.05
+        },
+        "snapshot_counting": {
+          "requested": 0.985,
+          "used": 0.95,
+          "abs_error": 0.035
+        },
+        "cumulative_counting": {
+          "requested": 0.925,
+          "used": 0.95,
+          "abs_error": 0.025
+        },
+        "dedup_counting": {
+          "requested": 0.992,
+          "used": 0.95,
+          "abs_error": 0.042
+        },
+        "realtime_state_monitor": {
+          "requested": 0.8,
+          "used": 0.85,
+          "abs_error": 0.05
+        },
+        "event_narration": {
+          "requested": 0.1,
+          "used": 0.15,
+          "abs_error": 0.05
+        }
+      },
+      "delta_vs_best_single_global": {
+        "point": -0.0354,
+        "ci95": [
+          -0.0554,
+          -0.0159
+        ],
+        "p_le_0": 1.0
+      }
+    },
+    "fitted_per_task": {
+      "time_p": 0.1628,
+      "time_r": 0.5821,
+      "time_f1": 0.2544,
+      "thresholds": {
+        "instant_event_alert": 0.45,
+        "semantic_condition_alert": 0.25,
+        "explicit_target_grounding": 0.05,
+        "snapshot_counting": 0.55,
+        "cumulative_counting": 0.85,
+        "dedup_counting": 0.35,
+        "realtime_state_monitor": 0.45,
+        "event_narration": 0.65,
+        "sequential_step_instruction": 0.15
+      },
+      "off_grid": {},
+      "delta_vs_best_single_global": {
+        "point": 0.0075,
+        "ci95": [
+          -0.0107,
+          0.0269
+        ],
+        "p_le_0": 0.233
+      }
+    },
+    "best_single_global": {
+      "time_p": 0.1554,
+      "time_r": 0.6013,
+      "time_f1": 0.2469,
+      "thresholds": {
+        "instant_event_alert": 0.15,
+        "semantic_condition_alert": 0.15,
+        "explicit_target_grounding": 0.15,
+        "snapshot_counting": 0.15,
+        "cumulative_counting": 0.15,
+        "dedup_counting": 0.15,
+        "realtime_state_monitor": 0.15,
+        "event_narration": 0.15,
+        "sequential_step_instruction": 0.15
+      },
+      "off_grid": {}
+    }
+  },
+  "bsg_reselect_rate": 0.941,
+  "bsg_chance_rate": 0.1,
+  "bsg_winner_hist": {
+    "0.15": 1881,
+    "0.55": 46,
+    "0.45": 22,
+    "0.05": 16,
+    "0.35": 15,
+    "0.65": 12,
+    "0.25": 8
+  }
+}

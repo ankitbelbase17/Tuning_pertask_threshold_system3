@@ -1,0 +1,403 @@
+[login] chain start Fri Aug 28 08:03:01 PM CEST 2026 on clariden-ln004, gen=90min lane_base=100
+[login] gen 1: 0/1410 samples, cells 0/94, using GPUs [0,2,3]
+[login] gen 1 finished 21:33:01
+[login] gen 2: 81/1410 samples, cells 0/94, using GPUs [0,1,2,3]
+[login] gen 2 finished 23:00:23
+[login] gen 3: 82/1410 samples, cells 0/94, using GPUs [0,2,3]
+[login] gen 3 finished 00:27:24
+[login] gen 4: 82/1410 samples, cells 0/94, using GPUs [0,2,3]
+[login] gen 4 finished 01:54:24
+[login] gen 5: 82/1410 samples, cells 0/94, using GPUs [0,1,2,3]
+[login] gen 5 finished 03:22:46
+[login] gen 6: 82/1410 samples, cells 0/94, using GPUs [0,1,2,3]
+[login] gen 6 finished 04:49:09
+[login] gen 7: 82/1410 samples, cells 0/94, using GPUs [0,1,2,3]
+[login] gen 7 finished 06:17:30
+[login] gen 8: 167/1410 samples, cells 0/94, using GPUs [0,1,2,3]
+[login] gen 8 finished 07:47:52
+[login] gen 9: 456/1410 samples, cells 0/94, using GPUs [0,1,2,3]
+[login] gen 9 finished 09:18:14
+[login] gen 10: 705/1410 samples, cells 0/94, using GPUs [0,1,2,3]
+[login] gen 10 finished 10:44:36
+[login] gen 11: 906/1410 samples, cells 0/94, using GPUs [0,1,2,3]
+[login] gen 11 finished 12:14:57
+[login] gen 12: 1110/1410 samples, cells 0/94, using GPUs [0,1,2,3]
+[login] gen 12 finished 13:37:19
+[login] gen 13: 1169/1410 samples, cells 8/94, using GPUs [0,1,2,3]
+[login] gen 13 finished 13:38:41
+[login] gen 14: 1169/1410 samples, cells 8/94, using GPUs [0,1,2,3]
+[login] gen 14 finished 13:40:01
+[login] gen 15: 1169/1410 samples, cells 8/94, using GPUs [0,1,2,3]
+[login] gen 15 finished 13:41:22
+[login] gen 16: 1170/1410 samples, cells 8/94, using GPUs [0,1,2,3]
+[login] gen 16 finished 13:42:43
+[login] gen 17: 1171/1410 samples, cells 9/94, using GPUs [0,1,2,3]
+[login] gen 17 finished 13:44:04
+[login] gen 18: 1171/1410 samples, cells 9/94, using GPUs [0,1,2,3]
+[login] gen 18 finished 13:45:25
+[login] gen 19: 1171/1410 samples, cells 9/94, using GPUs [0,1,2,3]
+[login] gen 19 finished 13:46:46
+[login] gen 20: 1171/1410 samples, cells 9/94, using GPUs [0,1,2,3]
+[login] gen 20 finished 13:48:06
+[login] gen 21: 1171/1410 samples, cells 9/94, using GPUs [0,1,2,3]
+[login] gen 21 finished 13:49:27
+[login] gen 22: 1171/1410 samples, cells 9/94, using GPUs [0,1,2,3]
+[login] gen 22 finished 13:50:48
+[login] gen 23: 1171/1410 samples, cells 9/94, using GPUs [0,1,2]
+[login] gen 23 finished 13:51:50
+[login] gen 24: 1171/1410 samples, cells 9/94, using GPUs [0,1,2]
+[login] gen 24 finished 13:52:50
+[login] gen 25: 1171/1410 samples, cells 9/94, using GPUs [0,1,2]
+[login] gen 25 finished 13:53:51
+[login] gen 26: 1172/1410 samples, cells 10/94, using GPUs [0,1,2]
+[login] gen 26 finished 13:54:52
+[login] gen 27: 1172/1410 samples, cells 10/94, using GPUs [0,1,2]
+[login] gen 27 finished 13:55:53
+[login] gen 28: 1172/1410 samples, cells 10/94, using GPUs [0,1,2,3]
+[login] gen 28 finished 13:57:13
+[login] gen 29: 1172/1410 samples, cells 10/94, using GPUs [0,1,2,3]
+[login] gen 29 finished 13:58:34
+[login] gen 30: 1172/1410 samples, cells 10/94, using GPUs [0,1,2,3]
+[login] gen 30 finished 13:59:55
+[login] gen 31: 1172/1410 samples, cells 10/94, using GPUs [0,1,2,3]
+[login] gen 31 finished 14:01:15
+[login] gen 32: 1172/1410 samples, cells 10/94, using GPUs [0,1,2,3]
+[login] gen 32 finished 14:02:36
+[login] gen 33: 1172/1410 samples, cells 10/94, using GPUs [0,1,2,3]
+[login] gen 33 finished 14:03:57
+[login] gen 34: 1172/1410 samples, cells 10/94, using GPUs [0,1,2,3]
+[login] gen 34 finished 14:05:18
+[login] gen 35: 1172/1410 samples, cells 10/94, using GPUs [0,1,2,3]
+[login] gen 35 finished 14:06:39
+[login] gen 36: 1172/1410 samples, cells 10/94, using GPUs [0,1,2,3]
+[login] gen 36 finished 14:08:00
+[login] gen 37: 1172/1410 samples, cells 10/94, using GPUs [0,1,2]
+[login] gen 37 finished 14:09:01
+[login] gen 38: 1172/1410 samples, cells 10/94, using GPUs [0,1,2,3]
+[login] gen 38 finished 14:10:24
+[login] gen 39: 1172/1410 samples, cells 10/94, using GPUs [0,1,2,3]
+[login] gen 39 finished 14:11:45
+[login] gen 40: 1172/1410 samples, cells 10/94, using GPUs [0,1,2,3]
+[login] gen 40 finished 14:13:05
+[login] gen 41: 1172/1410 samples, cells 10/94, using GPUs [0,1,2]
+[login] gen 41 finished 14:14:06
+[login] gen 42: 1172/1410 samples, cells 10/94, using GPUs [0,1,2]
+[login] gen 42 finished 14:15:06
+[login] gen 43: 1172/1410 samples, cells 10/94, using GPUs [0,1,2,3]
+[login] gen 43 finished 14:16:27
+[login] gen 44: 1172/1410 samples, cells 10/94, using GPUs [0,1,2,3]
+[login] gen 44 finished 14:17:47
+[login] gen 45: 1172/1410 samples, cells 10/94, using GPUs [0,1,2,3]
+[login] gen 45 finished 14:19:08
+[login] gen 46: 1172/1410 samples, cells 10/94, using GPUs [0,1,2,3]
+[login] gen 46 finished 14:20:29
+[login] gen 47: 1172/1410 samples, cells 10/94, using GPUs [0,1,2,3]
+[login] gen 47 finished 14:21:50
+[login] gen 48: 1172/1410 samples, cells 10/94, using GPUs [0,1,2,3]
+[login] gen 48 finished 14:23:10
+[login] gen 49: 1172/1410 samples, cells 10/94, using GPUs [0,1,2,3]
+[login] gen 49 finished 14:24:31
+[login] gen 50: 1172/1410 samples, cells 10/94, using GPUs [0,1,2,3]
+[login] gen 50 finished 14:25:52
+[login] gen 51: 1173/1410 samples, cells 10/94, using GPUs [0,1,2,3]
+[login] gen 51 finished 14:27:13
+[login] gen 52: 1175/1410 samples, cells 10/94, using GPUs [0,1,2,3]
+[login] gen 52 finished 14:28:33
+[login] gen 53: 1179/1410 samples, cells 13/94, using GPUs [0,1,2,3]
+[login] gen 53 finished 14:29:54
+[login] gen 54: 1180/1410 samples, cells 14/94, using GPUs [0,1,2,3]
+[login] gen 54 finished 14:31:14
+[login] gen 55: 1180/1410 samples, cells 14/94, using GPUs [0,1,2,3]
+[login] gen 55 finished 14:32:35
+[login] gen 56: 1180/1410 samples, cells 14/94, using GPUs [0,1,2,3]
+[login] gen 56 finished 14:33:56
+[login] gen 57: 1180/1410 samples, cells 14/94, using GPUs [0,1,2,3]
+[login] gen 57 finished 14:35:17
+[login] gen 58: 1180/1410 samples, cells 14/94, using GPUs [0,1,2,3]
+[login] gen 58 finished 14:36:37
+[login] gen 59: 1180/1410 samples, cells 14/94, using GPUs [0,1,2,3]
+[login] gen 59 finished 14:37:58
+[login] gen 60: 1180/1410 samples, cells 14/94, using GPUs [0,1,2,3]
+[login] gen 60 finished 14:39:19
+[login] gen 61: 1180/1410 samples, cells 14/94, using GPUs [0,1,2,3]
+[login] gen 61 finished 14:40:39
+[login] gen 62: 1180/1410 samples, cells 14/94, using GPUs [0,1,2,3]
+[login] gen 62 finished 14:42:00
+[login] gen 63: 1180/1410 samples, cells 14/94, using GPUs [0,1,2,3]
+[login] gen 63 finished 14:43:21
+[login] gen 64: 1180/1410 samples, cells 14/94, using GPUs [0,1,2,3]
+[login] gen 64 finished 14:44:41
+[login] gen 65: 1180/1410 samples, cells 14/94, using GPUs [0,1,2,3]
+[login] gen 65 finished 14:46:02
+[login] gen 66: 1180/1410 samples, cells 14/94, using GPUs [0,1,2,3]
+[login] gen 66 finished 14:47:22
+[login] gen 67: 1180/1410 samples, cells 14/94, using GPUs [0,1,2,3]
+[login] gen 67 finished 14:48:42
+[login] gen 68: 1180/1410 samples, cells 14/94, using GPUs [0,1,2,3]
+[login] gen 68 finished 14:50:04
+[login] gen 69: 1180/1410 samples, cells 14/94, using GPUs [0,1,2,3]
+[login] gen 69 finished 14:51:25
+[login] gen 70: 1180/1410 samples, cells 14/94, using GPUs [0,1,2,3]
+[login] gen 70 finished 14:52:46
+[login] gen 71: 1180/1410 samples, cells 14/94, using GPUs [0,1,2,3]
+[login] gen 71 finished 14:54:07
+[login] gen 72: 1180/1410 samples, cells 14/94, using GPUs [0,1,2,3]
+[login] gen 72 finished 14:55:27
+[login] gen 73: 1180/1410 samples, cells 14/94, using GPUs [0,1,2,3]
+[login] gen 73 finished 14:56:48
+[login] gen 74: 1180/1410 samples, cells 14/94, using GPUs [0,1,2,3]
+[login] gen 74 finished 14:58:09
+[login] gen 75: 1180/1410 samples, cells 14/94, using GPUs [0,1,2,3]
+[login] gen 75 finished 14:59:29
+[login] gen 76: 1180/1410 samples, cells 14/94, using GPUs [0,1,2,3]
+[login] gen 76 finished 15:00:49
+[login] gen 77: 1180/1410 samples, cells 14/94, using GPUs [0,1,2,3]
+[login] gen 77 finished 15:02:10
+[login] gen 78: 1181/1410 samples, cells 14/94, using GPUs [0,1,2,3]
+[login] gen 78 finished 15:03:31
+[login] gen 79: 1183/1410 samples, cells 15/94, using GPUs [0,1,2,3]
+[login] gen 79 finished 15:04:52
+[login] gen 80: 1186/1410 samples, cells 16/94, using GPUs [0,1,2,3]
+[login] gen 80 finished 15:06:13
+[login] gen 81: 1186/1410 samples, cells 16/94, using GPUs [0,1,2,3]
+[login] gen 81 finished 15:07:33
+[login] gen 82: 1187/1410 samples, cells 17/94, using GPUs [0,1,2,3]
+[login] gen 82 finished 15:08:54
+[login] gen 83: 1188/1410 samples, cells 18/94, using GPUs [0,1,2,3]
+[login] gen 83 finished 15:10:15
+[login] gen 84: 1188/1410 samples, cells 18/94, using GPUs [0,1,2,3]
+[login] gen 84 finished 15:11:35
+[login] gen 85: 1188/1410 samples, cells 18/94, using GPUs [0,1,2,3]
+[login] gen 85 finished 15:12:56
+[login] gen 86: 1188/1410 samples, cells 18/94, using GPUs [0,1,2,3]
+[login] gen 86 finished 15:14:17
+[login] gen 87: 1188/1410 samples, cells 18/94, using GPUs [0,1,2,3]
+[login] gen 87 finished 15:15:38
+[login] gen 88: 1188/1410 samples, cells 18/94, using GPUs [0,1,2,3]
+[login] gen 88 finished 15:17:00
+[login] gen 89: 1189/1410 samples, cells 18/94, using GPUs [0,1,2,3]
+[login] gen 89 finished 15:18:20
+[login] gen 90: 1190/1410 samples, cells 18/94, using GPUs [0,1,2,3]
+[login] gen 90 finished 15:19:41
+[login] gen 91: 1194/1410 samples, cells 19/94, using GPUs [0,1,2,3]
+[login] gen 91 finished 15:21:01
+[login] gen 92: 1196/1410 samples, cells 20/94, using GPUs [0,1,2,3]
+[login] gen 92 finished 15:22:22
+[login] gen 93: 1196/1410 samples, cells 20/94, using GPUs [0,1,2,3]
+[login] gen 93 finished 15:23:43
+[login] gen 94: 1196/1410 samples, cells 20/94, using GPUs [0,1,2,3]
+[login] gen 94 finished 15:25:04
+[login] gen 95: 1196/1410 samples, cells 20/94, using GPUs [0,1,2,3]
+[login] gen 95 finished 15:26:25
+[login] gen 96: 1196/1410 samples, cells 20/94, using GPUs [0,1,2,3]
+[login] gen 96 finished 15:27:46
+[login] gen 97: 1196/1410 samples, cells 20/94, using GPUs [0,1,2,3]
+[login] gen 97 finished 15:29:07
+[login] gen 98: 1196/1410 samples, cells 20/94, using GPUs [0,1,2,3]
+[login] gen 98 finished 15:30:28
+[login] gen 99: 1196/1410 samples, cells 20/94, using GPUs [0,1,2,3]
+[login] gen 99 finished 15:31:48
+[login] gen 100: 1196/1410 samples, cells 20/94, using GPUs [0,1,2,3]
+[login] gen 100 finished 15:33:10
+[login] gen 101: 1196/1410 samples, cells 20/94, using GPUs [0,1,2,3]
+[login] gen 101 finished 15:34:30
+[login] gen 102: 1197/1410 samples, cells 20/94, using GPUs [0,1,2,3]
+[login] gen 102 finished 15:35:51
+[login] gen 103: 1201/1410 samples, cells 20/94, using GPUs [0,1,2,3]
+[login] gen 103 finished 15:37:12
+[login] gen 104: 1203/1410 samples, cells 20/94, using GPUs [0,1,2,3]
+[login] gen 104 finished 15:38:33
+[login] gen 105: 1204/1410 samples, cells 20/94, using GPUs [0,1,2,3]
+[login] gen 105 finished 15:39:53
+[login] gen 106: 1204/1410 samples, cells 20/94, using GPUs [0,1,2,3]
+[login] gen 106 finished 15:41:14
+[login] gen 107: 1204/1410 samples, cells 20/94, using GPUs [0,1,2,3]
+[login] gen 107 finished 15:42:35
+[login] gen 108: 1204/1410 samples, cells 20/94, using GPUs [0,1,2,3]
+[login] gen 108 finished 15:43:57
+[login] gen 109: 1206/1410 samples, cells 20/94, using GPUs [0,1,2,3]
+[login] gen 109 finished 15:45:19
+[login] gen 110: 1207/1410 samples, cells 20/94, using GPUs [0,1,2,3]
+[login] gen 110 finished 15:46:40
+[login] gen 111: 1208/1410 samples, cells 20/94, using GPUs [0,1,2,3]
+[login] gen 111 finished 15:48:01
+[login] gen 112: 1209/1410 samples, cells 21/94, using GPUs [0,1,2,3]
+[login] gen 112 finished 15:49:23
+[login] gen 113: 1210/1410 samples, cells 22/94, using GPUs [0,1,2,3]
+[login] gen 113 finished 15:50:44
+[login] gen 114: 1210/1410 samples, cells 22/94, using GPUs [0,1,2,3]
+[login] gen 114 finished 15:52:06
+[login] gen 115: 1212/1410 samples, cells 24/94, using GPUs [0,1,2,3]
+[login] gen 115 finished 15:53:27
+[login] gen 116: 1212/1410 samples, cells 24/94, using GPUs [0,1,2,3]
+[login] gen 116 finished 15:54:49
+[login] gen 117: 1212/1410 samples, cells 24/94, using GPUs [0,1,2,3]
+[login] gen 117 finished 15:56:11
+[login] gen 118: 1212/1410 samples, cells 24/94, using GPUs [0,1,2,3]
+[login] gen 118 finished 15:57:33
+[login] gen 119: 1213/1410 samples, cells 25/94, using GPUs [0,1,2,3]
+[login] gen 119 finished 15:58:54
+[login] gen 120: 1215/1410 samples, cells 27/94, using GPUs [0,1,2,3]
+[login] gen 120 finished 16:00:14
+[login] gen 121: 1218/1410 samples, cells 28/94, using GPUs [0,1,2,3]
+[login] gen 121 finished 16:01:35
+[login] gen 122: 1218/1410 samples, cells 28/94, using GPUs [0,1,2,3]
+[login] gen 122 finished 16:02:56
+[login] gen 123: 1218/1410 samples, cells 28/94, using GPUs [0,1,2,3]
+[login] gen 123 finished 16:04:18
+[login] gen 124: 1218/1410 samples, cells 28/94, using GPUs [0,1,2,3]
+[login] gen 124 finished 16:05:39
+[login] gen 125: 1218/1410 samples, cells 28/94, using GPUs [0,1,2,3]
+[login] gen 125 finished 16:07:00
+[login] gen 126: 1218/1410 samples, cells 28/94, using GPUs [0,1,2,3]
+[login] gen 126 finished 16:08:21
+[login] gen 127: 1218/1410 samples, cells 28/94, using GPUs [0,1,2,3]
+[login] gen 127 finished 16:09:42
+[login] gen 128: 1218/1410 samples, cells 28/94, using GPUs [0,1,2,3]
+[login] gen 128 finished 16:11:03
+[login] gen 129: 1218/1410 samples, cells 28/94, using GPUs [0,1,2,3]
+[login] gen 129 finished 16:12:25
+[login] gen 130: 1218/1410 samples, cells 28/94, using GPUs [0,1,2,3]
+[login] gen 130 finished 16:13:46
+[login] gen 131: 1220/1410 samples, cells 28/94, using GPUs [0,1,2,3]
+[login] gen 131 finished 16:15:06
+[login] gen 132: 1220/1410 samples, cells 28/94, using GPUs [0,1,2,3]
+[login] gen 132 finished 16:16:27
+[login] gen 133: 1220/1410 samples, cells 28/94, using GPUs [0,1,2,3]
+[login] gen 133 finished 16:17:48
+[login] gen 134: 1220/1410 samples, cells 28/94, using GPUs [0,1,2,3]
+[login] gen 134 finished 16:19:09
+[login] gen 135: 1220/1410 samples, cells 28/94, using GPUs [0,1,2,3]
+[login] gen 135 finished 16:20:29
+[login] gen 136: 1220/1410 samples, cells 28/94, using GPUs [0,1,2,3]
+[login] gen 136 finished 16:21:50
+[login] gen 137: 1221/1410 samples, cells 28/94, using GPUs [0,1,2,3]
+[login] gen 137 finished 16:23:11
+[login] gen 138: 1223/1410 samples, cells 30/94, using GPUs [0,1,2,3]
+[login] gen 138 finished 16:24:32
+[login] gen 139: 1224/1410 samples, cells 30/94, using GPUs [0,1,2,3]
+[login] gen 139 finished 16:25:52
+[login] gen 140: 1226/1410 samples, cells 30/94, using GPUs [0,1,2,3]
+[login] gen 140 finished 16:27:13
+[login] gen 141: 1227/1410 samples, cells 30/94, using GPUs [0,1,2,3]
+[login] gen 141 finished 16:28:34
+[login] gen 142: 1227/1410 samples, cells 30/94, using GPUs [0,1,2,3]
+[login] gen 142 finished 16:29:55
+[login] gen 143: 1228/1410 samples, cells 30/94, using GPUs [0,1,2,3]
+[login] gen 143 finished 16:31:16
+[login] gen 144: 1228/1410 samples, cells 30/94, using GPUs [0,1,2,3]
+[login] gen 144 finished 16:32:37
+[login] gen 145: 1228/1410 samples, cells 30/94, using GPUs [0,1,2,3]
+[login] gen 145 finished 16:33:58
+[login] gen 146: 1228/1410 samples, cells 30/94, using GPUs [0,1,2,3]
+[login] gen 146 finished 16:35:19
+[login] gen 147: 1228/1410 samples, cells 30/94, using GPUs [0,1,2,3]
+[login] gen 147 finished 16:36:41
+[login] gen 148: 1228/1410 samples, cells 30/94, using GPUs [0,1,2,3]
+[login] gen 148 finished 16:38:02
+[login] gen 149: 1228/1410 samples, cells 30/94, using GPUs [0,1,2,3]
+[login] gen 149 finished 16:39:24
+[login] gen 150: 1228/1410 samples, cells 30/94, using GPUs [0,1,2,3]
+[login] gen 150 finished 16:40:46
+[login] gen 151: 1231/1410 samples, cells 30/94, using GPUs [0,1,2,3]
+[login] gen 151 finished 16:42:07
+[login] gen 152: 1233/1410 samples, cells 30/94, using GPUs [0,1,2,3]
+[login] gen 152 finished 16:43:30
+[login] gen 153: 1234/1410 samples, cells 30/94, using GPUs [0,1,2,3]
+[login] gen 153 finished 16:44:53
+[login] gen 154: 1235/1410 samples, cells 30/94, using GPUs [0,1,2,3]
+[login] gen 154 finished 16:46:15
+[login] gen 155: 1235/1410 samples, cells 30/94, using GPUs [0,1,2,3]
+[login] gen 155 finished 16:47:36
+[login] gen 156: 1235/1410 samples, cells 30/94, using GPUs [0,1,2,3]
+[login] gen 156 finished 16:48:57
+[login] gen 157: 1235/1410 samples, cells 30/94, using GPUs [0,1,2,3]
+[login] gen 157 finished 16:50:19
+[login] gen 158: 1235/1410 samples, cells 30/94, using GPUs [0,1,2,3]
+[login] gen 158 finished 16:51:40
+[login] gen 159: 1235/1410 samples, cells 30/94, using GPUs [0,1,2,3]
+[login] gen 159 finished 16:53:01
+[login] gen 160: 1235/1410 samples, cells 30/94, using GPUs [0,1,2,3]
+[login] gen 160 finished 16:54:23
+[login] gen 161: 1235/1410 samples, cells 30/94, using GPUs [0,1,2,3]
+[login] gen 161 finished 16:55:44
+[login] gen 162: 1235/1410 samples, cells 30/94, using GPUs [0,1,2,3]
+[login] gen 162 finished 16:57:05
+[login] gen 163: 1235/1410 samples, cells 30/94, using GPUs [0,1,2,3]
+[login] gen 163 finished 16:58:26
+[login] gen 164: 1235/1410 samples, cells 30/94, using GPUs [0,1,2,3]
+[login] gen 164 finished 16:59:47
+[login] gen 165: 1235/1410 samples, cells 30/94, using GPUs [0,1,2,3]
+[login] gen 165 finished 17:01:09
+[login] gen 166: 1235/1410 samples, cells 30/94, using GPUs [0,1,2,3]
+[login] gen 166 finished 17:02:30
+[login] gen 167: 1235/1410 samples, cells 30/94, using GPUs [0,1,2,3]
+[login] gen 167 finished 17:03:51
+[login] gen 168: 1236/1410 samples, cells 30/94, using GPUs [0,1,2,3]
+[login] gen 168 finished 17:05:12
+[login] gen 169: 1236/1410 samples, cells 30/94, using GPUs [0,1,2,3]
+[login] gen 169 finished 17:06:33
+[login] gen 170: 1236/1410 samples, cells 30/94, using GPUs [0,1,2,3]
+[login] gen 170 finished 17:07:55
+[login] gen 171: 1240/1410 samples, cells 32/94, using GPUs [0,1,2,3]
+[login] gen 171 finished 17:09:18
+[login] gen 172: 1243/1410 samples, cells 35/94, using GPUs [0,1,2,3]
+[login] gen 172 finished 17:10:41
+[login] gen 173: 1243/1410 samples, cells 35/94, using GPUs [0,1,2,3]
+[login] gen 173 finished 17:12:03
+[login] gen 174: 1243/1410 samples, cells 35/94, using GPUs [0,1,2,3]
+[login] gen 174 finished 17:13:27
+[login] gen 175: 1243/1410 samples, cells 35/94, using GPUs [0,1,2,3]
+[login] gen 175 finished 17:14:51
+[login] gen 176: 1244/1410 samples, cells 35/94, using GPUs [0,1,2,3]
+[login] gen 176 finished 17:16:16
+[login] gen 177: 1244/1410 samples, cells 35/94, using GPUs [0,1,2,3]
+[login] gen 177 finished 17:17:40
+[login] gen 178: 1244/1410 samples, cells 35/94, using GPUs [0,1,2,3]
+[login] gen 178 finished 17:19:04
+[login] gen 179: 1244/1410 samples, cells 35/94, using GPUs [0,1,2,3]
+[login] gen 179 finished 17:20:27
+[login] gen 180: 1245/1410 samples, cells 35/94, using GPUs [0,1,2,3]
+[login] gen 180 finished 17:21:53
+[login] gen 181: 1247/1410 samples, cells 35/94, using GPUs [0,1,2,3]
+[login] gen 181 finished 17:23:15
+[login] gen 182: 1248/1410 samples, cells 36/94, using GPUs [0,1,2,3]
+[login] gen 182 finished 17:24:39
+[login] gen 183: 1250/1410 samples, cells 36/94, using GPUs [0,1,2,3]
+[login] gen 183 finished 17:26:02
+[login] gen 184: 1251/1410 samples, cells 36/94, using GPUs [0,1,2,3]
+[login] gen 184 finished 17:27:35
+[login] gen 185: 1252/1410 samples, cells 36/94, using GPUs [0,1,2,3]
+[login] gen 185 finished 17:28:57
+[login] gen 186: 1252/1410 samples, cells 36/94, using GPUs [0,1,2,3]
+[login] gen 186 finished 17:30:20
+[login] gen 187: 1252/1410 samples, cells 36/94, using GPUs [0,1,2,3]
+[login] gen 187 finished 17:31:46
+[login] gen 188: 1252/1410 samples, cells 36/94, using GPUs [0,1,2,3]
+[login] gen 188 finished 17:33:08
+[login] gen 189: 1252/1410 samples, cells 36/94, using GPUs [0,1,2,3]
+[login] gen 189 finished 17:34:30
+[login] gen 190: 1252/1410 samples, cells 36/94, using GPUs [0,1,2,3]
+[login] gen 190 finished 17:35:51
+[login] gen 191: 1252/1410 samples, cells 36/94, using GPUs [0,1,2,3]
+[login] gen 191 finished 17:37:14
+[login] gen 192: 1252/1410 samples, cells 36/94, using GPUs [0,1,2,3]
+[login] gen 192 finished 17:38:35
+[login] gen 193: 1252/1410 samples, cells 36/94, using GPUs [0,1,2,3]
+[login] gen 193 finished 17:39:58
+[login] gen 194: 1253/1410 samples, cells 36/94, using GPUs [0,1,2,3]
+[login] gen 194 finished 17:41:20
+[login] gen 195: 1255/1410 samples, cells 36/94, using GPUs [0,1,2,3]
+[login] gen 195 finished 17:42:41
+[login] gen 196: 1255/1410 samples, cells 36/94, using GPUs [0,1,2,3]
+[login] gen 196 finished 17:44:03
+[login] gen 197: 1258/1410 samples, cells 36/94, using GPUs [0,1,2,3]
+[login] gen 197 finished 17:45:24
+[login] gen 198: 1259/1410 samples, cells 36/94, using GPUs [0,1,2,3]
+[login] gen 198 finished 17:46:46
+[login] gen 199: 1260/1410 samples, cells 37/94, using GPUs [0,1,2,3]
+[login] gen 199 finished 17:48:07
+[login] gen 200: 1260/1410 samples, cells 37/94, using GPUs [0,1,2,3]
+[login] gen 200 finished 17:49:29
+bin/login_chain.sh: line 94: syntax error near unexpected token `('
+bin/login_chain.sh: line 94: `a lane is HUNG (not dead), so a'

@@ -1,0 +1,21 @@
+\begin{table}[t]
+\centering
+\small
+\caption{Finalized per-task gate thresholds. $n$, $n_{gt}$ and $n_{emit}$ are reported beside every F1: at $\sim$2.4 GT events per sample a 15-sample cell holds $\sim$36 scoring events, and a 0.02--0.03 gap between adjacent thresholds is not a real difference.}
+\label{tab:thresholds}
+\begin{tabular}{lrrrrrrrrr}
+\toprule
+task & ship & p1 & 2nd & \textbf{final} & $\Delta$ & time-F1 & joint-F1 & $n$ & e/gt \\
+\midrule
+instant alert & 0.450 & 0.050 & 0.150 & \textbf{0.450} & +0.000 & 0.0000 & 0.0000 & 15 & 0.94 \\  % FLAT: kept shipped
+semantic alert & 0.980 & 0.250 & 0.150 & \textbf{0.250} & -0.730 & 0.1986 & 0.1986 & 15 & 5.21 \\
+grounding & 0.500 & 0.050 & 0.850 & \textbf{0.050} & -0.450 & 0.0645 & 0.0000 & 15 & 0.94 \\
+snapshot & 0.985 & 0.550 & 0.050 & \textbf{0.550} & -0.435 & 0.2000 & 0.0000 & 15 & 1.00 \\
+cumulative & 0.925 & 0.850 & 0.150 & \textbf{0.850} & -0.075 & 0.2394 & 0.0845 & 15 & 1.00 \\
+dedup & 0.992 & 0.350 & 0.550 & \textbf{0.350} & -0.642 & 0.2132 & 0.0063 & 15 & 3.31 \\
+state monitor & 0.800 & 0.450 & 0.150 & \textbf{0.450} & -0.350 & 0.3062 & 0.0096 & 15 & 4.73 \\
+narration & 0.100 & 0.650 & 0.150 & \textbf{0.650} & +0.550 & 0.2045 & \WITHHELD & 15 & 5.88 \\
+sequential step & 0.010 & 0.150 & 0.020 & \textbf{0.150} & +0.140 & 0.3612 & \WITHHELD & 15 & 3.76 \\
+\bottomrule
+\end{tabular}
+\end{table}

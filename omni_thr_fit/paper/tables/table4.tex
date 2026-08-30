@@ -1,0 +1,16 @@
+\begin{table}[t]
+\centering
+\small
+\caption{Ablation of the fit, pooled micro-averaged over 135 videos (fit subset). \emph{global $0.5$} is the shipped gate's effective behaviour (\texttt{hysteresis} tested $p_{\mathrm{hit}}\!\ge\!0.5$ and ignored the per-task table); \emph{shipped per-task} is the vision-only fit; \emph{fitted per-task} is this work. $^{\dagger}$Threshold not on the run grid; served by the nearest cell actually evaluated (max.\ error 0.050). These rows are approximations. The single global optimum is stable: re-selected in 94\% of 2000 paired bootstrap resamples of the videos (chance 10\%). The per-task fits are not (25--61\%; see text). joint-F1 is WITHHELD: the judge was unreachable for this run and content verdicts are never guessed.}
+\label{tab:ablation}
+\begin{tabular}{lrrrl}
+\toprule
+gate & time-P & time-R & time-F1 & $\Delta$ vs best global [95\% CI] \\
+\midrule
+global $0.5$$^{\dagger}$ & 0.1421 & 0.5650 & 0.2271 & $-0.020$ $[-0.039,-0.003]$ \\
+best single global (0.15) & 0.1554 & 0.6013 & \textbf{0.2469} & --- \\
+shipped per-task$^{\dagger}$ & 0.1505 & 0.3561 & 0.2115 & $-0.035$ $[-0.055,-0.016]$ \\
+fitted per-task & 0.1628 & 0.5821 & 0.2544 & $+0.007$ $[-0.011,+0.027]$\,(n.s.) \\
+\bottomrule
+\end{tabular}
+\end{table}

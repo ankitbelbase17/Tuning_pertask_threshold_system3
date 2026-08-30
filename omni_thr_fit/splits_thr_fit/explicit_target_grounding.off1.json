@@ -1,0 +1,31 @@
+{
+ "subset_off": 1,
+ "n": 15,
+ "audio_mix": {
+  "required": 14,
+  "helpful": 1
+ },
+ "duration_s": {
+  "min": 30.7,
+  "max": 546.2,
+  "sum": 2796.6
+ },
+ "n_gt": 19,
+ "ids": [
+  "explicit_target_grounding::-QEfaBLGPQk::14",
+  "explicit_target_grounding::2nuCU7AeR_o::19",
+  "explicit_target_grounding::8n7a6zE0i48::297",
+  "explicit_target_grounding::Dd13d5FL220::51",
+  "explicit_target_grounding::IigutYLNdfU::65",
+  "explicit_target_grounding::MIo6g2mBh-o::146",
+  "explicit_target_grounding::SdtXGQyC6GM::80",
+  "explicit_target_grounding::X6Spq62kq8E::92",
+  "explicit_target_grounding::ZzNKv0hbkCY::169",
+  "explicit_target_grounding::ePTs86a7Dh4::124",
+  "explicit_target_grounding::hKkycSsq__E::204",
+  "explicit_target_grounding::liertmG3u_s::221",
+  "explicit_target_grounding::ozipQfodpAg::241",
+  "explicit_target_grounding::sIXsU2bGkqQ::262",
+  "explicit_target_grounding::vkDb-j2R5_s::273"
+ ]
+}

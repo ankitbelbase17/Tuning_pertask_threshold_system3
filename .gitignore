@@ -34,3 +34,39 @@ omniprofast/output*/
 # SYSTEM3_TECHNICAL_ARCHITECTURE.pdf
 t.pdf
 mtest.pdf
+
+# ---------------------------------------------------------------------------
+# Threshold-fit run tree (omni_thr_fit/) -- what is deliberately NOT committed.
+#
+# The rule: commit anything expensive to REGENERATE, exclude anything large that
+# a re-run reproduces. The banked predictions (online_pred.jsonl, ~6.6 MB) ARE
+# committed -- they are ~150 GPU-hours of results and the whole study is
+# re-scorable from them offline. The per-tick run logs are not: 444 MB that any
+# re-run reproduces and nothing downstream reads except the AUC audit.
+#
+# NOTE: git treats "#" as a comment ONLY at the start of a line. An inline
+# comment after a pattern becomes part of the pattern and silently matches
+# nothing -- which is exactly what happened on the first draft of this block.
+# ---------------------------------------------------------------------------
+
+# a full copy of this same repo, made so a run never mutates the source tree.
+# Recreate it by copying this checkout; do not version it twice (2.4 GB).
+omni_thr_fit/repo/
+
+# verbose per-tick logs, 444 MB across 556 files, fully regenerable
+omni_thr_fit/**/run.log
+
+# torch core dumps (7 GB apparent size, sparse on disk)
+core_*
+
+# local before/after backups of edited scripts
+*.bak_*
+
+__pycache__/
+*.pyc
+
+# Never commit credentials. .env is ignored above too; this is a second barrier
+# because the keys in it are live and do NOT match the usual AIza.../sk-...
+# shapes a secret scanner looks for.
+.env
+*.env

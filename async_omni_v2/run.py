@@ -1,11 +1,18 @@
 """
 run.py — entrypoint: build config, load backend, wire the three threads.
 
-Pipeline (all sharing ONE Qwen3-VL model + ONE linear KV cache via the manager):
+FORK (system3_qwem_omni): backbone is Qwen2.5-Omni-7B (vision + audio) by
+default, selected via cfg.backend -- see OMNI_EXTENSION.md for why this model,
+OMNI_FEASIBILITY.md for the audio-path verification, backend.py's
+Qwen2_5OmniBackend docstring for the engineering detail.
+
+Pipeline (all sharing ONE model + ONE linear KV cache via the manager):
     vision_stream  --frames-->  input_ingester  --shared KV cache-->  controller
 The encoder streams + encodes frames; the ingester prefills them into the shared
-cache; the controller reads that cache each tick via an MVCC snapshot and emits a
-control JSON (fps steer + answer). Each runs in its own thread at its own pace.
+cache (AND, every audio_seconds_per_chunk, synchronously embeds + ingests the
+matching audio window -- see input_ingester.py's "OPTION A" docstring); the
+controller reads that cache each tick via an MVCC snapshot and emits a control
+JSON (fps steer + answer). Each runs in its own thread at its own pace.
 """
 import argparse
 import dataclasses
@@ -13,7 +20,7 @@ import queue
 import threading
 
 from config import AsyncOmniConfig
-from backend import Qwen3VLBackend
+from backend import Qwen3VLBackend, Qwen2_5OmniBackend
 from manager import KVCacheManager
 from vision_stream import encoder_thread
 from input_ingester import input_ingester_thread
@@ -45,7 +52,15 @@ def main():
 
     seed_everything(cfg.seed, cfg.deterministic)   # before any model/RNG use
 
-    backend = Qwen3VLBackend(cfg)
+    # FORK (system3_qwem_omni): cfg.backend selects the frozen backbone.
+    # "qwen3_vl" is kept for an explicit A/B against the parent checkout
+    # (with cfg.use_audio=False, cfg.tmrope_positions=False to match it
+    # exactly) -- run.py:48 remains the single construction site the
+    # OMNI_FEASIBILITY.md engineering plan calls for.
+    BACKENDS = {"qwen2_5_omni": Qwen2_5OmniBackend, "qwen3_vl": Qwen3VLBackend}
+    if cfg.backend not in BACKENDS:
+        raise SystemExit(f"--backend must be one of {list(BACKENDS)}, got {cfg.backend!r}")
+    backend = BACKENDS[cfg.backend](cfg)
     prof = Profiler(enabled=cfg.profile)
     mgr = KVCacheManager(backend, kv_budget=cfg.kv_budget, prof=prof)
 
