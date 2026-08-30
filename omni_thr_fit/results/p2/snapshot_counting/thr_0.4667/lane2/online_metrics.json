@@ -1,8 +1,8 @@
 {
   "overall": {
-    "n_samples": 3,
-    "n_gt": 3,
-    "n_emits": 3,
+    "n_samples": 4,
+    "n_gt": 4,
+    "n_emits": 4,
     "time_precision": 0.0,
     "time_recall": 0.0,
     "time_f1": 0.0,
@@ -29,9 +29,9 @@
   },
   "per_task": {
     "snapshot_counting": {
-      "n_samples": 3,
-      "n_gt": 3,
-      "n_emits": 3,
+      "n_samples": 4,
+      "n_gt": 4,
+      "n_emits": 4,
       "time_precision": 0.0,
       "time_recall": 0.0,
       "time_f1": 0.0,
@@ -48,5 +48,5 @@
       "content_acc": 0.0
     }
   },
-  "n": 3
+  "n": 4
 }

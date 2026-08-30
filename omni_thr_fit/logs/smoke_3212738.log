@@ -1,0 +1,27 @@
+[smoke] host=nid007058 job=3212738 Fri Aug 28 07:26:50 PM CEST 2026
+0, NVIDIA GH200 120GB, 97268 MiB
+1, NVIDIA GH200 120GB, 97260 MiB
+2, NVIDIA GH200 120GB, 97271 MiB
+3, NVIDIA GH200 120GB, 97267 MiB
+[smoke] pids.max=n/a nproc=4 OMP=4
+[smoke] === thr=0.05 ===
+[smoke] thr=0.05 rc=0
+[smoke]   ticks=60 fires=6 emits=6
+Counters: ctrl_argmax_agrees=5  ctrl_argmax_disagrees=25  frames_emitted=31  frames_ingested=31
+==============================================================================
+[19:30:12] [eval] [online] 2/2 semantic_condition_alert video=ZbIpDFXfS_I emits=3 gt=2 tp=1 fp=2 fn=1 (83.73s wall / 30.78s video = 2.7203x)
+[19:30:12] [eval] time_f1=0.4 joint_f1=0.4 content_acc=1.0 (n=2)
+[smoke] === thr=0.95 ===
+[smoke] thr=0.95 rc=0
+[smoke]   ticks=60 fires=2 emits=2
+Counters: ctrl_argmax_agrees=15  ctrl_argmax_disagrees=15  frames_emitted=31  frames_ingested=31
+==============================================================================
+[19:32:11] [eval] [online] 2/2 semantic_condition_alert video=ZbIpDFXfS_I emits=1 gt=2 tp=1 fp=0 fn=1 (46.84s wall / 30.78s video = 1.5217x)
+[19:32:11] [eval] time_f1=0.3333 joint_f1=0.3333 content_acc=1.0 (n=2)
+
+[smoke] ===== VERDICT =====
+  thr=0.05  n_sample=2  n_emit=6  xRT=2.73
+  thr=0.95  n_sample=2  n_emit=2  xRT=1.73
+
+  emits at 0.05 (6) vs at 0.95 (2)
+  THRESHOLD IS LIVE -- safe to launch the sweep

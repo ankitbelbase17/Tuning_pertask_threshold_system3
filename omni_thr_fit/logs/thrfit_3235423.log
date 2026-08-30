@@ -1,0 +1,15 @@
+[chain] gen=26/400 nodes=1 lanes=4
+[chain] progress=674/675 samples, cells=44/45
+[chain] xRT_mean=2.303 p95=3.400 longest_remaining=594.6s rec_nodes=1
+[chain] window-fit cap for this shape: max_dur=0s
+[chain] gen 27 queued: nodes=1 time=01:28:00
+/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/bin/worker.sh: line 110: 257454 Terminated              bash "$THR_ROOT/bin/heartbeat.sh" "$UNIT"
+/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/bin/worker.sh: line 110: 257445 Terminated              bash "$THR_ROOT/bin/heartbeat.sh" "$UNIT"
+/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/bin/worker.sh: line 110: 257462 Terminated              bash "$THR_ROOT/bin/heartbeat.sh" "$UNIT"
+/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/bin/worker.sh: line 110: 257911 Terminated              bash "$THR_ROOT/bin/heartbeat.sh" "$UNIT"
+/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/bin/worker.sh: line 110: 257946 Terminated              bash "$THR_ROOT/bin/heartbeat.sh" "$UNIT"
+/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/bin/worker.sh: line 110: 259291 Terminated              bash "$THR_ROOT/bin/heartbeat.sh" "$UNIT"
+/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/bin/worker.sh: line 110: 257434 Terminated              bash "$THR_ROOT/bin/heartbeat.sh" "$UNIT"
+[chain] gen 26 end: 675/675 samples, cells 45/45
+[chain]   next shape: nodes=1 max_dur=0s fit_n=0
+[chain] gen 26 exit Sun Aug 30 07:13:46 PM CEST 2026

@@ -13,3 +13,15 @@
 [login] gen 4 finished 11:52:04
 [login] gen 5: GPU allowlist [0,3] -> usable [0,3]
 [login] gen 5: 567/675 samples, cells 13/45, using GPUs [0,3]
+[login] gen 5 finished 13:21:52
+[login] gen 6: GPU allowlist [0,3] -> usable [0,3]
+[login] gen 6: 592/675 samples, cells 19/45, using GPUs [0,3]
+[login] gen 6 finished 14:51:34
+[login] gen 7: GPU allowlist [0,3] -> usable [0,3]
+[login] gen 7: 613/675 samples, cells 25/45, using GPUs [0,3]
+[login] gen 7 finished 16:21:16
+[login] gen 8: GPU allowlist [0,3] -> usable [0,3]
+[login] gen 8: 640/675 samples, cells 34/45, using GPUs [0,3]
+[login] gen 8 finished 17:51:02
+[login] gen 9: GPU allowlist [0,3] -> usable [0,3]
+[login] gen 9: 662/675 samples, cells 36/45, using GPUs [0,3]

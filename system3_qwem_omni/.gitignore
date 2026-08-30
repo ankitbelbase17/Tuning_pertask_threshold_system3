@@ -1,0 +1,36 @@
+# data / large assets
+*.webm
+*.mp4
+*.mkv
+
+# python
+__pycache__/
+*.pyc
+*.pyo
+
+# logs / runtime
+*.log
+run.log
+
+# checkpoints / caches
+checkpoints/
+*.pt
+*.safetensors
+.claude/
+
+# core dumps
+core
+core.*
+core_*
+
+# omnipro eval outputs (regenerable predictions/metrics)
+omniprofast/output*/
+
+.env
+# corrupt-git backup taken 2026-07-30 during object-corruption recovery; local only
+.git.corrupt.bak/
+
+# scratch PDF build artifacts (see build_pdf.py); the real deliverable is
+# SYSTEM3_TECHNICAL_ARCHITECTURE.pdf
+t.pdf
+mtest.pdf

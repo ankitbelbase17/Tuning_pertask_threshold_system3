@@ -1,0 +1,11 @@
+{
+ "instant_event_alert": 0.45,
+ "semantic_condition_alert": 0.2167,
+ "explicit_target_grounding": 0.7167,
+ "snapshot_counting": 0.3833,
+ "cumulative_counting": 0.6167,
+ "dedup_counting": 0.55,
+ "realtime_state_monitor": 0.45,
+ "event_narration": 0.65,
+ "sequential_step_instruction": 0.15
+}

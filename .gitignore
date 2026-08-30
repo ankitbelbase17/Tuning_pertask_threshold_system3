@@ -24,7 +24,7 @@ core.*
 core_*
 
 # omnipro eval outputs (regenerable predictions/metrics)
-omniprofast/output*/
+system3_qwem_omni/omniprofast/output*/
 
 .env
 # corrupt-git backup taken 2026-07-30 during object-corruption recovery; local only
@@ -70,3 +70,19 @@ __pycache__/
 # shapes a secret scanner looks for.
 .env
 *.env
+
+# ---------------------------------------------------------------------------
+# ...but the fit tree's own logs ARE the profiling record, so un-ignore them.
+#
+# The blanket "*.log" above is inherited from the system tree, where logs are
+# throwaway. In omni_thr_fit/logs/ they are not: lane_*.log carries per-unit
+# timings, xRT and model-load costs, and thrfit_*.log is the SLURM record of
+# which generation did what. 10.8 MB across 90 files, and no re-run reproduces
+# them, because they describe one specific run on specific hardware.
+#
+# This does NOT re-admit results/**/run.log (444 MB of per-tick output): that
+# lives under results/, not logs/, and stays excluded.
+# ---------------------------------------------------------------------------
+!omni_thr_fit/logs/*.log
+!omni_thr_fit/logs/*.err
+!omni_thr_fit/logs/*.out

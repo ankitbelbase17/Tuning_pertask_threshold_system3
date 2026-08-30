@@ -1,0 +1,2512 @@
+[lane 102] clariden-ln004 gpu=3 start=19:33:59 deadline=21:03:18 max_dur=300
+[lane 102] --> p1 instant_event_alert thr=0.4500 shard=2 (19:33:59, 5359s left)
+[lane 102] clariden-ln004 gpu=3 start=19:53:31 deadline=21:22:51 max_dur=300
+[lane 102] --> p1 instant_event_alert thr=0.1500 shard=1 (19:53:31, 5360s left)
+[lane 102] <-- instant_event_alert thr=0.1500 shard=1 rc=1 (19:54:29)
+[lane 102] --> p1 instant_event_alert thr=0.4500 shard=1 (19:54:29, 5302s left)
+[lane 102] <-- instant_event_alert thr=0.4500 shard=1 rc=1 (19:55:06)
+[lane 102] --> p1 instant_event_alert thr=0.3500 shard=2 (19:55:06, 5265s left)
+[lane 102] <-- instant_event_alert thr=0.3500 shard=2 rc=1 (19:55:16)
+[lane 102] --> p1 instant_event_alert thr=0.3500 shard=3 (19:55:16, 5255s left)
+[lane 102] <-- instant_event_alert thr=0.3500 shard=3 rc=1 (19:55:34)
+[lane 102] --> p1 instant_event_alert thr=0.3500 shard=3 (19:55:35, 5237s left)
+[lane 102] <-- instant_event_alert thr=0.3500 shard=3 rc=1 (19:55:56)
+[lane 102] --> p1 instant_event_alert thr=0.4500 shard=2 (19:55:56, 5215s left)
+[lane 102] <-- instant_event_alert thr=0.4500 shard=2 rc=1 (19:56:20)
+[lane 102] --> p1 instant_event_alert thr=0.1500 shard=3 (19:56:21, 5191s left)
+[lane 102] clariden-ln004 gpu=3 start=20:03:41 deadline=21:33:01 max_dur=300
+[lane 102] --> p1 instant_event_alert thr=0.9500 shard=0 (20:03:42, 5360s left)
+[lane 102] <-- instant_event_alert thr=0.9500 shard=0 rc=0 (20:25:43)
+[lane 102] --> p1 instant_event_alert thr=0.9500 shard=0 (20:25:43, 4038s left)
+[lane 102] <-- instant_event_alert thr=0.9500 shard=0 rc=0 (20:27:24)
+[lane 102] --> p1 instant_event_alert thr=0.5500 shard=1 (20:27:24, 3937s left)
+[lane 102] <-- instant_event_alert thr=0.5500 shard=1 rc=0 (20:28:58)
+[lane 102] --> p1 instant_event_alert thr=0.5500 shard=1 (20:28:59, 3843s left)
+[lane 102] <-- instant_event_alert thr=0.5500 shard=1 rc=0 (20:30:01)
+[lane 102] --> p1 instant_event_alert thr=0.5500 shard=1 (20:30:01, 3780s left)
+[lane 102] <-- instant_event_alert thr=0.5500 shard=1 rc=0 (20:31:25)
+[lane 102] --> p1 instant_event_alert thr=0.5500 shard=1 (20:31:25, 3696s left)
+[lane 102] <-- instant_event_alert thr=0.5500 shard=1 rc=0 (20:32:55)
+[lane 102] --> p1 instant_event_alert thr=0.5500 shard=1 (20:32:55, 3606s left)
+[lane 102] <-- instant_event_alert thr=0.5500 shard=1 rc=0 (20:33:58)
+[lane 102] --> p1 instant_event_alert thr=0.5500 shard=1 (20:33:58, 3543s left)
+[lane 102] <-- instant_event_alert thr=0.5500 shard=1 rc=0 (20:34:56)
+[lane 102] --> p1 instant_event_alert thr=0.5500 shard=1 (20:34:56, 3485s left)
+[lane 102] <-- instant_event_alert thr=0.5500 shard=1 rc=0 (20:35:40)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (20:35:40, 3441s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (20:48:54)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (20:48:54, 2647s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (20:49:38)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (20:49:38, 2603s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (20:50:21)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (20:50:21, 2560s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (20:51:01)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (20:51:01, 2520s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (20:51:42)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (20:51:42, 2479s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (20:52:26)
+[lane 102] --> p1 instant_event_alert thr=0.1500 shard=1 (20:52:26, 2435s left)
+[lane 102] <-- instant_event_alert thr=0.1500 shard=1 rc=0 (20:53:30)
+[lane 102] --> p1 instant_event_alert thr=0.1500 shard=1 (20:53:30, 2371s left)
+[lane 102] <-- instant_event_alert thr=0.1500 shard=1 rc=0 (20:54:15)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (20:54:15, 2326s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (20:54:44)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (20:54:44, 2297s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (20:55:30)
+[lane 102] --> p1 instant_event_alert thr=0.1500 shard=1 (20:55:30, 2251s left)
+[lane 102] <-- instant_event_alert thr=0.1500 shard=1 rc=0 (20:56:17)
+[lane 102] --> p1 instant_event_alert thr=0.4500 shard=3 (20:56:17, 2204s left)
+[lane 102] <-- instant_event_alert thr=0.4500 shard=3 rc=0 (20:57:04)
+[lane 102] --> p1 instant_event_alert thr=0.4500 shard=3 (20:57:04, 2157s left)
+[lane 102] <-- instant_event_alert thr=0.4500 shard=3 rc=0 (20:57:48)
+[lane 102] --> p1 instant_event_alert thr=0.1500 shard=1 (20:57:48, 2113s left)
+[lane 102] <-- instant_event_alert thr=0.1500 shard=1 rc=0 (20:58:29)
+[lane 102] --> p1 instant_event_alert thr=0.2500 shard=1 (20:58:29, 2072s left)
+[lane 102] <-- instant_event_alert thr=0.2500 shard=1 rc=0 (20:59:11)
+[lane 102] --> p1 instant_event_alert thr=0.1500 shard=1 (20:59:11, 2030s left)
+[lane 102] <-- instant_event_alert thr=0.1500 shard=1 rc=0 (20:59:59)
+[lane 102] --> p1 instant_event_alert thr=0.1500 shard=1 (20:59:59, 1982s left)
+[lane 102] <-- instant_event_alert thr=0.1500 shard=1 rc=0 (21:01:26)
+[lane 102] --> p1 instant_event_alert thr=0.1500 shard=1 (21:01:26, 1895s left)
+[lane 102] <-- instant_event_alert thr=0.1500 shard=1 rc=0 (21:02:34)
+[lane 102] --> p1 instant_event_alert thr=0.1500 shard=1 (21:02:34, 1827s left)
+[lane 102] <-- instant_event_alert thr=0.1500 shard=1 rc=0 (21:03:19)
+[lane 102] --> p1 instant_event_alert thr=0.2500 shard=1 (21:03:20, 1782s left)
+[lane 102] <-- instant_event_alert thr=0.2500 shard=1 rc=0 (21:04:06)
+[lane 102] --> p1 instant_event_alert thr=0.2500 shard=1 (21:04:06, 1735s left)
+[lane 102] <-- instant_event_alert thr=0.2500 shard=1 rc=0 (21:04:49)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (21:04:49, 1692s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (21:05:38)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (21:05:38, 1643s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (21:06:25)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (21:06:25, 1596s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (21:06:59)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (21:06:59, 1562s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (21:07:40)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (21:07:40, 1521s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (21:08:23)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (21:08:23, 1478s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (21:09:05)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (21:09:05, 1436s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (21:09:35)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (21:09:35, 1406s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (21:10:17)
+[lane 102] --> p1 instant_event_alert thr=0.1500 shard=1 (21:10:17, 1364s left)
+[lane 102] <-- instant_event_alert thr=0.1500 shard=1 rc=0 (21:11:08)
+[lane 102] --> p1 instant_event_alert thr=0.1500 shard=1 (21:11:08, 1313s left)
+[lane 102] <-- instant_event_alert thr=0.1500 shard=1 rc=0 (21:11:50)
+[lane 102] --> p1 instant_event_alert thr=0.1500 shard=1 (21:11:50, 1271s left)
+[lane 102] <-- instant_event_alert thr=0.1500 shard=1 rc=0 (21:12:35)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (21:12:35, 1226s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (21:13:30)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (21:13:30, 1171s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (21:14:15)
+[lane 102] --> p1 instant_event_alert thr=0.1500 shard=1 (21:14:15, 1126s left)
+[lane 102] <-- instant_event_alert thr=0.1500 shard=1 rc=0 (21:14:56)
+[lane 102] --> p1 instant_event_alert thr=0.1500 shard=1 (21:14:56, 1085s left)
+[lane 102] <-- instant_event_alert thr=0.1500 shard=1 rc=0 (21:15:40)
+[lane 102] --> p1 instant_event_alert thr=0.1500 shard=1 (21:15:40, 1041s left)
+[lane 102] <-- instant_event_alert thr=0.1500 shard=1 rc=0 (21:16:51)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (21:16:51, 970s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (21:18:41)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (21:18:41, 860s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (21:20:10)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (21:20:10, 771s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (21:22:23)
+[lane 102] --> p1 instant_event_alert thr=0.5500 shard=1 (21:22:23, 638s left)
+[lane 102] <-- instant_event_alert thr=0.5500 shard=1 rc=0 (21:24:05)
+[lane 102] --> p1 instant_event_alert thr=0.5500 shard=1 (21:24:05, 536s left)
+[lane 102] <-- instant_event_alert thr=0.5500 shard=1 rc=0 (21:25:27)
+[lane 102] --> p1 instant_event_alert thr=0.5500 shard=1 (21:25:27, 454s left)
+[lane 102] <-- instant_event_alert thr=0.5500 shard=1 rc=0 (21:26:43)
+[lane 102] --> p1 instant_event_alert thr=0.3500 shard=1 (21:26:43, 378s left)
+[lane 102] <-- instant_event_alert thr=0.3500 shard=1 rc=0 (21:28:35)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (21:28:35, 266s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (21:30:19)
+[lane 102] 162s left (< 240) -- stopping cleanly
+[lane 102] done, 54 units attempted 21:30:19
+[lane 102] clariden-ln004 gpu=2 start=21:33:42 deadline=23:03:02 max_dur=300
+[lane 102] --> p1 instant_event_alert thr=0.5500 shard=1 (21:33:43, 5360s left)
+[lane 102] <-- instant_event_alert thr=0.5500 shard=1 rc=0 (21:35:54)
+[lane 102] --> p1 instant_event_alert thr=0.5500 shard=1 (21:35:55, 5228s left)
+[lane 102] <-- instant_event_alert thr=0.5500 shard=1 rc=0 (21:37:34)
+[lane 102] --> p1 instant_event_alert thr=0.5500 shard=1 (21:37:35, 5128s left)
+[lane 102] <-- instant_event_alert thr=0.5500 shard=1 rc=0 (21:39:20)
+[lane 102] --> p1 instant_event_alert thr=0.5500 shard=1 (21:39:20, 5022s left)
+[lane 102] <-- instant_event_alert thr=0.5500 shard=1 rc=0 (21:40:57)
+[lane 102] --> p1 instant_event_alert thr=0.5500 shard=1 (21:40:58, 4925s left)
+[lane 102] <-- instant_event_alert thr=0.5500 shard=1 rc=0 (21:42:39)
+[lane 102] --> p1 instant_event_alert thr=0.5500 shard=1 (21:42:39, 4823s left)
+[lane 102] <-- instant_event_alert thr=0.5500 shard=1 rc=0 (21:44:19)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (21:44:20, 4723s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (21:46:02)
+[lane 102] --> p1 instant_event_alert thr=0.5500 shard=1 (21:46:03, 4620s left)
+[lane 102] <-- instant_event_alert thr=0.5500 shard=1 rc=0 (21:47:42)
+[lane 102] --> p1 instant_event_alert thr=0.5500 shard=1 (21:47:43, 4520s left)
+[lane 102] <-- instant_event_alert thr=0.5500 shard=1 rc=0 (21:49:17)
+[lane 102] --> p1 instant_event_alert thr=0.5500 shard=1 (21:49:18, 4425s left)
+[lane 102] <-- instant_event_alert thr=0.5500 shard=1 rc=0 (21:51:06)
+[lane 102] --> p1 instant_event_alert thr=0.5500 shard=2 (21:51:06, 4316s left)
+[lane 102] <-- instant_event_alert thr=0.5500 shard=2 rc=0 (21:52:11)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (21:52:11, 4251s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (21:53:19)
+[lane 102] --> p1 instant_event_alert thr=0.5500 shard=1 (21:53:19, 4183s left)
+[lane 102] <-- instant_event_alert thr=0.5500 shard=1 rc=0 (21:54:53)
+[lane 102] --> p1 instant_event_alert thr=0.5500 shard=1 (21:54:53, 4089s left)
+[lane 102] <-- instant_event_alert thr=0.5500 shard=1 rc=0 (21:56:22)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (21:56:22, 4000s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (21:57:26)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (21:57:26, 3936s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (21:59:13)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (21:59:13, 3829s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (22:00:52)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (22:00:52, 3730s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (22:03:36)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (22:03:37, 3566s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (22:06:22)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (22:06:22, 3400s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (22:07:54)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (22:07:54, 3308s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (22:10:06)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (22:10:06, 3176s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (22:11:49)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (22:11:49, 3073s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (22:13:12)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (22:13:12, 2990s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (22:14:13)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (22:14:13, 2929s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (22:15:09)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (22:15:09, 2873s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (22:16:00)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (22:16:00, 2822s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (22:17:02)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (22:17:02, 2760s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (22:18:00)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (22:18:00, 2702s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (22:18:50)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (22:18:50, 2652s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (22:20:08)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (22:20:09, 2574s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (22:21:04)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (22:21:04, 2518s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (22:21:48)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (22:21:48, 2474s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (22:22:34)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (22:22:34, 2428s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (22:23:15)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (22:23:15, 2387s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (22:23:58)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (22:23:58, 2344s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (22:24:41)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (22:24:41, 2301s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (22:25:21)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (22:25:21, 2261s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (22:26:06)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (22:26:06, 2216s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (22:26:46)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (22:26:46, 2176s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (22:27:30)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (22:27:30, 2132s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (22:28:16)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (22:28:16, 2086s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (22:28:58)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (22:28:58, 2044s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (22:29:42)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (22:29:42, 2000s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (22:30:28)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (22:30:28, 1954s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (22:31:11)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (22:31:11, 1911s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (22:32:10)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (22:32:10, 1852s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (22:32:55)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (22:32:55, 1807s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (22:33:43)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (22:33:43, 1759s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (22:34:25)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (22:34:25, 1717s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (22:35:11)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (22:35:11, 1671s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (22:36:00)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (22:36:00, 1622s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (22:36:44)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (22:36:44, 1578s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (22:37:32)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (22:37:32, 1530s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (22:38:17)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (22:38:17, 1485s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (22:39:01)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (22:39:01, 1441s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (22:39:45)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (22:39:45, 1397s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (22:40:31)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (22:40:31, 1351s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (22:41:34)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (22:41:34, 1288s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (22:42:31)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (22:42:31, 1231s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (22:43:26)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (22:43:26, 1176s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (22:44:08)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (22:44:08, 1134s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (22:44:52)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (22:44:52, 1090s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (22:45:41)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (22:45:41, 1041s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (22:46:26)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (22:46:26, 996s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (22:47:17)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (22:47:17, 945s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (22:48:02)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (22:48:02, 900s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (22:48:48)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (22:48:48, 854s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (22:49:33)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (22:49:33, 809s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (22:50:17)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (22:50:18, 764s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (22:51:02)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (22:51:02, 720s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (22:51:53)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (22:51:54, 669s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (22:52:45)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (22:52:45, 617s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (22:53:32)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (22:53:33, 570s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (22:54:27)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (22:54:27, 515s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (22:55:15)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (22:55:15, 467s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (22:56:01)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (22:56:01, 421s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (22:56:47)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (22:56:47, 375s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (22:57:39)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (22:57:40, 323s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (22:58:36)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (22:58:36, 266s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (22:59:26)
+[lane 102] 216s left (< 240) -- stopping cleanly
+[lane 102] done, 80 units attempted 22:59:26
+[lane 102] clariden-ln004 gpu=3 start=23:01:03 deadline=00:30:23 max_dur=300
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (23:01:03, 5360s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (23:02:45)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (23:02:45, 5258s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (23:04:04)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (23:04:04, 5179s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (23:05:16)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (23:05:16, 5107s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (23:05:54)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (23:05:54, 5069s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (23:06:37)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (23:06:37, 5026s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (23:07:19)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (23:07:19, 4984s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (23:08:02)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (23:08:02, 4941s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (23:08:46)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (23:08:46, 4897s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (23:09:32)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (23:09:32, 4851s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (23:10:13)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (23:10:13, 4810s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (23:10:59)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (23:10:59, 4764s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (23:11:39)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (23:11:39, 4724s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (23:12:33)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (23:12:33, 4670s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (23:13:23)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (23:13:23, 4620s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (23:14:07)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (23:14:07, 4576s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (23:14:49)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (23:14:49, 4534s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (23:15:37)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (23:15:37, 4486s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (23:16:20)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (23:16:20, 4443s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (23:17:04)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (23:17:04, 4399s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (23:17:52)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (23:17:52, 4351s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (23:18:40)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (23:18:41, 4303s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (23:19:25)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (23:19:25, 4258s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (23:20:12)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (23:20:12, 4211s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (23:20:53)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (23:20:53, 4170s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (23:21:45)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (23:21:45, 4118s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (23:22:32)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (23:22:32, 4071s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (23:23:13)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (23:23:13, 4030s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (23:23:56)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (23:23:56, 3987s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (23:24:48)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (23:24:48, 3935s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (23:25:37)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (23:25:37, 3886s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (23:26:28)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (23:26:28, 3835s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (23:27:23)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (23:27:23, 3780s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (23:28:29)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (23:28:29, 3714s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (23:29:19)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (23:29:19, 3664s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (23:30:04)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (23:30:04, 3619s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (23:31:03)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (23:31:03, 3560s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (23:31:49)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (23:31:49, 3514s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (23:32:31)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (23:32:31, 3472s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (23:33:22)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (23:33:22, 3421s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (23:34:05)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (23:34:05, 3378s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (23:34:46)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (23:34:46, 3337s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (23:35:29)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (23:35:29, 3294s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (23:36:18)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (23:36:18, 3245s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (23:37:02)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (23:37:02, 3201s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (23:37:49)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (23:37:49, 3154s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (23:38:35)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (23:38:35, 3108s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (23:39:24)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (23:39:24, 3059s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (23:40:08)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (23:40:08, 3015s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (23:40:55)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (23:40:55, 2968s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (23:41:43)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (23:41:43, 2920s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (23:42:29)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (23:42:29, 2874s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (23:43:16)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (23:43:16, 2827s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (23:44:19)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (23:44:20, 2763s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (23:45:09)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (23:45:09, 2714s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (23:46:03)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (23:46:03, 2660s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (23:46:50)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (23:46:50, 2613s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (23:47:38)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (23:47:38, 2565s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (23:48:23)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (23:48:23, 2520s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (23:49:26)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (23:49:26, 2457s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (23:50:09)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (23:50:09, 2414s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (23:50:53)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (23:50:53, 2370s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (23:51:43)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (23:51:43, 2320s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (23:52:29)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (23:52:29, 2274s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (23:53:12)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (23:53:12, 2231s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (23:53:58)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (23:53:58, 2185s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (23:54:42)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (23:54:42, 2141s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (23:55:27)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (23:55:27, 2096s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (23:56:16)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (23:56:16, 2047s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (23:57:00)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (23:57:00, 2003s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (23:57:48)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (23:57:48, 1955s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (23:58:35)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (23:58:35, 1908s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (23:59:28)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (23:59:28, 1855s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (00:00:16)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (00:00:16, 1807s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (00:01:02)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (00:01:02, 1761s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (00:01:49)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (00:01:49, 1714s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (00:02:42)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (00:02:42, 1661s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (00:03:28)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (00:03:28, 1615s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (00:04:16)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (00:04:16, 1567s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (00:05:00)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (00:05:00, 1523s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (00:05:45)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (00:05:45, 1478s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (00:06:30)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (00:06:30, 1433s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (00:07:42)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (00:07:42, 1361s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (00:08:49)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (00:08:49, 1294s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (00:09:39)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (00:09:39, 1244s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (00:10:21)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (00:10:21, 1202s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (00:11:06)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (00:11:06, 1157s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (00:11:48)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (00:11:48, 1115s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (00:12:34)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (00:12:35, 1069s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (00:13:17)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (00:13:17, 1026s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (00:14:03)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (00:14:03, 980s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (00:14:45)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (00:14:45, 938s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (00:15:28)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (00:15:28, 895s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (00:16:19)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (00:16:19, 844s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (00:17:14)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (00:17:14, 789s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (00:17:59)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (00:17:59, 744s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (00:18:49)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (00:18:49, 694s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (00:19:33)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (00:19:33, 650s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (00:20:16)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (00:20:16, 607s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (00:20:59)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (00:20:59, 564s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (00:21:57)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (00:21:57, 506s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (00:22:40)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (00:22:41, 463s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (00:23:31)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (00:23:31, 412s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (00:24:21)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (00:24:21, 362s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (00:25:07)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (00:25:07, 316s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (00:25:53)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (00:25:53, 270s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (00:26:37)
+[lane 102] 226s left (< 240) -- stopping cleanly
+[lane 102] done, 106 units attempted 00:26:37
+[lane 102] clariden-ln004 gpu=3 start=00:28:04 deadline=01:57:24 max_dur=300
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (00:28:04, 5360s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (00:29:50)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (00:29:50, 5254s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (00:30:44)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (00:30:44, 5200s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (00:31:19)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (00:31:19, 5165s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (00:32:10)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (00:32:10, 5114s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (00:32:54)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (00:32:54, 5070s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (00:33:50)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (00:33:50, 5014s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (00:34:35)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (00:34:35, 4969s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (00:35:18)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (00:35:18, 4926s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (00:36:05)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (00:36:05, 4879s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (00:37:08)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (00:37:08, 4816s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (00:37:48)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (00:37:48, 4776s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (00:38:37)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (00:38:37, 4727s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (00:39:19)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (00:39:19, 4685s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (00:40:13)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (00:40:13, 4631s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (00:40:56)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (00:40:56, 4588s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (00:41:44)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (00:41:44, 4540s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (00:42:26)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (00:42:26, 4498s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (00:43:10)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (00:43:10, 4454s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (00:43:52)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (00:43:52, 4412s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (00:44:39)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (00:44:39, 4365s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (00:45:25)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (00:45:25, 4319s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (00:46:07)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (00:46:07, 4277s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (00:46:54)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (00:46:54, 4230s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (00:47:42)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (00:47:42, 4182s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (00:48:25)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (00:48:25, 4139s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (00:49:10)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (00:49:10, 4094s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (00:49:57)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (00:49:57, 4047s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (00:50:39)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (00:50:39, 4005s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (00:51:20)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (00:51:20, 3964s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (00:52:04)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (00:52:04, 3920s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (00:52:57)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (00:52:57, 3867s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (00:53:39)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (00:53:39, 3825s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (00:54:21)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (00:54:21, 3783s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (00:55:07)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (00:55:08, 3736s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (00:56:02)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (00:56:02, 3682s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (00:56:46)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (00:56:46, 3638s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (00:57:31)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (00:57:31, 3593s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (00:58:17)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (00:58:18, 3547s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (00:59:08)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (00:59:08, 3496s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (00:59:51)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (00:59:51, 3453s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (01:00:34)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (01:00:34, 3410s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (01:01:18)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (01:01:18, 3366s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (01:02:07)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (01:02:07, 3317s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (01:02:50)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (01:02:50, 3274s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (01:03:35)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (01:03:35, 3229s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (01:04:18)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (01:04:19, 3185s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (01:05:07)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (01:05:07, 3137s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (01:05:51)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (01:05:51, 3093s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (01:06:35)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (01:06:35, 3049s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (01:07:22)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (01:07:22, 3002s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (01:08:11)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (01:08:12, 2953s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (01:08:58)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (01:08:58, 2906s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (01:09:47)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (01:09:47, 2857s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (01:10:35)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (01:10:35, 2809s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (01:11:18)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (01:11:19, 2766s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (01:12:00)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (01:12:00, 2724s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (01:12:45)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (01:12:45, 2679s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (01:13:32)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (01:13:32, 2632s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (01:14:15)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (01:14:15, 2589s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (01:14:57)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (01:14:57, 2547s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (01:15:47)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (01:15:47, 2497s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (01:16:37)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (01:16:37, 2447s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (01:17:20)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (01:17:20, 2404s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (01:18:02)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (01:18:02, 2362s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (01:18:46)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (01:18:46, 2318s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (01:19:35)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (01:19:35, 2269s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (01:20:20)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (01:20:20, 2224s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (01:21:02)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (01:21:02, 2182s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (01:21:45)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (01:21:45, 2139s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (01:22:31)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (01:22:31, 2093s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (01:23:14)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (01:23:14, 2050s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (01:23:59)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (01:23:59, 2005s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (01:24:43)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (01:24:43, 1961s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (01:25:31)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (01:25:31, 1913s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (01:26:13)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (01:26:13, 1871s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (01:26:57)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (01:26:57, 1827s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (01:27:40)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (01:27:40, 1784s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (01:28:29)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (01:28:29, 1735s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (01:29:12)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (01:29:12, 1692s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (01:29:54)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (01:29:54, 1650s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (01:30:37)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (01:30:37, 1607s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (01:31:24)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (01:31:24, 1560s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (01:32:06)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (01:32:06, 1518s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (01:32:48)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (01:32:48, 1476s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (01:33:31)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (01:33:32, 1433s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (01:34:20)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (01:34:20, 1384s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (01:35:04)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (01:35:04, 1340s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (01:35:48)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (01:35:49, 1296s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (01:36:33)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (01:36:33, 1251s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (01:37:17)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (01:37:17, 1207s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (01:38:02)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (01:38:02, 1162s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (01:38:44)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (01:38:44, 1120s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (01:39:27)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (01:39:27, 1077s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (01:40:20)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (01:40:20, 1024s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (01:41:05)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (01:41:05, 979s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (01:41:51)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (01:41:51, 933s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (01:42:35)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (01:42:35, 889s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (01:43:24)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (01:43:24, 840s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (01:44:12)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (01:44:12, 792s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (01:44:55)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (01:44:55, 749s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (01:45:40)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (01:45:40, 704s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (01:46:44)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (01:46:44, 640s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (01:47:32)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (01:47:32, 592s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (01:48:13)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (01:48:13, 551s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (01:48:55)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (01:48:55, 509s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (01:49:46)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (01:49:46, 458s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (01:50:30)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (01:50:30, 414s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (01:51:16)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (01:51:16, 368s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (01:52:02)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (01:52:02, 322s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (01:52:55)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (01:52:55, 269s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (01:53:41)
+[lane 102] 223s left (< 240) -- stopping cleanly
+[lane 102] done, 111 units attempted 01:53:41
+[lane 102] clariden-ln004 gpu=2 start=01:55:05 deadline=03:24:25 max_dur=300
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (01:55:05, 5360s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (01:56:05)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (01:56:05, 5300s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (01:57:02)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (01:57:03, 5243s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (01:57:44)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (01:57:44, 5201s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (01:58:32)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (01:58:32, 5153s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (01:59:14)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (01:59:14, 5111s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (01:59:47)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (01:59:47, 5078s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (02:00:32)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (02:00:32, 5033s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (02:01:18)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (02:01:18, 4987s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (02:02:02)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (02:02:02, 4943s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (02:02:47)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (02:02:47, 4898s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (02:03:31)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (02:03:31, 4854s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (02:04:24)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (02:04:24, 4801s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (02:05:06)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (02:05:06, 4759s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (02:05:50)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (02:05:50, 4715s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (02:06:32)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (02:06:32, 4673s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (02:07:19)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (02:07:19, 4626s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (02:08:03)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (02:08:03, 4582s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (02:08:49)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (02:08:49, 4536s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (02:09:33)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (02:09:34, 4492s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (02:10:25)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (02:10:25, 4440s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (02:11:09)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (02:11:09, 4396s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (02:11:51)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (02:11:51, 4354s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (02:12:37)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (02:12:37, 4308s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (02:13:32)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (02:13:32, 4253s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (02:14:15)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (02:14:15, 4210s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (02:14:57)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (02:14:57, 4168s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (02:15:45)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (02:15:45, 4120s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (02:16:33)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (02:16:34, 4072s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (02:17:18)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (02:17:18, 4027s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (02:18:02)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (02:18:02, 3983s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (02:18:48)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (02:18:48, 3937s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (02:19:33)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (02:19:33, 3892s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (02:20:15)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (02:20:16, 3850s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (02:21:00)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (02:21:00, 3805s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (02:21:44)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (02:21:44, 3761s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (02:22:34)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (02:22:34, 3711s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (02:23:16)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (02:23:16, 3669s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (02:24:00)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (02:24:00, 3625s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (02:24:48)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (02:24:48, 3577s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (02:25:33)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (02:25:33, 3532s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (02:26:17)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (02:26:17, 3488s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (02:27:01)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (02:27:01, 3444s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (02:27:49)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (02:27:49, 3396s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (02:28:36)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (02:28:36, 3349s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (02:29:32)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (02:29:32, 3293s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (02:30:18)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (02:30:18, 3247s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (02:31:08)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (02:31:08, 3197s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (02:31:53)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (02:31:53, 3152s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (02:32:38)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (02:32:38, 3107s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (02:33:26)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (02:33:26, 3059s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (02:34:13)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (02:34:13, 3012s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (02:35:02)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (02:35:02, 2963s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (02:35:48)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (02:35:48, 2917s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (02:36:43)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (02:36:43, 2862s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (02:37:30)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (02:37:30, 2815s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (02:38:16)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (02:38:17, 2769s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (02:39:08)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (02:39:08, 2717s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (02:40:00)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (02:40:00, 2665s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (02:40:48)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (02:40:48, 2617s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (02:41:35)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (02:41:35, 2570s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (02:42:25)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (02:42:26, 2520s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (02:43:16)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (02:43:16, 2469s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (02:44:04)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (02:44:04, 2421s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (02:44:56)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (02:44:56, 2369s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (02:45:47)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (02:45:47, 2318s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (02:46:39)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (02:46:39, 2266s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (02:47:26)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (02:47:26, 2219s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (02:48:16)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (02:48:16, 2169s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (02:49:02)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (02:49:02, 2123s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (02:49:49)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (02:49:49, 2076s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (02:50:39)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (02:50:39, 2026s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (02:51:40)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (02:51:40, 1965s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (02:52:25)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (02:52:26, 1920s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (02:53:11)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (02:53:11, 1874s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (02:54:05)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (02:54:05, 1820s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (02:54:51)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (02:54:51, 1774s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (02:55:41)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (02:55:41, 1724s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (02:56:34)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (02:56:34, 1671s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (02:57:30)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (02:57:30, 1615s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (02:58:17)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (02:58:17, 1568s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (02:59:10)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (02:59:10, 1515s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (03:00:05)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (03:00:05, 1460s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (03:00:52)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (03:00:52, 1413s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (03:01:49)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (03:01:49, 1356s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (03:02:39)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (03:02:39, 1306s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (03:03:35)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (03:03:35, 1250s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (03:04:23)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (03:04:23, 1202s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (03:05:08)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (03:05:08, 1157s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (03:06:05)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (03:06:05, 1100s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (03:06:52)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (03:06:52, 1053s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (03:07:37)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (03:07:38, 1008s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (03:08:23)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (03:08:23, 962s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (03:09:17)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (03:09:17, 908s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (03:10:03)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (03:10:03, 862s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (03:10:51)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (03:10:52, 814s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (03:11:51)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (03:11:51, 754s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (03:12:41)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (03:12:41, 704s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (03:13:28)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (03:13:28, 657s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (03:14:23)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (03:14:23, 602s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (03:15:18)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (03:15:18, 547s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (03:16:06)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (03:16:06, 499s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (03:16:52)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (03:16:52, 453s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (03:17:50)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (03:17:50, 395s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (03:18:40)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (03:18:40, 345s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (03:19:26)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (03:19:26, 299s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (03:20:16)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (03:20:16, 249s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (03:22:17)
+[lane 102] 128s left (< 240) -- stopping cleanly
+[lane 102] done, 107 units attempted 03:22:17
+[lane 102] clariden-ln004 gpu=2 start=03:23:27 deadline=04:52:47 max_dur=300
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (03:23:27, 5360s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (03:24:25)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (03:24:25, 5302s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (03:26:06)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (03:26:06, 5201s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (03:27:19)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (03:27:19, 5128s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (03:28:18)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (03:28:18, 5069s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (03:28:53)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (03:28:53, 5034s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (03:29:47)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (03:29:47, 4980s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (03:30:44)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (03:30:44, 4923s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (03:31:37)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (03:31:37, 4870s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (03:32:27)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (03:32:27, 4820s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (03:33:18)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (03:33:18, 4769s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (03:34:10)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (03:34:10, 4717s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (03:35:01)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (03:35:01, 4666s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (03:35:55)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (03:35:55, 4612s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (03:36:43)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (03:36:43, 4564s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (03:37:30)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (03:37:30, 4517s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (03:38:17)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (03:38:17, 4470s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (03:39:12)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (03:39:12, 4415s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (03:39:59)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (03:39:59, 4368s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (03:40:52)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (03:40:52, 4315s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (03:41:48)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (03:41:48, 4259s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (03:42:35)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (03:42:35, 4212s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (03:43:21)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (03:43:22, 4166s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (03:44:12)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (03:44:12, 4115s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (03:45:03)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (03:45:03, 4064s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (03:45:52)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (03:45:52, 4015s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (03:46:40)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (03:46:40, 3967s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (03:47:28)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (03:47:28, 3919s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (03:48:16)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (03:48:16, 3871s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (03:49:09)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (03:49:09, 3818s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (03:49:55)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (03:49:55, 3772s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (03:50:47)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (03:50:47, 3720s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (03:51:35)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (03:51:36, 3672s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (03:52:25)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (03:52:25, 3622s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (03:53:17)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (03:53:17, 3570s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (03:54:06)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (03:54:06, 3521s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (03:54:56)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (03:54:56, 3471s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (03:55:45)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (03:55:45, 3422s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (03:56:41)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (03:56:41, 3366s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (03:57:30)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (03:57:30, 3317s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (03:58:21)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (03:58:21, 3266s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (03:59:14)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (03:59:14, 3213s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (04:00:07)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (04:00:08, 3160s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (04:01:01)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (04:01:01, 3106s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (04:01:53)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (04:01:53, 3054s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (04:02:54)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (04:02:54, 2993s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (04:03:50)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (04:03:50, 2937s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (04:04:48)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (04:04:48, 2879s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (04:05:44)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (04:05:44, 2823s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (04:06:40)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (04:06:40, 2767s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (04:07:38)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (04:07:38, 2709s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (04:08:39)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (04:08:39, 2648s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (04:09:36)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (04:09:36, 2591s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (04:10:34)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (04:10:34, 2533s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (04:11:29)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (04:11:29, 2478s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (04:12:26)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (04:12:26, 2421s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (04:13:23)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (04:13:23, 2364s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (04:14:22)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (04:14:22, 2305s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (04:15:32)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (04:15:33, 2235s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (04:16:37)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (04:16:37, 2170s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (04:17:49)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (04:17:49, 2098s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (04:18:59)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (04:18:59, 2028s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (04:20:03)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (04:20:03, 1964s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (04:21:06)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (04:21:06, 1901s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (04:22:13)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (04:22:13, 1834s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (04:23:17)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (04:23:17, 1770s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (04:24:25)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (04:24:25, 1702s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (04:25:29)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (04:25:30, 1638s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (04:26:46)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (04:26:46, 1561s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (04:27:52)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (04:27:52, 1495s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (04:29:00)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (04:29:00, 1427s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (04:30:07)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (04:30:07, 1360s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (04:31:11)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (04:31:11, 1296s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (04:32:15)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (04:32:15, 1232s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (04:33:23)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (04:33:23, 1164s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (04:34:29)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (04:34:29, 1098s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (04:35:32)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (04:35:32, 1035s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (04:36:37)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (04:36:37, 970s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (04:37:42)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (04:37:42, 905s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (04:38:48)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (04:38:48, 839s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (04:39:54)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (04:39:54, 773s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (04:41:01)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (04:41:01, 706s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (04:42:08)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (04:42:09, 639s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (04:43:15)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (04:43:15, 572s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (04:44:24)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (04:44:24, 503s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (04:45:30)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (04:45:30, 437s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (04:46:36)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (04:46:36, 371s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (04:47:43)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (04:47:43, 304s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (04:48:53)
+[lane 102] 234s left (< 240) -- stopping cleanly
+[lane 102] done, 88 units attempted 04:48:53
+[lane 102] clariden-ln004 gpu=2 start=04:49:49 deadline=06:19:09 max_dur=300
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (04:49:49, 5360s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (04:50:58)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (04:50:58, 5291s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (04:51:52)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (04:51:52, 5237s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (04:52:42)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (04:52:42, 5187s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (04:53:49)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (04:53:49, 5120s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (04:54:53)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (04:54:53, 5056s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (04:55:59)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (04:56:00, 4990s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (04:57:01)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (04:57:01, 4928s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (04:58:06)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (04:58:06, 4863s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (04:59:11)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (04:59:11, 4798s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (05:00:19)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (05:00:19, 4730s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (05:01:24)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (05:01:24, 4665s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (05:02:27)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (05:02:27, 4602s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (05:03:34)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (05:03:34, 4535s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (05:04:37)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (05:04:38, 4472s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (05:05:42)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (05:05:42, 4407s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (05:06:42)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (05:06:43, 4347s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (05:07:46)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (05:07:46, 4283s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (05:08:48)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (05:08:49, 4221s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (05:09:55)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (05:09:55, 4154s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (05:10:57)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (05:10:57, 4092s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (05:11:56)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (05:11:56, 4033s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (05:13:01)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (05:13:02, 3968s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (05:14:04)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (05:14:04, 3905s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (05:15:10)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (05:15:10, 3839s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (05:16:17)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (05:16:17, 3772s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (05:17:21)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (05:17:21, 3708s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (05:18:26)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (05:18:26, 3643s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (05:19:23)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (05:19:23, 3586s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (05:20:23)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (05:20:23, 3526s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (05:21:29)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (05:21:29, 3460s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (05:22:28)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (05:22:28, 3401s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (05:23:24)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (05:23:24, 3345s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (05:24:29)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (05:24:29, 3280s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (05:25:29)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (05:25:29, 3220s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (05:26:30)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (05:26:30, 3159s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (05:27:32)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (05:27:32, 3097s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (05:28:25)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (05:28:25, 3044s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (05:29:25)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (05:29:26, 2984s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (05:30:26)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (05:30:26, 2923s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (05:31:29)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (05:31:29, 2860s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (05:32:28)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (05:32:28, 2801s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (05:33:38)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (05:33:38, 2731s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (05:34:45)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (05:34:45, 2664s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (05:35:49)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (05:35:49, 2600s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (05:36:52)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (05:36:52, 2537s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (05:37:55)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (05:37:55, 2474s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (05:38:51)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (05:38:51, 2418s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (05:39:55)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (05:39:55, 2354s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (05:41:00)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (05:41:00, 2289s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (05:42:09)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (05:42:09, 2220s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (05:43:14)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (05:43:14, 2155s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (05:44:14)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (05:44:15, 2095s left)
+[lane 102] clariden-ln002 gpu=2 start=05:44:55 deadline=07:14:15 max_dur=300
+[lane 102] --> p1 instant_event_alert thr=0.1500 shard=2 (05:44:56, 5360s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (05:45:15)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (05:45:15, 2034s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (05:46:11)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (05:46:12, 1978s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (05:47:17)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (05:47:17, 1912s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (05:48:17)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (05:48:18, 1852s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (05:49:19)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (05:49:20, 1790s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (05:50:18)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (05:50:18, 1731s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (05:51:18)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (05:51:19, 1671s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (05:52:23)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (05:52:23, 1606s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (05:53:20)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (05:53:20, 1549s left)
+[lane 102] <-- instant_event_alert thr=0.1500 shard=2 rc=0 +3 samples (05:53:51)
+[lane 102] --> p1 instant_event_alert thr=0.1500 shard=1 (05:53:51, 4824s left)
+[lane 102] <-- instant_event_alert thr=0.1500 shard=1 rc=0 BARREN (nothing under 300s) (05:54:16)
+[lane 102] --> p1 instant_event_alert thr=0.1500 shard=2 (05:54:16, 4799s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (05:54:23)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (05:54:23, 1486s left)
+[lane 102] <-- instant_event_alert thr=0.1500 shard=2 rc=0 BARREN (nothing under 300s) (05:54:48)
+[lane 102] --> p1 instant_event_alert thr=0.1500 shard=3 (05:54:48, 4767s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (05:55:33)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (05:55:33, 1416s left)
+[lane 102] <-- instant_event_alert thr=0.1500 shard=3 rc=0 +1 samples (05:55:35)
+[lane 102] --> p1 instant_event_alert thr=0.1500 shard=3 (05:55:35, 4720s left)
+[lane 102] <-- instant_event_alert thr=0.1500 shard=3 rc=0 BARREN (nothing under 300s) (05:56:00)
+[lane 102] --> p1 instant_event_alert thr=0.3500 shard=1 (05:56:00, 4695s left)
+[lane 102] <-- instant_event_alert thr=0.3500 shard=1 rc=0 BARREN (nothing under 300s) (05:56:23)
+[lane 102] --> p1 instant_event_alert thr=0.3500 shard=3 (05:56:23, 4672s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (05:56:26)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (05:56:26, 1363s left)
+[lane 102] <-- instant_event_alert thr=0.3500 shard=3 rc=0 BARREN (nothing under 300s) (05:56:59)
+[lane 102] --> p1 instant_event_alert thr=0.3500 shard=2 (05:56:59, 4636s left)
+[lane 102] <-- instant_event_alert thr=0.3500 shard=2 rc=0 +1 samples (05:57:30)
+[lane 102] --> p1 instant_event_alert thr=0.4500 shard=0 (05:57:30, 4605s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (05:57:36)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (05:57:36, 1293s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (05:58:37)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (05:58:37, 1232s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (05:59:39)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (05:59:39, 1170s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (06:00:40)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (06:00:40, 1109s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (06:01:42)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (06:01:42, 1047s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (06:02:49)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (06:02:50, 980s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (06:03:55)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (06:03:55, 914s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (06:05:05)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=3 (06:05:05, 844s left)
+[lane 102] <-- instant_event_alert thr=0.4500 shard=0 rc=0 +1 samples (06:05:12)
+[lane 102] --> p1 instant_event_alert thr=0.6500 shard=1 (06:05:12, 4143s left)
+[lane 102] <-- instant_event_alert thr=0.6500 shard=1 rc=0 BARREN (nothing under 300s) (06:05:29)
+[lane 102] --> p1 instant_event_alert thr=0.6500 shard=2 (06:05:29, 4126s left)
+[lane 102] <-- instant_event_alert thr=0.6500 shard=2 rc=0 BARREN (nothing under 300s) (06:05:45)
+[lane 102] --> p1 instant_event_alert thr=0.6500 shard=3 (06:05:45, 4110s left)
+[lane 102] <-- instant_event_alert thr=0.6500 shard=3 rc=0 +1 samples (06:06:02)
+[lane 102] --> p1 instant_event_alert thr=0.7500 shard=1 (06:06:03, 4093s left)
+[lane 102] <-- instant_event_alert thr=0.7500 shard=1 rc=0 BARREN (nothing under 300s) (06:06:19)
+[lane 102] --> p1 instant_event_alert thr=0.7500 shard=2 (06:06:19, 4076s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=3 rc=0 (06:06:21)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (06:06:22, 768s left)
+[lane 102] <-- instant_event_alert thr=0.7500 shard=2 rc=0 BARREN (nothing under 300s) (06:06:35)
+[lane 102] --> p1 instant_event_alert thr=0.7500 shard=3 (06:06:36, 4060s left)
+[lane 102] <-- instant_event_alert thr=0.7500 shard=3 rc=0 BARREN (nothing under 300s) (06:07:07)
+[lane 102] --> p1 instant_event_alert thr=0.8500 shard=1 (06:07:07, 4028s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (06:07:39)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (06:07:39, 690s left)
+[lane 102] <-- instant_event_alert thr=0.8500 shard=1 rc=0 BARREN (nothing under 300s) (06:08:13)
+[lane 102] --> p1 instant_event_alert thr=0.8500 shard=2 (06:08:13, 3962s left)
+[lane 102] <-- instant_event_alert thr=0.8500 shard=2 rc=0 BARREN (nothing under 300s) (06:08:35)
+[lane 102] --> p1 instant_event_alert thr=0.9500 shard=1 (06:08:35, 3940s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (06:08:50)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (06:08:51, 619s left)
+[lane 102] <-- instant_event_alert thr=0.9500 shard=1 rc=0 BARREN (nothing under 300s) (06:09:12)
+[lane 102] --> p1 instant_event_alert thr=0.8500 shard=3 (06:09:12, 3903s left)
+[lane 102] <-- instant_event_alert thr=0.8500 shard=3 rc=0 BARREN (nothing under 300s) (06:10:18)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (06:10:18)
+[lane 102] --> p1 instant_event_alert thr=0.9500 shard=0 (06:10:18, 3837s left)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=2 (06:10:18, 531s left)
+[lane 102] <-- instant_event_alert thr=0.9500 shard=0 rc=0 BARREN (nothing under 300s) (06:10:39)
+[lane 102] --> p1 semantic_condition_alert thr=0.0100 shard=1 (06:10:39, 3816s left)
+[lane 102] <-- semantic_condition_alert thr=0.0100 shard=1 rc=0 BARREN (nothing under 300s) (06:10:58)
+[lane 102] --> p1 semantic_condition_alert thr=0.0100 shard=2 (06:10:58, 3797s left)
+[lane 102] <-- semantic_condition_alert thr=0.0100 shard=2 rc=0 BARREN (nothing under 300s) (06:11:15)
+[lane 102] --> p1 semantic_condition_alert thr=0.0500 shard=1 (06:11:15, 3780s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=2 rc=0 (06:11:22)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=1 (06:11:22, 467s left)
+[lane 102] <-- semantic_condition_alert thr=0.0500 shard=1 rc=0 BARREN (nothing under 300s) (06:11:33)
+[lane 102] --> p1 semantic_condition_alert thr=0.0200 shard=2 (06:11:33, 3762s left)
+[lane 102] <-- semantic_condition_alert thr=0.0200 shard=2 rc=0 BARREN (nothing under 300s) (06:11:52)
+[lane 102] --> p1 semantic_condition_alert thr=0.0100 shard=3 (06:11:52, 3743s left)
+[lane 102] <-- semantic_condition_alert thr=0.0100 shard=3 rc=0 BARREN (nothing under 300s) (06:12:12)
+[lane 102] --> p1 semantic_condition_alert thr=0.0500 shard=2 (06:12:12, 3723s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=1 rc=0 (06:12:27)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (06:12:27, 402s left)
+[lane 102] <-- semantic_condition_alert thr=0.0500 shard=2 rc=0 BARREN (nothing under 300s) (06:12:30)
+[lane 102] --> p1 semantic_condition_alert thr=0.1500 shard=1 (06:12:30, 3705s left)
+[lane 102] <-- semantic_condition_alert thr=0.1500 shard=1 rc=0 BARREN (nothing under 300s) (06:12:48)
+[lane 102] --> p1 semantic_condition_alert thr=0.0200 shard=3 (06:12:49, 3686s left)
+[lane 102] <-- semantic_condition_alert thr=0.0200 shard=3 rc=0 BARREN (nothing under 300s) (06:13:09)
+[lane 102] --> p1 semantic_condition_alert thr=0.0200 shard=1 (06:13:09, 3666s left)
+[lane 102] <-- semantic_condition_alert thr=0.0200 shard=1 rc=0 BARREN (nothing under 300s) (06:13:28)
+[lane 102] --> p1 semantic_condition_alert thr=0.1500 shard=2 (06:13:28, 3647s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (06:13:31)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (06:13:31, 338s left)
+[lane 102] <-- semantic_condition_alert thr=0.1500 shard=2 rc=0 BARREN (nothing under 300s) (06:13:52)
+[lane 102] --> p1 semantic_condition_alert thr=0.4500 shard=2 (06:13:52, 3623s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (06:14:37)
+[lane 102] --> p1 instant_event_alert thr=0.0500 shard=0 (06:14:37, 272s left)
+[lane 102] <-- instant_event_alert thr=0.0500 shard=0 rc=0 (06:15:40)
+[lane 102] 209s left (< 240) -- stopping cleanly
+[lane 102] clariden-ln004 gpu=2 start=06:18:11 deadline=07:47:31 max_dur=300
+[lane 102] --> p1 semantic_condition_alert thr=0.0100 shard=3 (06:18:12, 5360s left)
+[lane 102] <-- semantic_condition_alert thr=0.0100 shard=3 rc=0 BARREN (nothing under 300s) (06:19:17)
+[lane 102] --> p1 semantic_condition_alert thr=0.0200 shard=1 (06:19:18, 5294s left)
+[lane 102] <-- semantic_condition_alert thr=0.0200 shard=1 rc=0 BARREN (nothing under 300s) (06:20:29)
+[lane 102] --> p1 semantic_condition_alert thr=0.0100 shard=2 (06:20:30, 5222s left)
+[lane 102] <-- semantic_condition_alert thr=0.0100 shard=2 rc=0 BARREN (nothing under 300s) (06:21:35)
+[lane 102] --> p1 semantic_condition_alert thr=0.0100 shard=1 (06:21:36, 5156s left)
+[lane 102] <-- semantic_condition_alert thr=0.0100 shard=1 rc=0 BARREN (nothing under 300s) (06:22:39)
+[lane 102] --> p1 semantic_condition_alert thr=0.1500 shard=2 (06:22:40, 5092s left)
+[lane 102] <-- semantic_condition_alert thr=0.1500 shard=2 rc=0 +1 samples (06:23:46)
+[lane 102] --> p1 semantic_condition_alert thr=0.0200 shard=2 (06:23:47, 5025s left)
+[lane 102] <-- semantic_condition_alert thr=0.4500 shard=2 rc=0 +9 samples (06:23:56)
+[lane 102] --> p1 semantic_condition_alert thr=0.2500 shard=3 (06:23:56, 3019s left)
+[lane 102] <-- semantic_condition_alert thr=0.2500 shard=3 rc=0 +1 samples (06:24:47)
+[lane 102] --> p1 semantic_condition_alert thr=0.0200 shard=0 (06:24:47, 2968s left)
+[lane 102] <-- semantic_condition_alert thr=0.0200 shard=2 rc=0 BARREN (nothing under 300s) (06:24:48)
+[lane 102] --> p1 semantic_condition_alert thr=0.0200 shard=3 (06:24:48, 4963s left)
+[lane 102] <-- semantic_condition_alert thr=0.0200 shard=3 rc=0 BARREN (nothing under 300s) (06:25:55)
+[lane 102] --> p1 semantic_condition_alert thr=0.2500 shard=2 (06:25:55, 4896s left)
+[lane 102] <-- semantic_condition_alert thr=0.2500 shard=2 rc=0 BARREN (nothing under 300s) (06:27:00)
+[lane 102] --> p1 semantic_condition_alert thr=0.2500 shard=1 (06:27:01, 4831s left)
+[lane 102] <-- semantic_condition_alert thr=0.2500 shard=1 rc=0 BARREN (nothing under 300s) (06:28:03)
+[lane 102] --> p1 semantic_condition_alert thr=0.2500 shard=3 (06:28:03, 4768s left)
+[lane 102] <-- semantic_condition_alert thr=0.2500 shard=3 rc=0 BARREN (nothing under 300s) (06:29:08)
+[lane 102] --> p1 semantic_condition_alert thr=0.3500 shard=1 (06:29:09, 4703s left)
+[lane 102] <-- semantic_condition_alert thr=0.3500 shard=1 rc=0 BARREN (nothing under 300s) (06:30:13)
+[lane 102] --> p1 semantic_condition_alert thr=0.3500 shard=2 (06:30:13, 4638s left)
+[lane 102] <-- semantic_condition_alert thr=0.3500 shard=2 rc=0 +1 samples (06:31:16)
+[lane 102] --> p1 semantic_condition_alert thr=0.3500 shard=2 (06:31:16, 4575s left)
+[lane 102] <-- semantic_condition_alert thr=0.3500 shard=2 rc=0 BARREN (nothing under 300s) (06:32:26)
+[lane 102] --> p1 semantic_condition_alert thr=0.3500 shard=3 (06:32:27, 4505s left)
+[lane 102] <-- semantic_condition_alert thr=0.3500 shard=3 rc=0 BARREN (nothing under 300s) (06:33:34)
+[lane 102] --> p1 semantic_condition_alert thr=0.4500 shard=2 (06:33:34, 4437s left)
+[lane 102] <-- semantic_condition_alert thr=0.4500 shard=2 rc=0 +1 samples (06:34:46)
+[lane 102] --> p1 semantic_condition_alert thr=0.4500 shard=1 (06:34:46, 4365s left)
+[lane 102] <-- semantic_condition_alert thr=0.0200 shard=0 rc=0 +1 samples (06:35:07)
+[lane 102] --> p1 semantic_condition_alert thr=0.2500 shard=1 (06:35:07, 2348s left)
+[lane 102] <-- semantic_condition_alert thr=0.4500 shard=1 rc=0 BARREN (nothing under 300s) (06:35:54)
+[lane 102] --> p1 semantic_condition_alert thr=0.4500 shard=2 (06:35:55, 4297s left)
+[lane 102] <-- semantic_condition_alert thr=0.2500 shard=1 rc=0 +1 samples (06:36:05)
+[lane 102] --> p1 semantic_condition_alert thr=0.5500 shard=3 (06:36:06, 2290s left)
+[lane 102] <-- semantic_condition_alert thr=0.5500 shard=3 rc=0 BARREN (nothing under 300s) (06:36:53)
+[lane 102] --> p1 semantic_condition_alert thr=0.3500 shard=1 (06:36:54, 2242s left)
+[lane 102] <-- semantic_condition_alert thr=0.4500 shard=2 rc=0 BARREN (nothing under 300s) (06:37:06)
+[lane 102] --> p1 semantic_condition_alert thr=0.7500 shard=2 (06:37:06, 4225s left)
+[lane 102] <-- semantic_condition_alert thr=0.3500 shard=1 rc=0 BARREN (nothing under 300s) (06:37:47)
+[lane 102] --> p1 semantic_condition_alert thr=0.4500 shard=2 (06:37:47, 2188s left)
+[lane 102] <-- semantic_condition_alert thr=0.7500 shard=2 rc=0 +1 samples (06:38:07)
+[lane 102] --> p1 semantic_condition_alert thr=0.5500 shard=1 (06:38:07, 4164s left)
+[lane 102] <-- semantic_condition_alert thr=0.4500 shard=2 rc=0 BARREN (nothing under 300s) (06:38:18)
+[lane 102] --> p1 semantic_condition_alert thr=0.3500 shard=2 (06:38:18, 2157s left)
+[lane 102] <-- semantic_condition_alert thr=0.3500 shard=2 rc=0 BARREN (nothing under 300s) (06:38:45)
+[lane 102] --> p1 semantic_condition_alert thr=0.5500 shard=2 (06:38:46, 2130s left)
+[lane 102] <-- semantic_condition_alert thr=0.5500 shard=1 rc=0 +1 samples (06:39:05)
+[lane 102] --> p1 semantic_condition_alert thr=0.5500 shard=1 (06:39:05, 4106s left)
+[lane 102] <-- semantic_condition_alert thr=0.5500 shard=2 rc=0 +1 samples (06:39:15)
+[lane 102] --> p1 semantic_condition_alert thr=0.5500 shard=2 (06:39:15, 2100s left)
+[lane 102] <-- semantic_condition_alert thr=0.5500 shard=2 rc=0 BARREN (nothing under 300s) (06:39:51)
+[lane 102] --> p1 semantic_condition_alert thr=0.4500 shard=3 (06:39:52, 2064s left)
+[lane 102] <-- semantic_condition_alert thr=0.5500 shard=1 rc=0 BARREN (nothing under 300s) (06:40:02)
+[lane 102] --> p1 semantic_condition_alert thr=0.5500 shard=2 (06:40:02, 4049s left)
+[lane 102] <-- semantic_condition_alert thr=0.4500 shard=3 rc=0 BARREN (nothing under 300s) (06:40:40)
+[lane 102] --> p1 semantic_condition_alert thr=0.4500 shard=1 (06:40:41, 2015s left)
+[lane 102] <-- semantic_condition_alert thr=0.5500 shard=2 rc=0 BARREN (nothing under 300s) (06:40:57)
+[lane 102] --> p1 semantic_condition_alert thr=0.6500 shard=2 (06:40:58, 3994s left)
+[lane 102] <-- semantic_condition_alert thr=0.4500 shard=1 rc=0 BARREN (nothing under 300s) (06:41:10)
+[lane 102] --> p1 semantic_condition_alert thr=0.6500 shard=1 (06:41:10, 1985s left)
+[lane 102] <-- semantic_condition_alert thr=0.6500 shard=1 rc=0 BARREN (nothing under 300s) (06:41:39)
+[lane 102] --> p1 semantic_condition_alert thr=0.7500 shard=2 (06:41:39, 1956s left)
+[lane 102] <-- semantic_condition_alert thr=0.6500 shard=2 rc=0 BARREN (nothing under 300s) (06:42:04)
+[lane 102] --> p1 semantic_condition_alert thr=0.5500 shard=3 (06:42:04, 3927s left)
+[lane 102] <-- semantic_condition_alert thr=0.7500 shard=2 rc=0 BARREN (nothing under 300s) (06:42:32)
+[lane 102] --> p1 semantic_condition_alert thr=0.5500 shard=1 (06:42:32, 1903s left)
+[lane 102] <-- semantic_condition_alert thr=0.5500 shard=3 rc=0 BARREN (nothing under 300s) (06:43:16)
+[lane 102] --> p1 semantic_condition_alert thr=0.6500 shard=1 (06:43:16, 3855s left)
+[lane 102] <-- semantic_condition_alert thr=0.5500 shard=1 rc=0 BARREN (nothing under 300s) (06:43:32)
+[lane 102] --> p1 semantic_condition_alert thr=0.6500 shard=2 (06:43:32, 1843s left)
+[lane 102] <-- semantic_condition_alert thr=0.6500 shard=1 rc=0 BARREN (nothing under 300s) (06:44:17)
+[lane 102] --> p1 semantic_condition_alert thr=0.7500 shard=2 (06:44:17, 3794s left)
+[lane 102] <-- semantic_condition_alert thr=0.6500 shard=2 rc=0 BARREN (nothing under 300s) (06:44:22)
+[lane 102] --> p1 semantic_condition_alert thr=0.7500 shard=1 (06:44:22, 1793s left)
+[lane 102] <-- semantic_condition_alert thr=0.7500 shard=1 rc=0 BARREN (nothing under 300s) (06:45:03)
+[lane 102] --> p1 semantic_condition_alert thr=0.8500 shard=3 (06:45:03, 1752s left)
+[lane 102] <-- semantic_condition_alert thr=0.7500 shard=2 rc=0 BARREN (nothing under 300s) (06:45:33)
+[lane 102] --> p1 semantic_condition_alert thr=0.7500 shard=1 (06:45:34, 3718s left)
+[lane 102] <-- semantic_condition_alert thr=0.8500 shard=3 rc=0 BARREN (nothing under 300s) (06:45:51)
+[lane 102] --> p1 semantic_condition_alert thr=0.9500 shard=2 (06:45:52, 1704s left)
+[lane 102] <-- semantic_condition_alert thr=0.7500 shard=1 rc=0 BARREN (nothing under 300s) (06:46:21)
+[lane 102] --> p1 semantic_condition_alert thr=0.8500 shard=3 (06:46:21, 3670s left)
+[lane 102] <-- semantic_condition_alert thr=0.9500 shard=2 rc=0 BARREN (nothing under 300s) (06:46:33)
+[lane 102] --> p1 semantic_condition_alert thr=0.8500 shard=1 (06:46:34, 1662s left)
+[lane 102] <-- semantic_condition_alert thr=0.8500 shard=1 rc=0 BARREN (nothing under 300s) (06:47:07)
+[lane 102] --> p1 explicit_target_grounding thr=0.1500 shard=2 (06:47:08, 1628s left)
+[lane 102] <-- semantic_condition_alert thr=0.8500 shard=3 rc=0 BARREN (nothing under 300s) (06:47:16)
+[lane 102] --> p1 semantic_condition_alert thr=0.7500 shard=3 (06:47:17, 3615s left)
+[lane 102] <-- semantic_condition_alert thr=0.7500 shard=3 rc=0 BARREN (nothing under 300s) (06:48:17)
+[lane 102] --> p1 semantic_condition_alert thr=0.8500 shard=1 (06:48:18, 3554s left)
+[lane 102] <-- semantic_condition_alert thr=0.8500 shard=1 rc=0 BARREN (nothing under 300s) (06:49:16)
+[lane 102] --> p1 semantic_condition_alert thr=0.9500 shard=1 (06:49:17, 3495s left)
+[lane 102] <-- semantic_condition_alert thr=0.9500 shard=1 rc=0 BARREN (nothing under 300s) (06:50:10)
+[lane 102] --> p1 semantic_condition_alert thr=0.8500 shard=2 (06:50:10, 3441s left)
+[lane 102] <-- semantic_condition_alert thr=0.8500 shard=2 rc=0 BARREN (nothing under 300s) (06:51:07)
+[lane 102] --> p1 semantic_condition_alert thr=0.9500 shard=3 (06:51:09, 3384s left)
+[lane 102] <-- semantic_condition_alert thr=0.9500 shard=3 rc=0 BARREN (nothing under 300s) (06:52:07)
+[lane 102] --> p1 explicit_target_grounding thr=0.3500 shard=2 (06:52:08, 3324s left)
+[lane 102] <-- explicit_target_grounding thr=0.1500 shard=2 rc=0 +11 samples (07:00:40)
+[lane 102] --> p1 explicit_target_grounding thr=0.1500 shard=0 (07:00:40, 815s left)
+[lane 102] <-- explicit_target_grounding thr=0.1500 shard=0 rc=0 BARREN (nothing under 300s) (07:00:58)
+[lane 102] --> p1 explicit_target_grounding thr=0.1500 shard=2 (07:00:58, 797s left)
+[lane 102] <-- explicit_target_grounding thr=0.1500 shard=2 rc=0 BARREN (nothing under 300s) (07:01:14)
+[lane 102] --> p1 explicit_target_grounding thr=0.1500 shard=3 (07:01:14, 781s left)
+[lane 102] <-- explicit_target_grounding thr=0.1500 shard=3 rc=0 BARREN (nothing under 300s) (07:01:34)
+[lane 102] --> p1 explicit_target_grounding thr=0.2500 shard=0 (07:01:34, 761s left)
+[lane 102] <-- explicit_target_grounding thr=0.2500 shard=0 rc=0 BARREN (nothing under 300s) (07:01:50)
+[lane 102] --> p1 explicit_target_grounding thr=0.2500 shard=2 (07:01:50, 745s left)
+[lane 102] <-- explicit_target_grounding thr=0.2500 shard=2 rc=0 BARREN (nothing under 300s) (07:02:05)
+[lane 102] --> p1 explicit_target_grounding thr=0.2500 shard=3 (07:02:05, 730s left)
+[lane 102] <-- explicit_target_grounding thr=0.2500 shard=3 rc=0 BARREN (nothing under 300s) (07:02:21)
+[lane 102] --> p1 explicit_target_grounding thr=0.3500 shard=3 (07:02:21, 714s left)
+[lane 102] <-- explicit_target_grounding thr=0.3500 shard=3 rc=0 BARREN (nothing under 300s) (07:02:38)
+[lane 102] --> p1 explicit_target_grounding thr=0.4500 shard=3 (07:02:38, 697s left)
+[lane 102] <-- explicit_target_grounding thr=0.4500 shard=3 rc=0 BARREN (nothing under 300s) (07:02:55)
+[lane 102] --> p1 explicit_target_grounding thr=0.5500 shard=3 (07:02:55, 680s left)
+[lane 102] <-- explicit_target_grounding thr=0.5500 shard=3 rc=0 BARREN (nothing under 300s) (07:03:31)
+[lane 102] --> p1 explicit_target_grounding thr=0.7500 shard=1 (07:03:31, 644s left)
+[lane 102] <-- explicit_target_grounding thr=0.7500 shard=1 rc=124 +9 samples (07:13:45)
+[lane 102] 30s left (< 240) -- stopping cleanly
+[lane 102] done, 61 units attempted 07:13:45
+[lane 102] clariden-ln002 gpu=2 start=07:15:16 deadline=08:44:36 max_dur=300
+[lane 102] --> p1 explicit_target_grounding thr=0.3500 shard=0 (07:15:17, 5360s left)
+[lane 102] <-- explicit_target_grounding thr=0.3500 shard=0 rc=0 BARREN (nothing under 300s) (07:15:36)
+[lane 102] --> p1 explicit_target_grounding thr=0.4500 shard=3 (07:15:36, 5340s left)
+[lane 102] <-- explicit_target_grounding thr=0.4500 shard=3 rc=0 BARREN (nothing under 300s) (07:15:58)
+[lane 102] --> p1 explicit_target_grounding thr=0.1500 shard=2 (07:15:59, 5318s left)
+[lane 102] <-- explicit_target_grounding thr=0.1500 shard=2 rc=0 BARREN (nothing under 300s) (07:16:50)
+[lane 102] --> p1 explicit_target_grounding thr=0.7500 shard=2 (07:16:51, 5266s left)
+[lane 102] <-- explicit_target_grounding thr=0.7500 shard=2 rc=0 BARREN (nothing under 300s) (07:17:12)
+[lane 102] --> p1 explicit_target_grounding thr=0.8500 shard=2 (07:17:12, 5244s left)
+[lane 102] <-- explicit_target_grounding thr=0.8500 shard=2 rc=0 +1 samples (07:17:31)
+[lane 102] --> p1 explicit_target_grounding thr=0.1500 shard=0 (07:17:32, 5225s left)
+[lane 102] <-- explicit_target_grounding thr=0.1500 shard=0 rc=0 BARREN (nothing under 300s) (07:17:50)
+[lane 102] --> p1 explicit_target_grounding thr=0.8500 shard=2 (07:17:50, 5206s left)
+[lane 102] <-- explicit_target_grounding thr=0.8500 shard=2 rc=0 BARREN (nothing under 300s) (07:18:21)
+[lane 102] --> p1 explicit_target_grounding thr=0.3500 shard=3 (07:18:21, 5175s left)
+[lane 102] <-- explicit_target_grounding thr=0.3500 shard=3 rc=0 BARREN (nothing under 300s) (07:19:03)
+[lane 102] --> p1 explicit_target_grounding thr=0.8500 shard=3 (07:19:04, 5133s left)
+[lane 102] <-- explicit_target_grounding thr=0.8500 shard=3 rc=0 BARREN (nothing under 300s) (07:19:31)
+[lane 102] --> p1 snapshot_counting thr=0.2500 shard=2 (07:19:32, 5105s left)
+[lane 102] <-- explicit_target_grounding thr=0.3500 shard=2 rc=0 +12 samples (07:20:15)
+[lane 102] --> p1 explicit_target_grounding thr=0.4500 shard=3 (07:20:16, 1636s left)
+[lane 102] <-- explicit_target_grounding thr=0.4500 shard=3 rc=0 BARREN (nothing under 300s) (07:21:24)
+[lane 102] --> p1 explicit_target_grounding thr=0.4500 shard=0 (07:21:25, 1567s left)
+[lane 102] <-- explicit_target_grounding thr=0.4500 shard=0 rc=0 BARREN (nothing under 300s) (07:22:30)
+[lane 102] --> p1 snapshot_counting thr=0.3500 shard=3 (07:22:31, 1501s left)
+[lane 102] <-- snapshot_counting thr=0.3500 shard=3 rc=124 +8 samples (07:47:04)
+[lane 102] 27s left (< 240) -- stopping cleanly
+[lane 102] done, 36 units attempted 07:47:04
+[lane 102] clariden-ln004 gpu=2 start=07:48:32 deadline=09:17:52 max_dur=300
+[lane 102] --> p1 snapshot_counting thr=0.2500 shard=1 (07:48:34, 5360s left)
+[lane 102] <-- snapshot_counting thr=0.2500 shard=1 rc=0 BARREN (nothing under 300s) (07:51:11)
+[lane 102] --> p1 snapshot_counting thr=0.3500 shard=3 (07:51:14, 5201s left)
+[lane 102] <-- snapshot_counting thr=0.3500 shard=3 rc=0 BARREN (nothing under 300s) (07:52:56)
+[lane 102] --> p1 snapshot_counting thr=0.2500 shard=3 (07:52:57, 5096s left)
+[lane 102] <-- snapshot_counting thr=0.2500 shard=3 rc=0 BARREN (nothing under 300s) (07:54:05)
+[lane 102] --> p1 cumulative_counting thr=0.0500 shard=3 (07:54:08, 5027s left)
+[lane 102] <-- snapshot_counting thr=0.2500 shard=2 rc=0 +10 samples (08:07:01)
+[lane 102] --> p1 snapshot_counting thr=0.2500 shard=1 (08:07:01, 2255s left)
+[lane 102] <-- snapshot_counting thr=0.2500 shard=1 rc=0 BARREN (nothing under 300s) (08:07:34)
+[lane 102] --> p1 snapshot_counting thr=0.6500 shard=1 (08:07:35, 2222s left)
+[lane 102] <-- snapshot_counting thr=0.6500 shard=1 rc=0 BARREN (nothing under 300s) (08:08:07)
+[lane 102] --> p1 snapshot_counting thr=0.2500 shard=2 (08:08:07, 2189s left)
+[lane 102] <-- snapshot_counting thr=0.2500 shard=2 rc=0 BARREN (nothing under 300s) (08:08:28)
+[lane 102] --> p1 snapshot_counting thr=0.2500 shard=3 (08:08:29, 2168s left)
+[lane 102] <-- snapshot_counting thr=0.2500 shard=3 rc=0 BARREN (nothing under 300s) (08:09:05)
+[lane 102] --> p1 snapshot_counting thr=0.6500 shard=3 (08:09:05, 2131s left)
+[lane 102] <-- snapshot_counting thr=0.6500 shard=3 rc=0 BARREN (nothing under 300s) (08:09:49)
+[lane 102] --> p1 cumulative_counting thr=0.0500 shard=0 (08:09:50, 2087s left)
+[lane 102] <-- cumulative_counting thr=0.0500 shard=0 rc=0 BARREN (nothing under 300s) (08:10:43)
+[lane 102] --> p1 cumulative_counting thr=0.1500 shard=3 (08:10:45, 2033s left)
+[lane 102] <-- cumulative_counting thr=0.1500 shard=3 rc=0 +2 samples (08:11:21)
+[lane 102] --> p1 cumulative_counting thr=0.1500 shard=3 (08:11:23, 1995s left)
+[lane 102] <-- cumulative_counting thr=0.1500 shard=3 rc=0 BARREN (nothing under 300s) (08:11:59)
+[lane 102] --> p1 cumulative_counting thr=0.2500 shard=3 (08:12:00, 1957s left)
+[lane 102] <-- cumulative_counting thr=0.2500 shard=3 rc=0 BARREN (nothing under 300s) (08:12:29)
+[lane 102] --> p1 cumulative_counting thr=0.0500 shard=1 (08:12:29, 1927s left)
+[lane 102] <-- cumulative_counting thr=0.0500 shard=1 rc=0 BARREN (nothing under 300s) (08:12:54)
+[lane 102] --> p1 cumulative_counting thr=0.6500 shard=1 (08:12:54, 1902s left)
+[lane 102] <-- cumulative_counting thr=0.0500 shard=3 rc=0 +11 samples (08:20:22)
+[lane 102] --> p1 cumulative_counting thr=0.2500 shard=0 (08:20:22, 3450s left)
+[lane 102] <-- cumulative_counting thr=0.2500 shard=0 rc=0 +1 samples (08:21:13)
+[lane 102] --> p1 cumulative_counting thr=0.3500 shard=0 (08:21:13, 3399s left)
+[lane 102] <-- cumulative_counting thr=0.3500 shard=0 rc=0 BARREN (nothing under 300s) (08:22:03)
+[lane 102] --> p1 cumulative_counting thr=0.4500 shard=2 (08:22:04, 3349s left)
+[lane 102] <-- cumulative_counting thr=0.4500 shard=2 rc=0 BARREN (nothing under 300s) (08:23:35)
+[lane 102] --> p1 cumulative_counting thr=0.9500 shard=0 (08:23:36, 3257s left)
+[lane 102] <-- cumulative_counting thr=0.6500 shard=1 rc=124 +11 samples (08:44:06)
+[lane 102] 30s left (< 240) -- stopping cleanly
+[lane 102] done, 21 units attempted 08:44:06
+[lane 102] <-- cumulative_counting thr=0.9500 shard=0 rc=0 +12 samples (08:44:45)
+[lane 102] --> p1 cumulative_counting thr=0.6500 shard=0 (08:44:46, 1987s left)
+[lane 102] clariden-ln002 gpu=2 start=08:45:38 deadline=10:14:57 max_dur=300
+[lane 102] --> p1 dedup_counting thr=0.1500 shard=0 (08:45:39, 5359s left)
+[lane 102] <-- cumulative_counting thr=0.6500 shard=0 rc=0 BARREN (nothing under 300s) (08:45:42)
+[lane 102] --> p1 dedup_counting thr=0.4500 shard=1 (08:45:43, 1930s left)
+[lane 102] <-- dedup_counting thr=0.1500 shard=0 rc=0 +6 samples (09:05:56)
+[lane 102] --> p1 dedup_counting thr=0.0500 shard=2 (09:05:57, 4141s left)
+[lane 102] <-- dedup_counting thr=0.0500 shard=2 rc=0 BARREN (nothing under 300s) (09:06:42)
+[lane 102] --> p1 dedup_counting thr=0.0500 shard=3 (09:06:43, 4095s left)
+[lane 102] <-- dedup_counting thr=0.0500 shard=3 rc=0 BARREN (nothing under 300s) (09:07:02)
+[lane 102] --> p1 dedup_counting thr=0.1500 shard=0 (09:07:03, 4075s left)
+[lane 102] <-- dedup_counting thr=0.1500 shard=0 rc=0 BARREN (nothing under 300s) (09:07:20)
+[lane 102] --> p1 dedup_counting thr=0.0500 shard=0 (09:07:21, 4057s left)
+[lane 102] <-- dedup_counting thr=0.0500 shard=0 rc=0 BARREN (nothing under 300s) (09:07:41)
+[lane 102] --> p1 dedup_counting thr=0.1500 shard=1 (09:07:41, 4036s left)
+[lane 102] <-- dedup_counting thr=0.4500 shard=1 rc=124 +9 samples (09:17:23)
+[lane 102] 29s left (< 240) -- stopping cleanly
+[lane 102] done, 10 units attempted 09:17:23
+[lane 102] clariden-ln004 gpu=2 start=09:18:56 deadline=10:48:15 max_dur=300
+[lane 102] --> p1 dedup_counting thr=0.0500 shard=3 (09:18:58, 5359s left)
+[lane 102] <-- dedup_counting thr=0.0500 shard=3 rc=0 BARREN (nothing under 300s) (09:20:27)
+[lane 102] --> p1 dedup_counting thr=0.0500 shard=2 (09:20:28, 5268s left)
+[lane 102] <-- dedup_counting thr=0.0500 shard=2 rc=0 BARREN (nothing under 300s) (09:21:08)
+[lane 102] --> p1 dedup_counting thr=0.0500 shard=0 (09:21:12, 5227s left)
+[lane 102] <-- dedup_counting thr=0.0500 shard=0 rc=0 BARREN (nothing under 300s) (09:22:08)
+[lane 102] --> p1 dedup_counting thr=0.1500 shard=0 (09:22:10, 5167s left)
+[lane 102] <-- dedup_counting thr=0.1500 shard=0 rc=0 BARREN (nothing under 300s) (09:23:02)
+[lane 102] --> p1 dedup_counting thr=0.1500 shard=2 (09:23:03, 5113s left)
+[lane 102] <-- dedup_counting thr=0.1500 shard=2 rc=0 BARREN (nothing under 300s) (09:23:59)
+[lane 102] --> p1 dedup_counting thr=0.1500 shard=3 (09:24:00, 5056s left)
+[lane 102] <-- dedup_counting thr=0.1500 shard=3 rc=0 BARREN (nothing under 300s) (09:24:51)
+[lane 102] --> p1 dedup_counting thr=0.2500 shard=1 (09:24:53, 5004s left)
+[lane 102] <-- dedup_counting thr=0.1500 shard=1 rc=0 +2 samples (10:09:54)
+[lane 102] --> p1 dedup_counting thr=0.2500 shard=0 (10:09:55, 303s left)
+[lane 102] <-- dedup_counting thr=0.2500 shard=0 rc=0 BARREN (nothing under 300s) (10:10:50)
+[lane 102] --> p1 dedup_counting thr=0.2500 shard=2 (10:10:51, 247s left)
+[lane 102] <-- dedup_counting thr=0.2500 shard=2 rc=0 BARREN (nothing under 300s) (10:11:46)
+[lane 102] 191s left (< 240) -- stopping cleanly
+[lane 102] done, 8 units attempted 10:11:46
+[lane 102] clariden-ln002 gpu=2 start=10:16:00 deadline=11:45:20 max_dur=300
+[lane 102] --> p1 dedup_counting thr=0.2500 shard=3 (10:16:01, 5360s left)
+[lane 102] <-- dedup_counting thr=0.2500 shard=3 rc=0 BARREN (nothing under 300s) (10:16:57)
+[lane 102] --> p1 dedup_counting thr=0.2500 shard=2 (10:16:58, 5303s left)
+[lane 102] <-- dedup_counting thr=0.2500 shard=2 rc=0 BARREN (nothing under 300s) (10:17:58)
+[lane 102] --> p1 dedup_counting thr=0.3500 shard=2 (10:17:58, 5242s left)
+[lane 102] <-- dedup_counting thr=0.3500 shard=2 rc=0 BARREN (nothing under 300s) (10:18:47)
+[lane 102] --> p1 dedup_counting thr=0.2500 shard=0 (10:18:48, 5193s left)
+[lane 102] <-- dedup_counting thr=0.2500 shard=0 rc=0 BARREN (nothing under 300s) (10:19:43)
+[lane 102] --> p1 dedup_counting thr=0.3500 shard=0 (10:19:44, 5137s left)
+[lane 102] <-- dedup_counting thr=0.3500 shard=0 rc=0 BARREN (nothing under 300s) (10:20:42)
+[lane 102] --> p1 dedup_counting thr=0.6500 shard=2 (10:20:43, 5078s left)
+[lane 102] <-- dedup_counting thr=0.6500 shard=2 rc=0 BARREN (nothing under 300s) (10:21:41)
+[lane 102] --> p1 dedup_counting thr=0.3500 shard=3 (10:21:42, 5019s left)
+[lane 102] <-- dedup_counting thr=0.3500 shard=3 rc=0 BARREN (nothing under 300s) (10:22:39)
+[lane 102] --> p1 dedup_counting thr=0.6500 shard=0 (10:22:40, 4961s left)
+[lane 102] <-- dedup_counting thr=0.6500 shard=0 rc=0 BARREN (nothing under 300s) (10:23:38)
+[lane 102] --> p1 dedup_counting thr=0.6500 shard=3 (10:23:40, 4902s left)
+[lane 102] <-- dedup_counting thr=0.6500 shard=3 rc=0 BARREN (nothing under 300s) (10:24:40)
+[lane 102] --> p1 dedup_counting thr=0.7500 shard=0 (10:24:41, 4840s left)
+[lane 102] <-- dedup_counting thr=0.7500 shard=0 rc=0 BARREN (nothing under 300s) (10:25:28)
+[lane 102] --> p1 dedup_counting thr=0.7500 shard=2 (10:25:29, 4792s left)
+[lane 102] <-- dedup_counting thr=0.7500 shard=2 rc=0 BARREN (nothing under 300s) (10:26:05)
+[lane 102] --> p1 dedup_counting thr=0.8500 shard=1 (10:26:07, 4755s left)
+[lane 102] <-- dedup_counting thr=0.2500 shard=1 rc=0 +2 samples (10:37:25)
+[lane 102] --> p1 dedup_counting thr=0.3500 shard=0 (10:37:26, 650s left)
+[lane 102] <-- dedup_counting thr=0.3500 shard=0 rc=0 +1 samples (10:38:21)
+[lane 102] --> p1 dedup_counting thr=0.6500 shard=2 (10:38:22, 594s left)
+[lane 102] <-- dedup_counting thr=0.6500 shard=2 rc=0 BARREN (nothing under 300s) (10:39:22)
+[lane 102] --> p1 dedup_counting thr=0.6500 shard=0 (10:39:24, 533s left)
+[lane 102] <-- dedup_counting thr=0.6500 shard=0 rc=0 BARREN (nothing under 300s) (10:40:22)
+[lane 102] --> p1 dedup_counting thr=0.6500 shard=3 (10:40:23, 473s left)
+[lane 102] <-- dedup_counting thr=0.6500 shard=3 rc=0 BARREN (nothing under 300s) (10:41:22)
+[lane 102] --> p1 dedup_counting thr=0.7500 shard=2 (10:41:22, 413s left)
+[lane 102] <-- dedup_counting thr=0.7500 shard=2 rc=0 BARREN (nothing under 300s) (10:42:31)
+[lane 102] --> p1 dedup_counting thr=0.7500 shard=0 (10:42:32, 344s left)
+[lane 102] <-- dedup_counting thr=0.7500 shard=0 rc=0 +1 samples (10:43:39)
+[lane 102] --> p1 dedup_counting thr=0.9500 shard=0 (10:43:40, 276s left)
+[lane 102] <-- dedup_counting thr=0.9500 shard=0 rc=0 BARREN (nothing under 300s) (10:44:34)
+[lane 102] 221s left (< 240) -- stopping cleanly
+[lane 102] done, 14 units attempted 10:44:34
+[lane 102] clariden-ln004 gpu=2 start=10:45:17 deadline=12:14:37 max_dur=300
+[lane 102] --> p1 dedup_counting thr=0.8500 shard=3 (10:45:20, 5360s left)
+[lane 102] <-- dedup_counting thr=0.8500 shard=3 rc=0 BARREN (nothing under 300s) (10:46:26)
+[lane 102] --> p1 dedup_counting thr=0.9500 shard=0 (10:46:30, 5291s left)
+[lane 102] <-- dedup_counting thr=0.9500 shard=0 rc=0 BARREN (nothing under 300s) (10:47:40)
+[lane 102] --> p1 dedup_counting thr=0.8500 shard=2 (10:47:41, 5217s left)
+[lane 102] <-- dedup_counting thr=0.8500 shard=2 rc=0 BARREN (nothing under 300s) (10:48:35)
+[lane 102] --> p1 dedup_counting thr=0.8500 shard=0 (10:48:38, 5162s left)
+[lane 102] <-- dedup_counting thr=0.8500 shard=0 rc=0 BARREN (nothing under 300s) (10:49:37)
+[lane 102] --> p1 dedup_counting thr=0.9500 shard=2 (10:49:38, 5100s left)
+[lane 102] <-- dedup_counting thr=0.8500 shard=1 rc=0 +2 samples (10:50:24)
+[lane 102] --> p1 dedup_counting thr=0.9500 shard=0 (10:50:26, 3296s left)
+[lane 102] <-- dedup_counting thr=0.9500 shard=2 rc=0 BARREN (nothing under 300s) (10:50:37)
+[lane 102] --> p1 realtime_state_monitor thr=0.0500 shard=1 (10:50:38, 5040s left)
+[lane 102] <-- dedup_counting thr=0.9500 shard=0 rc=0 BARREN (nothing under 300s) (10:51:02)
+[lane 102] --> p1 dedup_counting thr=0.9500 shard=2 (10:51:05, 3258s left)
+[lane 102] <-- realtime_state_monitor thr=0.0500 shard=1 rc=0 BARREN (nothing under 300s) (10:51:42)
+[lane 102] --> p1 dedup_counting thr=0.9500 shard=3 (10:51:43, 4975s left)
+[lane 102] <-- dedup_counting thr=0.9500 shard=2 rc=0 BARREN (nothing under 300s) (10:51:55)
+[lane 102] --> p1 realtime_state_monitor thr=0.0500 shard=3 (10:51:56, 3205s left)
+[lane 102] <-- realtime_state_monitor thr=0.0500 shard=3 rc=0 BARREN (nothing under 300s) (10:52:57)
+[lane 102] --> p1 realtime_state_monitor thr=0.0500 shard=1 (10:52:58, 3143s left)
+[lane 102] <-- dedup_counting thr=0.9500 shard=3 rc=0 +1 samples (10:53:05)
+[lane 102] --> p1 realtime_state_monitor thr=0.0500 shard=0 (10:53:07, 4892s left)
+[lane 102] <-- realtime_state_monitor thr=0.0500 shard=1 rc=0 BARREN (nothing under 300s) (10:53:43)
+[lane 102] --> p1 realtime_state_monitor thr=0.2500 shard=0 (10:53:47, 3097s left)
+[lane 102] <-- realtime_state_monitor thr=0.0500 shard=0 rc=0 BARREN (nothing under 300s) (10:54:11)
+[lane 102] --> p1 realtime_state_monitor thr=0.0500 shard=3 (10:54:13, 4826s left)
+[lane 102] <-- realtime_state_monitor thr=0.0500 shard=3 rc=0 BARREN (nothing under 300s) (10:55:11)
+[lane 102] --> p1 realtime_state_monitor thr=0.2500 shard=2 (10:55:13, 4766s left)
+[lane 102] <-- realtime_state_monitor thr=0.2500 shard=0 rc=0 +2 samples (11:08:30)
+[lane 102] --> p1 realtime_state_monitor thr=0.2500 shard=0 (11:08:33, 2210s left)
+[lane 102] <-- realtime_state_monitor thr=0.2500 shard=2 rc=0 +3 samples (11:09:16)
+[lane 102] --> p1 realtime_state_monitor thr=0.3500 shard=3 (11:09:17, 3921s left)
+[lane 102] <-- realtime_state_monitor thr=0.2500 shard=0 rc=0 +1 samples (11:09:19)
+[lane 102] --> p1 realtime_state_monitor thr=0.4500 shard=1 (11:09:20, 2161s left)
+[lane 102] <-- realtime_state_monitor thr=0.3500 shard=3 rc=0 BARREN (nothing under 300s) (11:10:05)
+[lane 102] --> p1 realtime_state_monitor thr=0.5500 shard=0 (11:10:06, 3872s left)
+[lane 102] <-- realtime_state_monitor thr=0.4500 shard=1 rc=0 +2 samples (11:20:52)
+[lane 102] --> p1 realtime_state_monitor thr=0.4500 shard=1 (11:20:53, 1468s left)
+[lane 102] <-- realtime_state_monitor thr=0.4500 shard=1 rc=0 +1 samples (11:21:39)
+[lane 102] --> p1 realtime_state_monitor thr=0.6500 shard=2 (11:21:42, 1421s left)
+[lane 102] <-- realtime_state_monitor thr=0.5500 shard=0 rc=0 +1 samples (11:23:15)
+[lane 102] --> p1 realtime_state_monitor thr=0.5500 shard=0 (11:23:16, 3082s left)
+[lane 102] <-- realtime_state_monitor thr=0.5500 shard=0 rc=0 +2 samples (11:24:31)
+[lane 102] --> p1 realtime_state_monitor thr=0.7500 shard=2 (11:24:32, 3006s left)
+[lane 102] <-- realtime_state_monitor thr=0.6500 shard=2 rc=0 +1 samples (11:30:37)
+[lane 102] --> p1 realtime_state_monitor thr=0.6500 shard=2 (11:30:38, 883s left)
+[lane 102] <-- realtime_state_monitor thr=0.6500 shard=2 rc=0 BARREN (nothing under 300s) (11:31:33)
+[lane 102] --> p1 realtime_state_monitor thr=0.6500 shard=3 (11:31:34, 827s left)
+[lane 102] <-- realtime_state_monitor thr=0.6500 shard=3 rc=0 +2 samples (11:32:26)
+[lane 102] --> p1 realtime_state_monitor thr=0.8500 shard=3 (11:32:28, 774s left)
+[lane 102] <-- realtime_state_monitor thr=0.8500 shard=3 rc=0 BARREN (nothing under 300s) (11:33:13)
+[lane 102] --> p1 realtime_state_monitor thr=0.7500 shard=3 (11:33:14, 727s left)
+[lane 102] <-- realtime_state_monitor thr=0.7500 shard=3 rc=0 BARREN (nothing under 300s) (11:33:49)
+[lane 102] --> p1 realtime_state_monitor thr=0.9500 shard=1 (11:33:50, 691s left)
+[lane 102] <-- realtime_state_monitor thr=0.7500 shard=2 rc=0 +2 samples (11:34:58)
+[lane 102] --> p1 realtime_state_monitor thr=0.7500 shard=2 (11:34:59, 2379s left)
+[lane 102] <-- realtime_state_monitor thr=0.7500 shard=2 rc=0 BARREN (nothing under 300s) (11:35:48)
+[lane 102] --> p1 realtime_state_monitor thr=0.7500 shard=1 (11:35:49, 2329s left)
+[lane 102] <-- realtime_state_monitor thr=0.7500 shard=1 rc=0 +1 samples (11:36:42)
+[lane 102] --> p1 realtime_state_monitor thr=0.8500 shard=1 (11:36:45, 2275s left)
+[lane 102] <-- realtime_state_monitor thr=0.8500 shard=1 rc=0 BARREN (nothing under 300s) (11:37:42)
+[lane 102] --> p1 realtime_state_monitor thr=0.8500 shard=0 (11:37:45, 2215s left)
+[lane 102] <-- realtime_state_monitor thr=0.8500 shard=0 rc=0 BARREN (nothing under 300s) (11:38:36)
+[lane 102] --> p1 realtime_state_monitor thr=0.8500 shard=3 (11:38:39, 2161s left)
+[lane 102] <-- realtime_state_monitor thr=0.8500 shard=3 rc=0 BARREN (nothing under 300s) (11:39:35)
+[lane 102] --> p1 realtime_state_monitor thr=0.9500 shard=3 (11:39:39, 2102s left)
+[lane 102] <-- realtime_state_monitor thr=0.9500 shard=3 rc=0 BARREN (nothing under 300s) (11:40:36)
+[lane 102] --> p1 event_narration thr=0.0500 shard=3 (11:40:38, 2041s left)
+[lane 102] <-- event_narration thr=0.0500 shard=3 rc=0 BARREN (nothing under 300s) (11:41:38)
+[lane 102] --> p1 event_narration thr=0.0500 shard=0 (11:41:40, 1979s left)
+[lane 102] <-- realtime_state_monitor thr=0.9500 shard=1 rc=0 +1 samples (11:41:40)
+[lane 102] 220s left (< 240) -- stopping cleanly
+[lane 102] done, 26 units attempted 11:41:40
+[lane 102] <-- event_narration thr=0.0500 shard=0 rc=0 BARREN (nothing under 300s) (11:42:35)
+[lane 102] --> p1 realtime_state_monitor thr=0.9500 shard=0 (11:42:36, 1922s left)
+[lane 102] <-- realtime_state_monitor thr=0.9500 shard=0 rc=0 BARREN (nothing under 300s) (11:43:31)
+[lane 102] --> p1 realtime_state_monitor thr=0.9500 shard=1 (11:43:32, 1866s left)
+[lane 102] <-- realtime_state_monitor thr=0.9500 shard=1 rc=0 BARREN (nothing under 300s) (11:44:22)
+[lane 102] --> p1 event_narration thr=0.1500 shard=0 (11:44:24, 1815s left)
+[lane 102] <-- event_narration thr=0.1500 shard=0 rc=0 BARREN (nothing under 300s) (11:45:15)
+[lane 102] --> p1 event_narration thr=0.1500 shard=2 (11:45:18, 1762s left)
+[lane 102] clariden-ln002 gpu=2 start=11:46:25 deadline=13:15:45 max_dur=300
+[lane 102] --> p1 event_narration thr=0.1500 shard=0 (11:46:28, 5360s left)
+[lane 102] <-- event_narration thr=0.1500 shard=0 rc=0 BARREN (nothing under 300s) (11:47:27)
+[lane 102] --> p1 event_narration thr=0.0500 shard=3 (11:47:30, 5298s left)
+[lane 102] <-- event_narration thr=0.0500 shard=3 rc=0 BARREN (nothing under 300s) (11:48:24)
+[lane 102] --> p1 event_narration thr=0.2500 shard=0 (11:48:25, 5241s left)
+[lane 102] <-- event_narration thr=0.2500 shard=0 rc=0 BARREN (nothing under 300s) (11:49:21)
+[lane 102] --> p1 event_narration thr=0.0500 shard=0 (11:49:24, 5184s left)
+[lane 102] <-- event_narration thr=0.0500 shard=0 rc=0 BARREN (nothing under 300s) (11:50:21)
+[lane 102] --> p1 event_narration thr=0.1500 shard=3 (11:50:24, 5124s left)
+[lane 102] <-- event_narration thr=0.1500 shard=3 rc=0 BARREN (nothing under 300s) (11:51:18)
+[lane 102] --> p1 event_narration thr=0.3500 shard=0 (11:51:19, 5067s left)
+[lane 102] <-- event_narration thr=0.3500 shard=0 rc=0 BARREN (nothing under 300s) (11:52:05)
+[lane 102] --> p1 event_narration thr=0.2500 shard=3 (11:52:06, 5020s left)
+[lane 102] <-- event_narration thr=0.2500 shard=3 rc=0 BARREN (nothing under 300s) (11:52:50)
+[lane 102] --> p1 event_narration thr=0.3500 shard=2 (11:52:53, 4975s left)
+[lane 102] <-- event_narration thr=0.1500 shard=2 rc=124 BARREN (nothing under 300s) (12:14:10)
+[lane 102] 27s left (< 240) -- stopping cleanly
+[lane 102] done, 26 units attempted 12:14:10
+[lane 102] clariden-ln004 gpu=2 start=12:15:38 deadline=13:44:58 max_dur=300
+[lane 102] --> p1 event_narration thr=0.0500 shard=2 (12:15:40, 5360s left)
+[lane 102] <-- event_narration thr=0.3500 shard=2 rc=0 +2 samples (12:33:03)
+[lane 102] --> p1 event_narration thr=0.2500 shard=1 (12:33:05, 2562s left)
+[lane 102] <-- event_narration thr=0.2500 shard=1 rc=0 BARREN (nothing under 300s) (12:33:46)
+[lane 102] --> p1 event_narration thr=0.4500 shard=0 (12:33:49, 2519s left)
+[lane 102] <-- event_narration thr=0.4500 shard=0 rc=0 BARREN (nothing under 300s) (12:34:37)
+[lane 102] --> p1 event_narration thr=0.4500 shard=3 (12:34:40, 2468s left)
+[lane 102] <-- event_narration thr=0.4500 shard=3 rc=0 BARREN (nothing under 300s) (12:35:28)
+[lane 102] --> p1 event_narration thr=0.5500 shard=1 (12:35:30, 2417s left)
+[lane 102] <-- event_narration thr=0.0500 shard=2 rc=0 +2 samples (12:46:45)
+[lane 102] --> p1 event_narration thr=0.1500 shard=0 (12:46:46, 3493s left)
+[lane 102] <-- event_narration thr=0.1500 shard=0 rc=0 BARREN (nothing under 300s) (12:47:48)
+[lane 102] --> p1 event_narration thr=0.1500 shard=1 (12:47:52, 3430s left)
+[lane 102] <-- event_narration thr=0.1500 shard=1 rc=0 BARREN (nothing under 300s) (12:49:53)
+[lane 102] --> p1 event_narration thr=0.5500 shard=0 (12:49:55, 3305s left)
+[lane 102] <-- event_narration thr=0.5500 shard=0 rc=0 BARREN (nothing under 300s) (12:50:56)
+[lane 102] --> p1 event_narration thr=0.5500 shard=3 (12:50:58, 3242s left)
+[lane 102] <-- event_narration thr=0.5500 shard=3 rc=0 BARREN (nothing under 300s) (12:51:55)
+[lane 102] --> p1 event_narration thr=0.4500 shard=0 (12:51:58, 3183s left)
+[lane 102] <-- event_narration thr=0.4500 shard=0 rc=0 BARREN (nothing under 300s) (12:52:59)
+[lane 102] --> p1 event_narration thr=0.4500 shard=3 (12:53:01, 3119s left)
+[lane 102] <-- event_narration thr=0.4500 shard=3 rc=0 BARREN (nothing under 300s) (12:54:05)
+[lane 102] --> p1 event_narration thr=0.6500 shard=2 (12:54:07, 3053s left)
+[lane 102] <-- event_narration thr=0.5500 shard=1 rc=0 +1 samples (12:58:53)
+[lane 102] --> p1 event_narration thr=0.5500 shard=0 (12:58:55, 1012s left)
+[lane 102] <-- event_narration thr=0.5500 shard=0 rc=0 BARREN (nothing under 300s) (12:59:44)
+[lane 102] --> p1 event_narration thr=0.4500 shard=1 (12:59:47, 961s left)
+[lane 102] <-- event_narration thr=0.4500 shard=1 rc=0 BARREN (nothing under 300s) (13:00:37)
+[lane 102] --> p1 event_narration thr=0.5500 shard=1 (13:00:40, 908s left)
+[lane 102] <-- event_narration thr=0.5500 shard=1 rc=0 BARREN (nothing under 300s) (13:01:30)
+[lane 102] --> p1 event_narration thr=0.5500 shard=3 (13:01:33, 855s left)
+[lane 102] <-- event_narration thr=0.5500 shard=3 rc=0 BARREN (nothing under 300s) (13:02:22)
+[lane 102] --> p1 event_narration thr=0.6500 shard=0 (13:02:24, 803s left)
+[lane 102] <-- event_narration thr=0.6500 shard=0 rc=0 BARREN (nothing under 300s) (13:03:06)
+[lane 102] --> p1 event_narration thr=0.6500 shard=3 (13:03:08, 759s left)
+[lane 102] <-- event_narration thr=0.6500 shard=3 rc=0 BARREN (nothing under 300s) (13:03:44)
+[lane 102] --> p1 event_narration thr=0.7500 shard=0 (13:03:46, 721s left)
+[lane 102] <-- event_narration thr=0.7500 shard=0 rc=0 BARREN (nothing under 300s) (13:04:38)
+[lane 102] --> p1 event_narration thr=0.7500 shard=3 (13:04:40, 667s left)
+[lane 102] <-- event_narration thr=0.7500 shard=3 rc=0 BARREN (nothing under 300s) (13:05:33)
+[lane 102] --> p1 event_narration thr=0.8500 shard=0 (13:05:35, 612s left)
+[lane 102] <-- event_narration thr=0.8500 shard=0 rc=0 BARREN (nothing under 300s) (13:06:30)
+[lane 102] --> p1 event_narration thr=0.8500 shard=1 (13:06:32, 555s left)
+[lane 102] <-- event_narration thr=0.8500 shard=1 rc=124 BARREN (nothing under 300s) (13:15:18)
+[lane 102] 27s left (< 240) -- stopping cleanly
+[lane 102] done, 22 units attempted 13:15:18
+[lane 102] clariden-ln002 gpu=2 start=13:16:47 deadline=14:46:07 max_dur=300
+[lane 102] --> p1 event_narration thr=0.7500 shard=1 (13:16:52, 5360s left)
+[lane 102] <-- event_narration thr=0.7500 shard=1 rc=0 BARREN (nothing under 300s) (13:18:03)
+[lane 102] --> p1 event_narration thr=0.6500 shard=1 (13:18:06, 5284s left)
+[lane 102] <-- event_narration thr=0.6500 shard=1 rc=0 BARREN (nothing under 300s) (13:18:55)
+[lane 102] --> p1 event_narration thr=0.6500 shard=3 (13:18:57, 5232s left)
+[lane 102] <-- event_narration thr=0.6500 shard=3 rc=0 BARREN (nothing under 300s) (13:19:54)
+[lane 102] --> p1 event_narration thr=0.6500 shard=0 (13:19:56, 5173s left)
+[lane 102] <-- event_narration thr=0.6500 shard=0 rc=0 BARREN (nothing under 300s) (13:20:53)
+[lane 102] --> p1 event_narration thr=0.8500 shard=0 (13:20:56, 5114s left)
+[lane 102] <-- event_narration thr=0.8500 shard=0 rc=0 BARREN (nothing under 300s) (13:21:46)
+[lane 102] --> p1 event_narration thr=0.8500 shard=3 (13:21:48, 5061s left)
+[lane 102] <-- event_narration thr=0.8500 shard=3 rc=0 BARREN (nothing under 300s) (13:22:29)
+[lane 102] --> p1 event_narration thr=0.9500 shard=0 (13:22:31, 5018s left)
+[lane 102] <-- event_narration thr=0.9500 shard=0 rc=0 BARREN (nothing under 300s) (13:23:14)
+[lane 102] no claimable units left
+[lane 102] done, 7 units attempted 13:23:16
+[lane 102] <-- event_narration thr=0.6500 shard=2 rc=0 +2 samples (13:24:59)
+[lane 102] --> p1 event_narration thr=0.8500 shard=0 (13:25:00, 1199s left)
+[lane 102] <-- event_narration thr=0.8500 shard=0 rc=0 BARREN (nothing under 300s) (13:25:46)
+[lane 102] --> p1 event_narration thr=0.8500 shard=3 (13:25:47, 1152s left)
+[lane 102] <-- event_narration thr=0.8500 shard=3 rc=0 BARREN (nothing under 300s) (13:26:18)
+[lane 102] --> p1 event_narration thr=0.9500 shard=0 (13:26:19, 1120s left)
+[lane 102] <-- event_narration thr=0.9500 shard=0 rc=0 BARREN (nothing under 300s) (13:27:02)
+[lane 102] --> p1 event_narration thr=0.9500 shard=3 (13:27:03, 1076s left)
+[lane 102] <-- event_narration thr=0.9500 shard=3 rc=0 BARREN (nothing under 300s) (13:27:35)
+[lane 102] no claimable units left
+[lane 102] done, 12 units attempted 13:27:37
+[lane 102] clariden-ln004 gpu=2 start=13:38:01 deadline=15:07:21 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 13:38:04
+[lane 102] clariden-ln002 gpu=2 start=13:38:09 deadline=15:07:29 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 13:38:13
+[lane 102] clariden-ln004 gpu=2 start=13:39:21 deadline=15:08:41 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 13:39:24
+[lane 102] clariden-ln002 gpu=2 start=13:39:31 deadline=15:08:51 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 13:39:33
+[lane 102] clariden-ln004 gpu=2 start=13:40:42 deadline=15:10:02 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 13:40:44
+[lane 102] clariden-ln002 gpu=2 start=13:40:53 deadline=15:10:13 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 13:40:57
+[lane 102] clariden-ln004 gpu=2 start=13:42:03 deadline=15:11:23 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 13:42:05
+[lane 102] clariden-ln002 gpu=2 start=13:42:14 deadline=15:11:34 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 13:42:16
+[lane 102] clariden-ln004 gpu=2 start=13:43:24 deadline=15:12:44 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 13:43:26
+[lane 102] clariden-ln002 gpu=2 start=13:43:34 deadline=15:12:54 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 13:43:36
+[lane 102] clariden-ln004 gpu=2 start=13:44:45 deadline=15:14:05 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 13:44:47
+[lane 102] clariden-ln002 gpu=2 start=13:44:56 deadline=15:14:16 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 13:44:58
+[lane 102] clariden-ln004 gpu=2 start=13:46:06 deadline=15:15:26 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 13:46:08
+[lane 102] clariden-ln002 gpu=2 start=13:46:17 deadline=15:15:37 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 13:46:18
+[lane 102] clariden-ln004 gpu=2 start=13:47:26 deadline=15:16:46 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 13:47:28
+[lane 102] clariden-ln002 gpu=2 start=13:47:38 deadline=15:16:58 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 13:47:40
+[lane 102] clariden-ln004 gpu=2 start=13:48:47 deadline=15:18:07 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 13:48:49
+[lane 102] clariden-ln002 gpu=2 start=13:48:59 deadline=15:18:19 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 13:49:00
+[lane 102] clariden-ln004 gpu=2 start=13:50:08 deadline=15:19:28 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 13:50:10
+[lane 102] clariden-ln002 gpu=2 start=13:50:20 deadline=15:19:40 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 13:50:22
+[lane 102] clariden-ln004 gpu=2 start=13:51:30 deadline=15:20:50 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 13:51:31
+[lane 102] clariden-ln002 gpu=2 start=13:51:42 deadline=15:21:02 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 13:51:43
+[lane 102] clariden-ln004 gpu=2 start=13:52:30 deadline=15:21:50 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 13:52:32
+[lane 102] clariden-ln002 gpu=2 start=13:53:02 deadline=15:22:22 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 13:53:04
+[lane 102] clariden-ln004 gpu=2 start=13:53:31 deadline=15:22:51 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 13:53:33
+[lane 102] clariden-ln002 gpu=2 start=13:54:23 deadline=15:23:43 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 13:54:25
+[lane 102] clariden-ln004 gpu=2 start=13:54:32 deadline=15:23:52 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 13:54:33
+[lane 102] clariden-ln004 gpu=2 start=13:55:33 deadline=15:24:53 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 13:55:34
+[lane 102] clariden-ln002 gpu=2 start=13:55:44 deadline=15:25:04 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 13:55:46
+[lane 102] clariden-ln004 gpu=2 start=13:56:33 deadline=15:25:53 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 13:56:34
+[lane 102] clariden-ln002 gpu=2 start=13:57:05 deadline=15:26:25 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 13:57:06
+[lane 102] clariden-ln004 gpu=2 start=13:57:54 deadline=15:27:14 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 13:57:55
+[lane 102] clariden-ln002 gpu=2 start=13:58:26 deadline=15:27:45 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 13:58:27
+[lane 102] clariden-ln004 gpu=2 start=13:59:15 deadline=15:28:35 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 13:59:16
+[lane 102] clariden-ln002 gpu=2 start=13:59:46 deadline=15:29:06 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 13:59:47
+[lane 102] clariden-ln004 gpu=2 start=14:00:35 deadline=15:29:55 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 14:00:37
+[lane 102] clariden-ln002 gpu=2 start=14:01:07 deadline=15:30:27 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 14:01:08
+[lane 102] clariden-ln004 gpu=2 start=14:01:56 deadline=15:31:16 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 14:01:57
+[lane 102] clariden-ln002 gpu=2 start=14:02:08 deadline=15:31:28 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 14:02:09
+[lane 102] clariden-ln004 gpu=2 start=14:03:17 deadline=15:32:37 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 14:03:19
+[lane 102] clariden-ln002 gpu=2 start=14:03:29 deadline=15:32:49 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 14:03:31
+[lane 102] clariden-ln004 gpu=2 start=14:04:38 deadline=15:33:58 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 14:04:39
+[lane 102] clariden-ln002 gpu=2 start=14:04:50 deadline=15:34:10 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 14:04:52
+[lane 102] clariden-ln004 gpu=2 start=14:05:59 deadline=15:35:19 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 14:06:00
+[lane 102] clariden-ln002 gpu=2 start=14:06:11 deadline=15:35:31 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 14:06:13
+[lane 102] clariden-ln004 gpu=2 start=14:07:20 deadline=15:36:40 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 14:07:22
+[lane 102] clariden-ln002 gpu=2 start=14:07:32 deadline=15:36:52 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 14:07:33
+[lane 102] clariden-ln004 gpu=2 start=14:08:41 deadline=15:38:01 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 14:08:43
+[lane 102] clariden-ln002 gpu=2 start=14:08:52 deadline=15:38:12 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 14:08:53
+[lane 102] clariden-ln004 gpu=2 start=14:09:44 deadline=15:39:04 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 14:09:46
+[lane 102] clariden-ln002 gpu=2 start=14:10:13 deadline=15:39:33 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 14:10:14
+[lane 102] clariden-ln004 gpu=2 start=14:11:05 deadline=15:40:25 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 14:11:06
+[lane 102] clariden-ln002 gpu=2 start=14:11:33 deadline=15:40:53 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 14:11:34
+[lane 102] clariden-ln004 gpu=2 start=14:12:25 deadline=15:41:45 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 14:12:27
+[lane 102] clariden-ln002 gpu=2 start=14:12:34 deadline=15:41:54 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 14:12:35
+[lane 102] clariden-ln002 gpu=2 start=14:13:35 deadline=15:42:55 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 14:13:38
+[lane 102] clariden-ln004 gpu=2 start=14:13:46 deadline=15:43:06 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 14:13:47
+[lane 102] clariden-ln004 gpu=2 start=14:14:46 deadline=15:44:06 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 14:14:47
+[lane 102] clariden-ln002 gpu=2 start=14:15:04 deadline=15:44:24 max_dur=0
+[lane 102] --> p1 semantic_condition_alert thr=0.0200 shard=2 (14:15:04, 5360s left)
+[lane 102] clariden-ln004 gpu=2 start=14:15:47 deadline=15:45:07 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 14:15:48
+[lane 102] <-- semantic_condition_alert thr=0.0200 shard=2 rc=0 BARREN (nothing under 0s) (14:16:01)
+[lane 102] --> p1 semantic_condition_alert thr=0.0100 shard=2 (14:16:01, 5303s left)
+[lane 102] <-- semantic_condition_alert thr=0.0100 shard=2 rc=0 BARREN (nothing under 0s) (14:17:05)
+[lane 102] --> p1 semantic_condition_alert thr=0.0100 shard=3 (14:17:05, 5239s left)
+[lane 102] clariden-ln004 gpu=2 start=14:17:07 deadline=15:46:27 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 14:17:10
+[lane 102] <-- semantic_condition_alert thr=0.0100 shard=3 rc=0 BARREN (nothing under 0s) (14:18:01)
+[lane 102] --> p1 semantic_condition_alert thr=0.0200 shard=3 (14:18:01, 5183s left)
+[lane 102] clariden-ln004 gpu=2 start=14:18:28 deadline=15:47:48 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 14:18:31
+[lane 102] <-- semantic_condition_alert thr=0.0200 shard=3 rc=0 BARREN (nothing under 0s) (14:19:07)
+[lane 102] --> p1 semantic_condition_alert thr=0.1500 shard=2 (14:19:07, 5117s left)
+[lane 102] clariden-ln004 gpu=2 start=14:19:49 deadline=15:49:09 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 14:19:51
+[lane 102] <-- semantic_condition_alert thr=0.1500 shard=2 rc=0 BARREN (nothing under 0s) (14:20:07)
+[lane 102] --> p1 semantic_condition_alert thr=0.0500 shard=2 (14:20:08, 5057s left)
+[lane 102] <-- semantic_condition_alert thr=0.0500 shard=2 rc=0 BARREN (nothing under 0s) (14:21:10)
+[lane 102] clariden-ln004 gpu=2 start=14:21:10 deadline=15:50:30 max_dur=300
+[lane 102] --> p1 semantic_condition_alert thr=0.0500 shard=3 (14:21:10, 4994s left)
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 14:21:12
+[lane 102] <-- semantic_condition_alert thr=0.0500 shard=3 rc=0 BARREN (nothing under 0s) (14:22:15)
+[lane 102] --> p1 semantic_condition_alert thr=0.1500 shard=3 (14:22:15, 4929s left)
+[lane 102] clariden-ln004 gpu=2 start=14:22:30 deadline=15:51:50 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 14:22:34
+[lane 102] <-- semantic_condition_alert thr=0.1500 shard=3 rc=0 BARREN (nothing under 0s) (14:23:02)
+[lane 102] --> p1 semantic_condition_alert thr=0.2500 shard=2 (14:23:03, 4882s left)
+[lane 102] <-- semantic_condition_alert thr=0.2500 shard=2 rc=0 BARREN (nothing under 0s) (14:23:32)
+[lane 102] --> p1 semantic_condition_alert thr=0.2500 shard=3 (14:23:32, 4852s left)
+[lane 102] clariden-ln004 gpu=2 start=14:23:51 deadline=15:53:11 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 14:23:54
+[lane 102] <-- semantic_condition_alert thr=0.2500 shard=3 rc=0 BARREN (nothing under 0s) (14:24:16)
+[lane 102] --> p1 semantic_condition_alert thr=0.3500 shard=1 (14:24:17, 4808s left)
+[lane 102] clariden-ln004 gpu=2 start=14:25:12 deadline=15:54:32 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 14:25:14
+[lane 102] clariden-ln004 gpu=2 start=14:26:33 deadline=15:55:53 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 14:26:34
+[lane 102] clariden-ln004 gpu=2 start=14:27:53 deadline=15:57:13 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 14:27:54
+[lane 102] clariden-ln004 gpu=2 start=14:29:14 deadline=15:58:34 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 14:29:14
+[lane 102] clariden-ln004 gpu=2 start=14:30:34 deadline=15:59:54 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 14:30:35
+[lane 102] clariden-ln004 gpu=2 start=14:31:55 deadline=16:01:15 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 14:31:56
+[lane 102] clariden-ln004 gpu=2 start=14:33:16 deadline=16:02:36 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 14:33:18
+[lane 102] clariden-ln004 gpu=2 start=14:34:37 deadline=16:03:57 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 14:34:38
+[lane 102] clariden-ln004 gpu=2 start=14:35:57 deadline=16:05:17 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 14:35:59
+[lane 102] clariden-ln004 gpu=2 start=14:37:18 deadline=16:06:38 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 14:37:19
+[lane 102] clariden-ln004 gpu=2 start=14:38:39 deadline=16:07:59 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 14:38:40
+[lane 102] clariden-ln004 gpu=2 start=14:39:59 deadline=16:09:19 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 14:40:01
+[lane 102] clariden-ln004 gpu=2 start=14:41:21 deadline=16:10:40 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 14:41:22
+[lane 102] clariden-ln004 gpu=2 start=14:42:41 deadline=16:12:01 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 14:42:41
+[lane 102] clariden-ln004 gpu=2 start=14:44:01 deadline=16:13:21 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 14:44:03
+[lane 102] clariden-ln004 gpu=2 start=14:45:22 deadline=16:14:42 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 14:45:22
+[lane 102] clariden-ln004 gpu=2 start=14:46:42 deadline=16:16:02 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 14:46:43
+[lane 102] clariden-ln004 gpu=2 start=14:48:02 deadline=16:17:22 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 14:48:04
+[lane 102] clariden-ln004 gpu=2 start=14:49:24 deadline=16:18:44 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 14:49:25
+[lane 102] clariden-ln004 gpu=2 start=14:50:45 deadline=16:20:05 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 14:50:46
+[lane 102] clariden-ln004 gpu=2 start=14:52:06 deadline=16:21:26 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 14:52:07
+[lane 102] clariden-ln004 gpu=2 start=14:53:27 deadline=16:22:47 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 14:53:28
+[lane 102] clariden-ln004 gpu=2 start=14:54:47 deadline=16:24:07 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 14:54:48
+[lane 102] clariden-ln004 gpu=2 start=14:56:08 deadline=16:25:28 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 14:56:09
+[lane 102] clariden-ln004 gpu=2 start=14:57:29 deadline=16:26:49 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 14:57:30
+[lane 102] clariden-ln004 gpu=2 start=14:58:49 deadline=16:28:09 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 14:58:50
+[lane 102] clariden-ln004 gpu=2 start=15:00:09 deadline=16:29:29 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 15:00:10
+[lane 102] clariden-ln004 gpu=2 start=15:01:30 deadline=16:30:50 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 15:01:31
+[lane 102] clariden-ln004 gpu=2 start=15:02:51 deadline=16:32:11 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 15:02:51
+[lane 102] clariden-ln004 gpu=2 start=15:04:12 deadline=16:33:32 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 15:04:13
+[lane 102] clariden-ln004 gpu=2 start=15:05:33 deadline=16:34:53 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 15:05:34
+[lane 102] clariden-ln004 gpu=2 start=15:06:53 deadline=16:36:13 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 15:06:54
+[lane 102] clariden-ln004 gpu=2 start=15:08:14 deadline=16:37:34 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 15:08:15
+[lane 102] clariden-ln004 gpu=2 start=15:09:35 deadline=16:38:55 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 15:09:36
+[lane 102] clariden-ln004 gpu=2 start=15:10:55 deadline=16:40:15 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 15:10:56
+[lane 102] clariden-ln004 gpu=2 start=15:12:16 deadline=16:41:36 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 15:12:17
+[lane 102] clariden-ln004 gpu=2 start=15:13:37 deadline=16:42:57 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 15:13:38
+[lane 102] clariden-ln004 gpu=2 start=15:14:58 deadline=16:44:18 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 15:15:02
+[lane 102] clariden-ln004 gpu=2 start=15:16:20 deadline=16:45:40 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 15:16:22
+[lane 102] clariden-ln004 gpu=2 start=15:17:40 deadline=16:47:00 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 15:17:42
+[lane 102] clariden-ln004 gpu=2 start=15:19:01 deadline=16:48:21 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 15:19:02
+[lane 102] clariden-ln004 gpu=2 start=15:20:21 deadline=16:49:41 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 15:20:22
+[lane 102] clariden-ln004 gpu=2 start=15:21:42 deadline=16:51:02 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 15:21:44
+[lane 102] clariden-ln004 gpu=2 start=15:23:03 deadline=16:52:23 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 15:23:06
+[lane 102] clariden-ln004 gpu=2 start=15:24:24 deadline=16:53:44 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 15:24:26
+[lane 102] clariden-ln004 gpu=2 start=15:25:45 deadline=16:55:05 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 15:25:47
+[lane 102] clariden-ln004 gpu=2 start=15:27:06 deadline=16:56:26 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 15:27:08
+[lane 102] clariden-ln004 gpu=2 start=15:28:27 deadline=16:57:47 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 15:28:29
+[lane 102] clariden-ln004 gpu=2 start=15:29:48 deadline=16:59:08 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 15:29:49
+[lane 102] clariden-ln004 gpu=2 start=15:31:08 deadline=17:00:28 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 15:31:10
+[lane 102] clariden-ln004 gpu=2 start=15:32:30 deadline=17:01:50 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 15:32:31
+[lane 102] clariden-ln004 gpu=2 start=15:33:50 deadline=17:03:10 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 15:33:51
+[lane 102] clariden-ln004 gpu=2 start=15:35:11 deadline=17:04:31 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 15:35:12
+[lane 102] clariden-ln004 gpu=2 start=15:36:32 deadline=17:05:52 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 15:36:33
+[lane 102] clariden-ln004 gpu=2 start=15:37:53 deadline=17:07:13 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 15:37:54
+[lane 102] clariden-ln004 gpu=2 start=15:39:13 deadline=17:08:33 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 15:39:15
+[lane 102] clariden-ln004 gpu=2 start=15:40:34 deadline=17:09:54 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 15:40:35
+[lane 102] clariden-ln004 gpu=2 start=15:41:55 deadline=17:11:15 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 15:41:57
+[lane 102] clariden-ln004 gpu=2 start=15:43:17 deadline=17:12:37 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 15:43:21
+[lane 102] <-- semantic_condition_alert thr=0.3500 shard=1 rc=124 BARREN (nothing under 0s) (15:43:55)
+[lane 102] 29s left (< 240) -- stopping cleanly
+[lane 102] done, 11 units attempted 15:43:55
+[lane 102] clariden-ln004 gpu=2 start=15:44:39 deadline=17:13:59 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 15:44:40
+[lane 102] clariden-ln002 gpu=2 start=15:45:25 deadline=17:14:45 max_dur=0
+[lane 102] --> p1 semantic_condition_alert thr=0.2500 shard=2 (15:45:25, 5360s left)
+[lane 102] clariden-ln004 gpu=2 start=15:46:00 deadline=17:15:20 max_dur=300
+[lane 102] <-- semantic_condition_alert thr=0.2500 shard=2 rc=0 BARREN (nothing under 0s) (15:46:01)
+[lane 102] --> p1 semantic_condition_alert thr=0.3500 shard=0 (15:46:02, 5324s left)
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 15:46:02
+[lane 102] clariden-ln004 gpu=2 start=15:47:21 deadline=17:16:41 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 15:47:23
+[lane 102] clariden-ln004 gpu=2 start=15:48:43 deadline=17:18:03 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 15:48:45
+[lane 102] clariden-ln004 gpu=2 start=15:50:04 deadline=17:19:24 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 15:50:06
+[lane 102] clariden-ln004 gpu=2 start=15:51:26 deadline=17:20:46 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 15:51:28
+[lane 102] clariden-ln004 gpu=2 start=15:52:47 deadline=17:22:07 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 15:52:50
+[lane 102] clariden-ln004 gpu=2 start=15:54:09 deadline=17:23:29 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 15:54:10
+[lane 102] clariden-ln004 gpu=2 start=15:55:31 deadline=17:24:51 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 15:55:32
+[lane 102] clariden-ln004 gpu=2 start=15:56:53 deadline=17:26:13 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 15:56:54
+[lane 102] clariden-ln004 gpu=2 start=15:58:14 deadline=17:27:34 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 15:58:15
+[lane 102] clariden-ln004 gpu=2 start=15:59:34 deadline=17:28:54 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 15:59:35
+[lane 102] clariden-ln004 gpu=2 start=16:00:55 deadline=17:30:15 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 16:00:56
+[lane 102] clariden-ln004 gpu=2 start=16:02:16 deadline=17:31:36 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 16:02:18
+[lane 102] clariden-ln004 gpu=2 start=16:03:38 deadline=17:32:58 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 16:03:39
+[lane 102] clariden-ln004 gpu=2 start=16:04:59 deadline=17:34:19 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 16:05:00
+[lane 102] clariden-ln004 gpu=2 start=16:06:20 deadline=17:35:40 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 16:06:25
+[lane 102] clariden-ln004 gpu=2 start=16:07:41 deadline=17:37:01 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 16:07:42
+[lane 102] clariden-ln004 gpu=2 start=16:09:02 deadline=17:38:22 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 16:09:04
+[lane 102] clariden-ln004 gpu=2 start=16:10:24 deadline=17:39:43 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 16:10:25
+[lane 102] clariden-ln004 gpu=2 start=16:11:45 deadline=17:41:05 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 16:11:46
+[lane 102] clariden-ln004 gpu=2 start=16:13:06 deadline=17:42:26 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 16:13:07
+[lane 102] clariden-ln004 gpu=2 start=16:14:26 deadline=17:43:46 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 16:14:28
+[lane 102] clariden-ln004 gpu=2 start=16:15:47 deadline=17:45:07 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 16:15:48
+[lane 102] clariden-ln004 gpu=2 start=16:17:08 deadline=17:46:28 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 16:17:09
+[lane 102] clariden-ln004 gpu=2 start=16:18:29 deadline=17:47:49 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 16:18:32
+[lane 102] clariden-ln004 gpu=2 start=16:19:49 deadline=17:49:09 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 16:19:50
+[lane 102] clariden-ln004 gpu=2 start=16:21:10 deadline=17:50:30 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 16:21:12
+[lane 102] clariden-ln004 gpu=2 start=16:22:31 deadline=17:51:51 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 16:22:34
+[lane 102] clariden-ln004 gpu=2 start=16:23:52 deadline=17:53:12 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 16:23:53
+[lane 102] clariden-ln004 gpu=2 start=16:25:12 deadline=17:54:32 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 16:25:16
+[lane 102] clariden-ln004 gpu=2 start=16:26:33 deadline=17:55:53 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 16:26:34
+[lane 102] clariden-ln004 gpu=2 start=16:27:54 deadline=17:57:14 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 16:27:55
+[lane 102] clariden-ln004 gpu=2 start=16:29:15 deadline=17:58:35 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 16:29:16
+[lane 102] clariden-ln004 gpu=2 start=16:30:36 deadline=17:59:56 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 16:30:38
+[lane 102] clariden-ln004 gpu=2 start=16:31:57 deadline=18:01:17 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 16:31:58
+[lane 102] clariden-ln004 gpu=2 start=16:33:18 deadline=18:02:38 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 16:33:20
+[lane 102] clariden-ln004 gpu=2 start=16:34:39 deadline=18:03:59 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 16:34:41
+[lane 102] clariden-ln004 gpu=2 start=16:36:01 deadline=18:05:20 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 16:36:02
+[lane 102] clariden-ln004 gpu=2 start=16:37:22 deadline=18:06:42 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 16:37:24
+[lane 102] clariden-ln004 gpu=2 start=16:38:44 deadline=18:08:03 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 16:38:45
+[lane 102] clariden-ln004 gpu=2 start=16:40:06 deadline=18:09:26 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 16:40:07
+[lane 102] clariden-ln004 gpu=2 start=16:41:27 deadline=18:10:47 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 16:41:28
+[lane 102] clariden-ln004 gpu=2 start=16:42:50 deadline=18:12:10 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 16:42:52
+[lane 102] clariden-ln004 gpu=2 start=16:44:13 deadline=18:13:33 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 16:44:15
+[lane 102] clariden-ln004 gpu=2 start=16:45:35 deadline=18:14:55 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 16:45:36
+[lane 102] clariden-ln004 gpu=2 start=16:46:56 deadline=18:16:16 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 16:46:58
+[lane 102] clariden-ln004 gpu=2 start=16:48:17 deadline=18:17:37 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 16:48:18
+[lane 102] clariden-ln004 gpu=2 start=16:49:39 deadline=18:18:59 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 16:49:40
+[lane 102] clariden-ln004 gpu=2 start=16:51:00 deadline=18:20:20 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 16:51:02
+[lane 102] clariden-ln004 gpu=2 start=16:52:22 deadline=18:21:41 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 16:52:25
+[lane 102] clariden-ln004 gpu=2 start=16:53:43 deadline=18:23:03 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 16:53:44
+[lane 102] clariden-ln004 gpu=2 start=16:55:04 deadline=18:24:24 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 16:55:05
+[lane 102] clariden-ln004 gpu=2 start=16:56:25 deadline=18:25:45 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 16:56:26
+[lane 102] clariden-ln004 gpu=2 start=16:57:46 deadline=18:27:06 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 16:57:47
+[lane 102] clariden-ln004 gpu=2 start=16:59:07 deadline=18:28:27 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 16:59:09
+[lane 102] clariden-ln004 gpu=2 start=17:00:29 deadline=18:29:49 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 17:00:30
+[lane 102] clariden-ln004 gpu=2 start=17:01:50 deadline=18:31:10 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 17:01:51
+[lane 102] clariden-ln004 gpu=2 start=17:03:11 deadline=18:32:31 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 17:03:12
+[lane 102] clariden-ln004 gpu=2 start=17:04:32 deadline=18:33:52 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 17:04:33
+[lane 102] clariden-ln004 gpu=2 start=17:05:53 deadline=18:35:13 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 17:05:56
+[lane 102] clariden-ln004 gpu=2 start=17:07:16 deadline=18:36:35 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 17:07:19
+[lane 102] clariden-ln004 gpu=2 start=17:08:38 deadline=18:37:58 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 17:08:40
+[lane 102] clariden-ln004 gpu=2 start=17:10:01 deadline=18:39:21 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 17:10:03
+[lane 102] clariden-ln004 gpu=2 start=17:11:23 deadline=18:40:43 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 17:11:28
+[lane 102] clariden-ln004 gpu=2 start=17:12:47 deadline=18:42:07 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 17:12:56
+[lane 102] <-- semantic_condition_alert thr=0.3500 shard=0 rc=0 +1 samples (17:13:49)
+[lane 102] 56s left (< 240) -- stopping cleanly
+[lane 102] done, 2 units attempted 17:13:49
+[lane 102] clariden-ln004 gpu=2 start=17:14:11 deadline=18:43:31 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 17:14:16
+[lane 102] clariden-ln004 gpu=2 start=17:15:36 deadline=18:44:56 max_dur=300
+[lane 102] clariden-ln002 gpu=2 start=17:15:46 deadline=18:45:06 max_dur=0
+[lane 102] --> p1 semantic_condition_alert thr=0.2500 shard=2 (17:15:46, 5360s left)
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 17:15:52
+[lane 102] <-- semantic_condition_alert thr=0.2500 shard=2 rc=0 BARREN (nothing under 0s) (17:16:30)
+[lane 102] --> p1 semantic_condition_alert thr=0.3500 shard=0 (17:16:31, 5316s left)
+[lane 102] clariden-ln004 gpu=2 start=17:17:00 deadline=18:46:20 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 17:17:02
+[lane 102] <-- semantic_condition_alert thr=0.3500 shard=0 rc=0 BARREN (nothing under 0s) (17:17:16)
+[lane 102] --> p1 semantic_condition_alert thr=0.2500 shard=3 (17:17:16, 5270s left)
+[lane 102] <-- semantic_condition_alert thr=0.2500 shard=3 rc=0 BARREN (nothing under 0s) (17:17:59)
+[lane 102] --> p1 semantic_condition_alert thr=0.3500 shard=1 (17:17:59, 5227s left)
+[lane 102] clariden-ln004 gpu=2 start=17:18:24 deadline=18:47:44 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 17:18:32
+[lane 102] clariden-ln004 gpu=2 start=17:19:47 deadline=18:49:07 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 17:19:49
+[lane 102] clariden-ln004 gpu=2 start=17:21:13 deadline=18:50:33 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 17:21:16
+[lane 102] clariden-ln004 gpu=2 start=17:22:35 deadline=18:51:55 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 17:22:35
+[lane 102] clariden-ln004 gpu=2 start=17:23:59 deadline=18:53:19 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 17:24:01
+[lane 102] clariden-ln004 gpu=2 start=17:25:22 deadline=18:54:42 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 17:25:23
+[lane 102] clariden-ln004 gpu=2 start=17:26:55 deadline=18:56:05 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 17:27:04
+[lane 102] clariden-ln004 gpu=2 start=17:28:17 deadline=18:57:37 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 17:28:18
+[lane 102] clariden-ln004 gpu=2 start=17:29:40 deadline=18:59:00 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 17:29:41
+[lane 102] clariden-ln004 gpu=2 start=17:31:06 deadline=19:00:26 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 17:31:07
+[lane 102] clariden-ln004 gpu=2 start=17:32:28 deadline=19:01:48 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 17:32:30
+[lane 102] clariden-ln004 gpu=2 start=17:33:50 deadline=19:03:10 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 17:33:54
+[lane 102] clariden-ln004 gpu=2 start=17:35:11 deadline=19:04:31 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 17:35:14
+[lane 102] clariden-ln004 gpu=2 start=17:36:34 deadline=19:05:54 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 17:36:36
+[lane 102] clariden-ln004 gpu=2 start=17:37:55 deadline=19:07:15 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 17:37:58
+[lane 102] clariden-ln004 gpu=2 start=17:39:18 deadline=19:08:38 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 17:39:27
+[lane 102] clariden-ln004 gpu=2 start=17:40:40 deadline=19:10:00 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 17:40:42
+[lane 102] clariden-ln004 gpu=2 start=17:42:01 deadline=19:11:21 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 17:42:04
+[lane 102] clariden-ln004 gpu=2 start=17:43:23 deadline=19:12:42 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 17:43:25
+[lane 102] clariden-ln004 gpu=2 start=17:44:44 deadline=19:14:04 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 17:44:46
+[lane 102] clariden-ln004 gpu=2 start=17:46:06 deadline=19:15:26 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 17:46:07
+[lane 102] clariden-ln004 gpu=2 start=17:47:27 deadline=19:16:47 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 17:47:29
+[lane 102] clariden-ln004 gpu=2 start=17:48:49 deadline=19:18:09 max_dur=300
+[lane 102] no claimable units left
+[lane 102] done, 0 units attempted 17:48:50
+[lane 102] <-- semantic_condition_alert thr=0.3500 shard=1 rc=124 BARREN (nothing under 0s) (18:44:37)
+[lane 102] 29s left (< 240) -- stopping cleanly
+[lane 102] done, 4 units attempted 18:44:37
+[lane 102] clariden-ln002 gpu=2 start=18:46:07 deadline=20:15:27 max_dur=0
+[lane 102] --> p1 semantic_condition_alert thr=0.2500 shard=3 (18:46:07, 5360s left)
+[lane 102] <-- semantic_condition_alert thr=0.2500 shard=3 rc=0 BARREN (nothing under 0s) (18:46:25)
+[lane 102] --> p1 semantic_condition_alert thr=0.2500 shard=2 (18:46:25, 5342s left)
+[lane 102] <-- semantic_condition_alert thr=0.2500 shard=2 rc=0 BARREN (nothing under 0s) (18:46:41)
+[lane 102] --> p1 semantic_condition_alert thr=0.3500 shard=0 (18:46:42, 5326s left)
+[lane 102] <-- semantic_condition_alert thr=0.3500 shard=0 rc=0 BARREN (nothing under 0s) (18:47:12)
+[lane 102] --> p1 semantic_condition_alert thr=0.3500 shard=2 (18:47:12, 5295s left)
+[lane 102] <-- semantic_condition_alert thr=0.3500 shard=2 rc=0 BARREN (nothing under 0s) (18:47:52)
+[lane 102] --> p1 semantic_condition_alert thr=0.3500 shard=3 (18:47:52, 5255s left)
+[lane 102] <-- semantic_condition_alert thr=0.3500 shard=3 rc=0 BARREN (nothing under 0s) (18:48:37)
+[lane 102] --> p1 snapshot_counting thr=0.7500 shard=0 (18:48:38, 5210s left)

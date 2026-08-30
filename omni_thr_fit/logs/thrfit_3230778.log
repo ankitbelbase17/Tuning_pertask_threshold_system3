@@ -1,0 +1,45 @@
+[chain] gen=11/400 nodes=4 lanes=16
+[chain] progress=479/675 samples, cells=1/45
+[chain] xRT_mean=2.116 p95=2.922 longest_remaining=594.6s rec_nodes=4
+[chain] window-fit cap for this shape: max_dur=267s
+[chain] gen 12 queued: nodes=4 time=00:22:00
+/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/bin/worker.sh: line 110: 25462 Terminated              bash "$THR_ROOT/bin/heartbeat.sh" "$UNIT"
+/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/bin/worker.sh: line 110: 78898 Terminated              bash "$THR_ROOT/bin/heartbeat.sh" "$UNIT"
+/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/bin/worker.sh: line 110: 79639 Terminated              bash "$THR_ROOT/bin/heartbeat.sh" "$UNIT"
+/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/bin/worker.sh: line 110: 181098 Terminated              bash "$THR_ROOT/bin/heartbeat.sh" "$UNIT"
+/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/bin/worker.sh: line 110: 181091 Terminated              bash "$THR_ROOT/bin/heartbeat.sh" "$UNIT"
+/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/bin/worker.sh: line 110: 200461 Terminated              bash "$THR_ROOT/bin/heartbeat.sh" "$UNIT"
+/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/bin/worker.sh: line 110: 200645 Terminated              bash "$THR_ROOT/bin/heartbeat.sh" "$UNIT"
+/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/bin/worker.sh: line 110: 200741 Terminated              bash "$THR_ROOT/bin/heartbeat.sh" "$UNIT"
+/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/bin/worker.sh: line 110: 200873 Terminated              bash "$THR_ROOT/bin/heartbeat.sh" "$UNIT"
+/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/bin/worker.sh: line 110: 201019 Terminated              bash "$THR_ROOT/bin/heartbeat.sh" "$UNIT"
+/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/bin/worker.sh: line 110: 201109 Terminated              bash "$THR_ROOT/bin/heartbeat.sh" "$UNIT"
+/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/bin/worker.sh: line 110: 201281 Terminated              bash "$THR_ROOT/bin/heartbeat.sh" "$UNIT"
+/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/bin/worker.sh: line 110: 201268 Terminated              bash "$THR_ROOT/bin/heartbeat.sh" "$UNIT"
+/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/bin/worker.sh: line 110: 25471 Terminated              bash "$THR_ROOT/bin/heartbeat.sh" "$UNIT"
+/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/bin/worker.sh: line 110: 53762 Terminated              bash "$THR_ROOT/bin/heartbeat.sh" "$UNIT"
+/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/bin/worker.sh: line 110: 54092 Terminated              bash "$THR_ROOT/bin/heartbeat.sh" "$UNIT"
+/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/bin/worker.sh: line 110: 54406 Terminated              bash "$THR_ROOT/bin/heartbeat.sh" "$UNIT"
+/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/bin/worker.sh: line 110: 54656 Terminated              bash "$THR_ROOT/bin/heartbeat.sh" "$UNIT"
+/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/bin/worker.sh: line 110: 55040 Terminated              bash "$THR_ROOT/bin/heartbeat.sh" "$UNIT"
+/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/bin/worker.sh: line 110: 181122 Terminated              bash "$THR_ROOT/bin/heartbeat.sh" "$UNIT"
+/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/bin/worker.sh: line 110: 181092 Terminated              bash "$THR_ROOT/bin/heartbeat.sh" "$UNIT"
+/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/bin/worker.sh: line 110: 219134 Terminated              bash "$THR_ROOT/bin/heartbeat.sh" "$UNIT"
+/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/bin/worker.sh: line 110: 219407 Terminated              bash "$THR_ROOT/bin/heartbeat.sh" "$UNIT"
+/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/bin/worker.sh: line 110: 219449 Terminated              bash "$THR_ROOT/bin/heartbeat.sh" "$UNIT"
+/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/bin/worker.sh: line 110: 78910 Terminated              bash "$THR_ROOT/bin/heartbeat.sh" "$UNIT"
+/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/bin/worker.sh: line 110: 25493 Terminated              bash "$THR_ROOT/bin/heartbeat.sh" "$UNIT"
+/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/bin/worker.sh: line 110: 44731 Terminated              bash "$THR_ROOT/bin/heartbeat.sh" "$UNIT"
+/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/bin/worker.sh: line 110: 26180 Terminated              bash "$THR_ROOT/bin/heartbeat.sh" "$UNIT"
+/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/bin/worker.sh: line 110: 82937 Terminated              bash "$THR_ROOT/bin/heartbeat.sh" "$UNIT"
+/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/bin/worker.sh: line 110: 201492 Terminated              bash "$THR_ROOT/bin/heartbeat.sh" "$UNIT"
+/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/bin/worker.sh: line 110: 78919 Terminated              bash "$THR_ROOT/bin/heartbeat.sh" "$UNIT"
+/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/bin/worker.sh: line 110: 201550 Terminated              bash "$THR_ROOT/bin/heartbeat.sh" "$UNIT"
+/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/bin/worker.sh: line 110: 44697 Terminated              bash "$THR_ROOT/bin/heartbeat.sh" "$UNIT"
+/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/bin/worker.sh: line 110: 25505 Terminated              bash "$THR_ROOT/bin/heartbeat.sh" "$UNIT"
+/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/bin/worker.sh: line 110: 44722 Terminated              bash "$THR_ROOT/bin/heartbeat.sh" "$UNIT"
+/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/bin/worker.sh: line 110: 44716 Terminated              bash "$THR_ROOT/bin/heartbeat.sh" "$UNIT"
+/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/bin/worker.sh: line 110: 78942 Terminated              bash "$THR_ROOT/bin/heartbeat.sh" "$UNIT"
+[chain] gen 11 end: 517/675 samples, cells 1/45
+[chain]   next shape: nodes=4 max_dur=261s fit_n=11
+[chain] gen 11 exit Sun Aug 30 09:31:37 AM CEST 2026

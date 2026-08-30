@@ -1,0 +1,52 @@
+{
+  "overall": {
+    "n_samples": 4,
+    "n_gt": 19,
+    "n_emits": 186,
+    "time_precision": 0.0645,
+    "time_recall": 0.6316,
+    "time_f1": 0.1171,
+    "n_matched": 12,
+    "n_judged": 0,
+    "n_unjudged": 12,
+    "content_complete": false,
+    "content_coverage": 0.0,
+    "joint_f1_lb": 0.0,
+    "content_acc_lb": 0.0,
+    "joint_precision": null,
+    "joint_recall": null,
+    "joint_f1": null,
+    "content_acc": null,
+    "num_tasks": 1,
+    "macro_time_f1": 0.1171,
+    "macro_time_f1_n": 1,
+    "macro_content_accuracy": null,
+    "content_scored_task_count": 0,
+    "macro_joint_f1": null,
+    "joint_task_count": 0,
+    "macro_content_acc_lb": 0.0,
+    "macro_joint_f1_lb": 0.0
+  },
+  "per_task": {
+    "event_narration": {
+      "n_samples": 4,
+      "n_gt": 19,
+      "n_emits": 186,
+      "time_precision": 0.0645,
+      "time_recall": 0.6316,
+      "time_f1": 0.1171,
+      "n_matched": 12,
+      "n_judged": 0,
+      "n_unjudged": 12,
+      "content_complete": false,
+      "content_coverage": 0.0,
+      "joint_f1_lb": 0.0,
+      "content_acc_lb": 0.0,
+      "joint_precision": null,
+      "joint_recall": null,
+      "joint_f1": null,
+      "content_acc": null
+    }
+  },
+  "n": 4
+}

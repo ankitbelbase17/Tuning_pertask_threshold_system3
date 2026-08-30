@@ -134,7 +134,17 @@ def main():
         sel, obs = select(counts, grid, common)
         order = sorted(grid, key=lambda t: -obs[t])
         best = order[0]
-        fitted = round(float(picks.get(task, {}).get("best", sel)), 4)
+        # The two passes record their pick in DIFFERENT SHAPES and the audit has
+        # to read both: P1_PICKS.json maps task -> {"best": thr, ...} while
+        # FINAL_THRESHOLDS.json maps task -> thr. Assuming the p1 shape raises on
+        # p2, which is the good failure mode, but it still has to be handled.
+        pk = picks.get(task)
+        pk = pk.get("best") if isinstance(pk, dict) else pk
+        fitted = round(float(sel if pk is None else pk), 4)
+        # sec.4 lets a COARSE pass-1 candidate win the finalise ranking, so the
+        # shipped threshold is not guaranteed to be a point on the pass-2 grid.
+        # When it is not, audit the rule's own pick on this grid rather than
+        # inventing a cell that was never run.
         if fitted not in obs:
             fitted = sel
         # the contrast that means something: the best cell that is NOT the fitted
