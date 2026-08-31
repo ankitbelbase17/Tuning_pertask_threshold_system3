@@ -17,8 +17,11 @@ NSHARDS=${2:?nshards}
 DEADLINE=${3:?deadline epoch}
 MAX_DUR=${4:-0}
 
-OUT=$THR_ROOT/results/full2700/lane$LANE
-LOG=$THR_ROOT/logs/stage3_lane_${LANE}.log
+# Resolve this lane's ARM. Unset $S3_ARM gives results/full2700 with no override,
+# which is what this script did before arms existed.
+eval "$("$PY" "$THR_ROOT/lib/arms.py")" || exit 2
+OUT=$S3_RESULTS/lane$LANE
+LOG=$THR_ROOT/logs/stage3_lane_${S3_ARM}_${LANE}.log
 mkdir -p "$OUT"
 
 # Judge offline, exactly as in pass 1/2 (RUNBOOK sec.3): a live judge puts a
@@ -26,14 +29,29 @@ mkdir -p "$OUT"
 # are backfilled from the banked predictions afterwards.
 unset GEMINI_API_KEY OPENAI_API_KEY GEMINI_API_BASE OPENAI_API_BASE
 
-# THE POINT OF STAGE 3 (sec.6): no threshold override. The run must exercise the
-# per-task lookup in config.py exactly as a deployed system would, so a stale
-# export from an interactive shell would silently invalidate the headline number.
-# preflight_stage3.sh asserts this too; belt and braces, because this is the one
-# mistake that produces a plausible-looking wrong result.
-if [ -n "${OMNIPRO_HIT_THRESHOLD:-}" ]; then
-  echo "[lane $LANE] ABORT: OMNIPRO_HIT_THRESHOLD=$OMNIPRO_HIT_THRESHOLD is set" >> "$LOG"
-  exit 2
+# THE ARM AND ITS THRESHOLD SOURCE MUST AGREE, asserted here and not merely
+# arranged by the caller. The two arms differ ONLY in a directory and this one
+# variable, and every way of getting the pairing wrong produces a run that
+# completes and banks well-formed predictions under the other arm's name --
+# undetectable downstream, because nothing in a prediction records which
+# threshold produced it.
+#
+#   fitted (override empty): sec.6 requires NO override, so the run exercises
+#     config.py's per-task lookup exactly as a deployed system would. A stale
+#     export from an interactive shell would silently void the headline number.
+#   g015 (override set): the flat global threshold must actually be forced, or
+#     the "single global" control is really a second copy of the fitted arm.
+if [ -z "${S3_OVERRIDE:-}" ]; then
+  if [ -n "${OMNIPRO_HIT_THRESHOLD:-}" ]; then
+    echo "[lane $LANE] ABORT arm=$S3_ARM: OMNIPRO_HIT_THRESHOLD=$OMNIPRO_HIT_THRESHOLD is set but this arm forbids an override" >> "$LOG"
+    exit 2
+  fi
+else
+  export OMNIPRO_HIT_THRESHOLD="$S3_OVERRIDE"
+  if [ "${OMNIPRO_HIT_THRESHOLD}" != "$S3_OVERRIDE" ]; then
+    echo "[lane $LANE] ABORT arm=$S3_ARM: override did not take" >> "$LOG"
+    exit 2
+  fi
 fi
 
 left=$(( DEADLINE - $(date +%s) ))
@@ -53,6 +71,6 @@ timeout $(( left - 30 )) "$PY" -u evaluate.py \
     --benchmark_json "$OMNIPRO_BENCHMARK_JSON" --dataset_dir "$OMNIPRO_DATASET_DIR" \
     --shard "$LANE" --nshards "$NSHARDS" --max_dur "$MAX_DUR" --resume \
     --out "$OUT" \
-    --done_glob "$THR_ROOT/results/full2700/lane*/online_pred.jsonl" \
+    --done_glob "$S3_RESULTS/lane*/online_pred.jsonl" \
     >> "$OUT/run.log" 2>&1
 echo "[lane $LANE] exit rc=$? $(date +%H:%M:%S)" >> "$LOG"

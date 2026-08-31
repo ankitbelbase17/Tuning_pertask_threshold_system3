@@ -155,6 +155,20 @@ repo is never mutated by a run:
 /iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/
 ```
 
+**Stage 3 is running now, as TWO arms — 2026-08-31.** The headline eval (2,700
+samples, `FINAL_THRESHOLDS` from `config.py`, no override) is chained on 4 nodes;
+the exact config edit it loads is banked as `omni_thr_fit/STAGE3_CONFIG_APPLIED.diff`
+and re-asserted by `preflight_stage3.sh` at every launch. A second arm forces a flat
+global 0.15 on every task, because the fitted arm alone yields a number with nothing
+to subtract it from — §2.7's `fitted_per_task` − `best_single_global` = +0.0075,
+CI [−0.011, +0.027], was measured *in sample* on the 135 fitting videos. At 2,700
+videos the CI half-width falls from ~0.019 to ~0.004, so this is the first version
+of that comparison able to resolve a sign. Two predictions are registered in advance
+and are not yet scored. Arms are a *pairing* (`STAGE3_ARMS.json` → `lib/arms.py`),
+never a loose flag: a right-directory/wrong-override arm completes normally and banks
+the other arm's predictions undetectably, so `stage3_worker.sh` asserts the pairing
+per lane. Details → `THRESHOLD_FIT_RUNBOOK.md` §2.9.
+
 ## 5. Cluster facts you will otherwise rediscover the hard way
 
 Verified on Clariden 2026-08-28 (`sacctmgr`, `scontrol`, `sinfo`):

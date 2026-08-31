@@ -618,6 +618,77 @@ thresholds. §6.1's fit-disjoint comparison remains the arbiter. Evidence →
 `omni_thr_fit/results/p2/CELLS.json`.
 
 
+### 2.9 Stage 3 launched as TWO arms, and why the second one is not optional — 2026-08-31
+
+Stage 3 is the headline eval: the complete 2,700-sample OmniPro Online run with
+`FINAL_THRESHOLDS` loaded from `config.py`, no override. It is running now
+(`bin/run_stage3.sbatch`, 4 nodes × 4 lanes, self-chaining on `afterany`), and the
+exact edit it is running under is banked as
+`omni_thr_fit/STAGE3_CONFIG_APPLIED.diff` — `preflight_stage3.sh` asserts
+`config.task_hit_thresholds == FINAL_THRESHOLDS.json` at every launch, and that
+diff is the assertion's paper trail. Only the nine thresholds move;
+`task_gate_modes` and `task_refractory_s` are inherited untouched from the
+vision-only fit, which is the standing limitation of §2.
+
+**A single arm cannot answer the question this experiment asks.** §2.7 measured
+`fitted_per_task` 0.2544 against `best_single_global` (0.15) 0.2469 — **+0.0075,
+CI [−0.011, +0.027]** — *in sample*, on the 135 videos the thresholds were fitted
+on, where the fitted arm has nine free parameters to the global arm's one. A
+stage-3 run of the fitted arm alone produces one number with nothing to subtract
+it from: it would show that the fitted system scores *X*, not that per-task
+fitting bought anything. So stage 3 runs twice — `fitted` (per-task from
+`config.py`) and `g015` (flat `OMNIPRO_HIT_THRESHOLD=0.15` on every task).
+`debug-qos` MaxJobsPU=1 makes the arms sequential regardless.
+
+**This is the first version of that comparison with the power to resolve a sign.**
+CI half-width scales as 1/√n, so 135 → 2,700 videos narrows §2.7's ±0.019 to
+roughly ±0.004: an effect the size of the in-sample +0.0075 would land as a CI
+excluding zero. §2.7's null was a *power* result, and this is the run that
+converts it into a claim either way.
+
+**Registered in advance, before either arm finishes.** Out of sample the fitted
+arm's nine parameters no longer have the advantage of having been fitted on the
+scored videos, so (i) the point estimate of ΔF1(fitted − g015) will come in
+**below the in-sample +0.0075**, and (ii) |ΔF1| will fall **inside the 0.03 noise
+band** (§6.2). I am *not* predicting the sign. Prediction 2 of §2.6 — stage-3
+`time_f1` under `FINAL_THRESHOLDS` within 0.03 of the shipped thresholds — stays
+open and is scored from the same arms.
+
+**The arm is a pairing, not a flag.** `STAGE3_ARMS.json` maps each arm to *both*
+its results directory and its threshold override, and `lib/arms.py` is the only
+thing that reads it. The failure this shape prevents is specific: an arm that gets
+the right directory with the wrong override completes normally and banks
+well-formed predictions under the other arm's name, and **nothing downstream can
+detect it**, because a prediction record does not carry the threshold that
+produced it. `stage3_worker.sh` therefore *asserts* the pairing per lane rather
+than trusting its caller — the fitted arm aborts if `OMNIPRO_HIT_THRESHOLD` is set
+at all, the control arm aborts if the export did not take. An unset `$S3_ARM`
+resolves to `fitted`, byte-identical to the pre-arm behaviour, which is what
+allowed an already-queued chain to be patched underneath.
+
+**Three bugs found while building it, two of them in the arm work itself:**
+
+1. *The arm was inherited from the submitting environment.* This is the identical
+   failure the pass-1/2 chain had with its worklist: a chain re-submits itself for
+   a day, one dropped `--export` loses the variable, and the fallback `fitted`
+   finds the fitted arm already complete and **stands the control arm down looking
+   finished**. The arm is now positional, carried explicitly through both
+   re-submit sites (`queue_next` and the reshape path).
+2. *`eval "$(arms.py)"` created shell variables, not exported ones.* The Python
+   block in `preflight_stage3.sh` read `S3_OVERRIDE` as empty and printed the
+   fitted arm's nine per-task thresholds under "gate in force" — on the control
+   arm, where a flat 0.15 overrides all nine. A safety gate that prints the
+   opposite of what will run is worse than no gate. `arms.py` now emits `export`.
+3. *Pre-existing:* `stage3_state.py` imports the eval module, whose banner goes to
+   stdout, and `eval "$(st)"` then tried to **execute** it — gen 1 logged
+   `dedup_counting,: command not found` five times. Harmless only because that
+   text happened to contain nothing dangerous. Now filtered to `^[A-Z_]+=`.
+
+**Progress at the time of writing:** 1,313/2,700 banked on the fitted arm, 0 torn
+records, `xRT_mean` 1.944 (against the 3.343 p95 prior the planner starts from),
+~207 GPU-h left on this arm.
+
+
 ## 3. Judge — offline, and selection on `time_f1`
 
 Decided: **no in-loop judging.** Lanes run with `GEMINI_API_KEY` / `OPENAI_API_KEY`

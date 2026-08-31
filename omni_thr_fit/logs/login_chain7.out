@@ -25,3 +25,6 @@
 [login] gen 8 finished 17:51:02
 [login] gen 9: GPU allowlist [0,3] -> usable [0,3]
 [login] gen 9: 662/675 samples, cells 36/45, using GPUs [0,3]
+[login] gen 9 finished 19:21:30
+[login] worklist COMPLETE (675/675) -- standing down
+[login] chain exit Sun Aug 30 07:21:30 PM CEST 2026

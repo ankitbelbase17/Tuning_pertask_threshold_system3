@@ -1,0 +1,9 @@
+[s3] arm=fitted (fitted per-task) -> /iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/results/full2700 override=<none>
+[s3] gen=5/600 nodes=4 lanes=16
+[s3] progress=520/2700 samples remaining=2180 (267.0 GPU-h)
+[s3] xRT_mean=2.001 p95=n/a longest_remaining=594.6s
+[s3] window-fit cap for this shape: max_dur=279s (0 = take everything)
+[s3] gen 6 queued: nodes=4 time=00:22:00
+[s3] gen 5 end: 603/2700 samples banked, 2097 left
+[s3]   next shape: nodes=4 max_dur=279s fit_n=1575
+[s3] gen 5 exit Mon Aug 31 03:57:25 AM CEST 2026

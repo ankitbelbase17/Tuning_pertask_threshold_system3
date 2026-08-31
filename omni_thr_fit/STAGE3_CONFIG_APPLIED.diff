@@ -1,0 +1,44 @@
+# STAGE3_CONFIG_APPLIED.diff -- the exact edit that stage 3 is running under.
+#
+# WHY THIS FILE EXISTS. The run happens in an isolated tree, omni_thr_fit/repo/,
+# which is a 2.4 GB working copy and is excluded from the push (see
+# scratchpad/sync_stage.sh). So the pushed tree carries FINAL_THRESHOLDS.json --
+# what the fit CHOSE -- with no evidence of what the run actually LOADED. Those
+# are the same nine numbers only if the edit landed, and "the config was updated"
+# is precisely the kind of claim that is assumed rather than checked.
+#
+# preflight_stage3.sh asserts the equality at launch (assertion 1: it imports
+# config.py and compares to FINAL_THRESHOLDS.json, failing on any mismatch), and
+# this diff is that assertion's paper trail: config.py.bak_20260831_020934 ->
+# config.py, generated with `diff -u`, nothing hand-edited.
+#
+# Note what is NOT here. task_gate_modes and task_refractory_s are untouched --
+# they are inherited from the vision-only fit and were never refitted, which is a
+# stated limitation (RUNBOOK sec.2: the three knobs are coupled, so inheriting two
+# of them bounds what the third can be claimed to show).
+--- /iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/repo/async_omni_v2/config.py.bak_20260831_020934	2026-08-28 19:05:43.000000000 +0200
++++ /iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/repo/async_omni_v2/config.py	2026-08-31 02:09:34.000000000 +0200
+@@ -282,15 +282,15 @@
+     # ⚠️ Offline SCREEN (assumes p_hit independent of the gate; firing feeds
+     # `reported` back into the prompt, so it is weakly not) — confirm on GPU.
+     task_hit_thresholds: dict = field(default_factory=lambda: {
+-        "cumulative_counting": 0.925,
+-        "dedup_counting": 0.992,
+-        "event_narration": 0.10,
+-        "explicit_target_grounding": 0.50,
++        "cumulative_counting": 0.6167,
++        "dedup_counting": 0.55,
++        "event_narration": 0.65,
++        "explicit_target_grounding": 0.7167,
+         "instant_event_alert": 0.45,
+-        "realtime_state_monitor": 0.80,
+-        "semantic_condition_alert": 0.98,
+-        "sequential_step_instruction": 0.01,
+-        "snapshot_counting": 0.985,
++        "realtime_state_monitor": 0.45,
++        "semantic_condition_alert": 0.2167,
++        "sequential_step_instruction": 0.15,
++        "snapshot_counting": 0.3833,
+     })
+     # Coupled per-task gate mode + refractory (seconds), from the same resweep fit.
+     # mode: "edge" = fire on the rising edge of p_hit>=thr; "level" = fire on every

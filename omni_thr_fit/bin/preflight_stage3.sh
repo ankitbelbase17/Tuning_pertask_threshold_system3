@@ -11,7 +11,14 @@ source "$THR_ROOT/env.sh"
 fail=0
 note () { printf '  %-6s %s\n' "$1" "$2"; [ "$1" = "FAIL" ] && fail=1; return 0; }
 
-echo "== stage 3 preflight =="
+eval "$("$PY" "$THR_ROOT/lib/arms.py")" || exit 1
+echo "== stage 3 preflight -- arm=$S3_ARM ($S3_LABEL) =="
+note "----" "results  -> $S3_RESULTS"
+if [ -n "${S3_OVERRIDE:-}" ]; then
+  note "----" "gate     -> flat global OMNIPRO_HIT_THRESHOLD=$S3_OVERRIDE (control arm)"
+else
+  note "----" "gate     -> config.py per-task lookup, no override (headline arm)"
+fi
 
 [ -f "$THR_ROOT/FINAL_THRESHOLDS.json" ] \
   && note OK "FINAL_THRESHOLDS.json present" \
@@ -33,7 +40,10 @@ PY
   [ $? -eq 0 ] || fail=1
 fi
 
-# 2. no override may reach the workers. sec.6: "no OMNIPRO_HIT_THRESHOLD override"
+# 2. No override may reach the workers FROM THE ENVIRONMENT, on either arm. sec.6
+#    forbids one outright on the fitted arm; on the control arm the value must
+#    come from STAGE3_ARMS.json, where it is paired with the output directory, and
+#    never from an interactive shell that could disagree with the directory.
 [ -z "${OMNIPRO_HIT_THRESHOLD:-}" ] \
   && note OK "no OMNIPRO_HIT_THRESHOLD in the environment" \
   || note FAIL "OMNIPRO_HIT_THRESHOLD=$OMNIPRO_HIT_THRESHOLD is exported -- unset it"
@@ -60,9 +70,19 @@ import os, sys
 sys.path.insert(0, os.path.join(os.environ["THR_ROOT"], "repo", "async_omni_v2"))
 from config import AsyncOmniConfig as C
 c = C()
-print("  ----   gate in force (mode/refractory inherited from the vision-only fit):")
+# On the control arm the override supersedes every per-task threshold, so printing
+# the config's nine values under the heading "gate in force" would state the
+# opposite of what runs. Show the value that actually applies, per arm; a safety
+# gate that prints a misleading readout is worse than one that prints nothing.
+ov = os.environ.get("S3_OVERRIDE") or ""
+if ov:
+    print(f"  ----   gate in force: FLAT {ov} on every task (control arm) --")
+    print("         the per-task thresholds below are OVERRIDDEN and do not apply.")
+else:
+    print("  ----   gate in force (mode/refractory inherited from the vision-only fit):")
 for t in sorted(c.task_hit_thresholds):
-    print(f"         {t:<30} thr={c.task_hit_thresholds[t]:<7} "
+    thr = f"{ov} (forced)" if ov else f"{c.task_hit_thresholds[t]}"
+    print(f"         {t:<30} thr={thr:<14} "
           f"mode={c.task_gate_modes.get(t,'edge'):<6} refr={c.task_refractory_s.get(t,0.0)}s")
 PY
 

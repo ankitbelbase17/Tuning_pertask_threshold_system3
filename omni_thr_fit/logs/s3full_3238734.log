@@ -1,0 +1,19 @@
+[s3] arm=fitted (fitted per-task) -> /iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit/results/full2700 override=<none>
+/var/spool/slurmd/job3238734/slurm_script: line 69: dedup_counting,: command not found
+/var/spool/slurmd/job3238734/slurm_script: line 69: [02:39:03]: command not found
+/var/spool/slurmd/job3238734/slurm_script: line 70: [02:39:03]: command not found
+/var/spool/slurmd/job3238734/slurm_script: line 71: [02:39:03]: command not found
+/var/spool/slurmd/job3238734/slurm_script: line 72: [02:39:03]: command not found
+[s3] gen=2/600 nodes=4 lanes=16
+[s3] progress=175/2700 samples remaining=2525 (301.4 GPU-h)
+[s3] xRT_mean=2.145 p95=3.086 longest_remaining=594.6s
+[s3] window-fit cap for this shape: max_dur=253s (0 = take everything)
+[s3] gen 3 queued: nodes=4 time=00:22:00
+/var/spool/slurmd/job3238734/slurm_script: line 116: dedup_counting,: command not found
+/var/spool/slurmd/job3238734/slurm_script: line 116: E_[02:58:27]: command not found
+/var/spool/slurmd/job3238734/slurm_script: line 117: E_[02:58:27]: command not found
+/var/spool/slurmd/job3238734/slurm_script: line 118: E_[02:58:27]: command not found
+/var/spool/slurmd/job3238734/slurm_script: line 119: E_[02:58:27]: command not found
+[s3] gen 2 end: 303/2700 samples banked, 2397 left
+[s3]   next shape: nodes=4 max_dur=265s fit_n=1827
+[s3] gen 2 exit Mon Aug 31 02:58:27 AM CEST 2026

@@ -1,0 +1,31 @@
+{
+  "_comment": [
+    "The stage-3 arms, defined ONCE so the output directory and the threshold",
+    "source can never disagree. Every consumer -- stage3_state.py,",
+    "stage3_worker.sh, run_stage3.sbatch, preflight_stage3.sh -- reads this file",
+    "rather than carrying its own copy of the mapping.",
+    "",
+    "Why that matters: the two arms differ ONLY in an env var and a directory. If",
+    "an arm's directory and its override ever drift apart, the run completes, the",
+    "chain reports success, and the predictions are silently the wrong arm's --",
+    "the exact class of failure sec.6 calls out, where a wrong answer looks",
+    "entirely plausible. The worker asserts the pairing at lane start.",
+    "",
+    "override=null means NO OMNIPRO_HIT_THRESHOLD may be set: the fitted arm must",
+    "reach its nine values through config.py's per-task lookup, the way a deployed",
+    "system does. A number means that flat global threshold is forced for every",
+    "task, which is what makes the global arm a single-degree-of-freedom control."
+  ],
+  "fitted": {
+    "dir": "full2700",
+    "override": null,
+    "label": "fitted per-task",
+    "note": "FINAL_THRESHOLDS.json, applied to config.py by bin/apply_thresholds.py"
+  },
+  "g015": {
+    "dir": "full2700_g015",
+    "override": 0.15,
+    "label": "best single global",
+    "note": "best_single_global_thr from ABLATION.json; re-selected in 94% of bootstrap draws"
+  }
+}

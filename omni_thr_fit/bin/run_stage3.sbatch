@@ -27,14 +27,25 @@ source $THR_ROOT/env.sh
 
 GEN=${1:-1}
 MAX_GEN=${2:-600}
+# The ARM is positional, NOT inherited from the submitting environment. A chain
+# re-submits itself for a day; an env var set at the first submit is one dropped
+# --export away from vanishing, and the fallback would be "fitted" -- which finds
+# the fitted arm already complete and stands the global arm down looking finished.
+# Same failure the pass-1/2 chain had with its worklist; same fix.
+export S3_ARM=${3:-${S3_ARM:-fitted}}
 NODES=${SLURM_JOB_NUM_NODES:-4}
 NLANE=$(( NODES * 4 ))
-mkdir -p "$THR_ROOT/logs" "$THR_ROOT/results/full2700"
 
-# THE OVERRIDE MUST NOT SURVIVE INTO THE CHAIN. env.sh does not set it, but a
-# generation inherits the submitting shell's environment through sbatch, so an
-# interactive `export OMNIPRO_HIT_THRESHOLD=0.5` from debugging pass 1 would
-# propagate to every generation of stage 3 and quietly void the headline number.
+eval "$("$PY" "$THR_ROOT/lib/arms.py")" || exit 1
+mkdir -p "$THR_ROOT/logs" "$S3_RESULTS"
+echo "[s3] arm=$S3_ARM ($S3_LABEL) -> $S3_RESULTS override=${S3_OVERRIDE:-<none>}"
+
+# THE OVERRIDE MUST NOT SURVIVE INTO THE CHAIN from an interactive shell. A
+# generation inherits the submitting environment through sbatch, so a stale
+# `export OMNIPRO_HIT_THRESHOLD=0.5` from debugging pass 1 would propagate to
+# every generation and quietly void the number. Cleared here unconditionally;
+# the arm that WANTS an override re-exports it per lane in stage3_worker.sh,
+# from STAGE3_ARMS.json, where it is paired with the output directory.
 unset OMNIPRO_HIT_THRESHOLD
 
 # Same retry-and-keep-moving contract as run_chain.sbatch: chain_state failing
@@ -42,8 +53,15 @@ unset OMNIPRO_HIT_THRESHOLD
 st () {
   local r=""
   for _try in 1 2 3; do
+    # KEEP ONLY KEY=VALUE LINES. stage3_state.py imports the eval module, which
+    # logs its banner to stdout -- "[02:19:24] [eval] loaded 2700 samples |
+    # tasks=['cumulative_counting', 'dedup_counting', ...]". That text reaches
+    # `eval` below, where bash tries to RUN it: gen 1 logged
+    # "dedup_counting,: command not found" five times. Harmless there only
+    # because the banner happens to contain nothing dangerous -- eval'ing
+    # arbitrary log text is not a thing to leave working by luck.
     r=$(timeout 600 "$PY" "$THR_ROOT/lib/stage3_state.py" --nodes "$NODES" \
-          2>>"$THR_ROOT/logs/stage3_state.err")
+          2>>"$THR_ROOT/logs/stage3_state.err" | grep -E '^[A-Z_]+=')
     if [ -n "$r" ] && printf '%s' "$r" | grep -q '^COMPLETE='; then
       printf '%s\n' "$r"; return 0
     fi
@@ -80,7 +98,7 @@ queue_next () {
     if timeout 120 sbatch --account="$SLURM_ACCOUNT_USE" \
               --dependency=afterany:"${SLURM_JOB_ID}" \
               --nodes="$NEXT_NODES" --time="$NEXT_TIME" \
-              "$THR_ROOT/bin/run_stage3.sbatch" $(( GEN + 1 )) "$MAX_GEN" >/dev/null 2>&1; then
+              "$THR_ROOT/bin/run_stage3.sbatch" $(( GEN + 1 )) "$MAX_GEN" "$S3_ARM" >/dev/null 2>&1; then
       CHAINED=1
       echo "[s3] gen $(( GEN + 1 )) queued: nodes=$NEXT_NODES time=$NEXT_TIME"
       return 0
@@ -137,7 +155,7 @@ if [ "$CHAINED" = "1" ] && [ -n "${E_REC_NODES:-}" ] && [ "$E_REC_NODES" != "$NE
     timeout 60 scancel "$DEP" 2>/dev/null
     timeout 120 sbatch --account="$SLURM_ACCOUNT_USE" \
         --dependency=afterany:"${SLURM_JOB_ID}" --nodes="$E_REC_NODES" --time="$NT" \
-        "$THR_ROOT/bin/run_stage3.sbatch" $(( GEN + 1 )) "$MAX_GEN" >/dev/null 2>&1 \
+        "$THR_ROOT/bin/run_stage3.sbatch" $(( GEN + 1 )) "$MAX_GEN" "$S3_ARM" >/dev/null 2>&1 \
       && echo "[s3] successor reshaped" \
       || echo "[s3] WARNING reshape failed; original successor cancelled"
   fi

@@ -26,7 +26,14 @@ LOAD_S = float(os.environ.get("CHAIN_LOAD_S", 300))
 SAFETY = float(os.environ.get("CHAIN_SAFETY", 0.80))
 XRT_PRIOR_P95 = float(os.environ.get("CHAIN_XRT_PRIOR", 3.343))
 
-RESULTS = os.path.join(os.environ["THR_ROOT"], "results", "full2700")
+# Which ARM's predictions this planner counts. An unset $S3_ARM resolves to
+# "fitted" -> results/full2700, exactly the path this line held before arms
+# existed. Counting the wrong arm's directory would make a fresh arm look
+# already finished, so the resolver is shared rather than re-implemented here.
+sys.path.insert(0, os.path.join(os.environ["THR_ROOT"], "lib"))
+import arms as _arms                                                # noqa: E402
+
+RESULTS = _arms.resolve()["results"]
 
 
 def target_samples():

@@ -1,0 +1,18 @@
+/var/spool/slurmd/job3238731/slurm_script: line 58: dedup_counting,: command not found
+/var/spool/slurmd/job3238731/slurm_script: line 58: [02:19:24]: command not found
+/var/spool/slurmd/job3238731/slurm_script: line 59: [02:19:24]: command not found
+/var/spool/slurmd/job3238731/slurm_script: line 60: [02:19:24]: command not found
+/var/spool/slurmd/job3238731/slurm_script: line 61: [02:19:24]: command not found
+[s3] gen=1/600 nodes=4 lanes=16
+[s3] progress=0/2700 samples remaining=2700 (477.3 GPU-h)
+[s3] xRT_mean=n/a p95=n/a longest_remaining=594.6s
+[s3] window-fit cap for this shape: max_dur=233s (0 = take everything)
+[s3] gen 2 queued: nodes=4 time=00:22:00
+/var/spool/slurmd/job3238731/slurm_script: line 105: dedup_counting,: command not found
+/var/spool/slurmd/job3238731/slurm_script: line 105: E_[02:38:48]: command not found
+/var/spool/slurmd/job3238731/slurm_script: line 106: E_[02:38:48]: command not found
+/var/spool/slurmd/job3238731/slurm_script: line 107: E_[02:38:48]: command not found
+/var/spool/slurmd/job3238731/slurm_script: line 108: E_[02:38:48]: command not found
+[s3] gen 1 end: 175/2700 samples banked, 2525 left
+[s3]   next shape: nodes=4 max_dur=253s fit_n=1890
+[s3] gen 1 exit Mon Aug 31 02:38:48 AM CEST 2026
