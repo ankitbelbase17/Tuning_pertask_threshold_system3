@@ -73,3 +73,16 @@
 [lane 6] nid006833 gpu=2 shard=6/16 max_dur=285 start=14:12:31 1191s left
 [lane 6] exit rc=124 14:31:53
 [lane 6] nid006833 gpu=2 shard=6/16 max_dur=285 start=14:32:09 1191s left
+[lane 6] exit rc=124 14:51:31
+[lane 6] nid006833 gpu=2 shard=6/16 max_dur=285 start=14:51:48 1191s left
+[lane 6] exit rc=124 15:11:10
+[lane 6] nid006833 gpu=2 shard=6/16 max_dur=285 start=15:11:28 1190s left
+[lane 6] exit rc=124 15:30:48
+[lane 6] nid007657 gpu=2 shard=6/16 max_dur=285 start=15:31:05 1191s left
+[lane 6] exit rc=0 15:41:30
+[lane 6] nid007657 gpu=2 shard=6/16 max_dur=285 start=15:50:45 1192s left
+[lane 6] exit rc=0 15:51:25
+[lane 6] nid007657 gpu=2 shard=6/16 max_dur=285 start=16:10:25 1191s left
+[lane 6] exit rc=0 16:11:04
+[lane 6] nid007646 gpu=2 shard=6/16 max_dur=285 start=16:31:54 1191s left
+[lane 6] exit rc=0 16:32:33
