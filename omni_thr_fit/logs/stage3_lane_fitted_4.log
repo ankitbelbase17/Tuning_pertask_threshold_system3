@@ -105,3 +105,7 @@
 [lane 4] nid007650 gpu=0 shard=4/8 max_dur=674 start=20:50:15 2511s left
 [lane 4] exit rc=124 21:31:37
 [lane 4] nid006146 gpu=0 shard=4/8 max_dur=673 start=21:31:55 2511s left
+[lane 4] exit rc=124 22:13:17
+[lane 4] nid006643 gpu=0 shard=4/8 max_dur=670 start=22:13:36 2511s left
+[lane 4] exit rc=124 22:54:58
+[lane 4] nid006643 gpu=0 shard=4/8 max_dur=669 start=22:55:14 2511s left
