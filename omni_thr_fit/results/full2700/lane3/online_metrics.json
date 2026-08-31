@@ -1,31 +1,31 @@
 {
   "overall": {
-    "n_samples": 138,
-    "n_gt": 453,
-    "n_emits": 1328,
-    "time_precision": 0.1883,
-    "time_recall": 0.5519,
-    "time_f1": 0.2807,
-    "n_matched": 250,
-    "n_judged": 143,
+    "n_samples": 139,
+    "n_gt": 457,
+    "n_emits": 1355,
+    "time_precision": 0.186,
+    "time_recall": 0.5514,
+    "time_f1": 0.2781,
+    "n_matched": 252,
+    "n_judged": 145,
     "n_unjudged": 107,
     "content_complete": false,
-    "content_coverage": 0.572,
-    "joint_f1_lb": 0.055,
-    "content_acc_lb": 0.196,
+    "content_coverage": 0.5754,
+    "joint_f1_lb": 0.0563,
+    "content_acc_lb": 0.2024,
     "joint_precision": null,
     "joint_recall": null,
     "joint_f1": null,
     "content_acc": null,
     "num_tasks": 9,
-    "macro_time_f1": 0.2213,
+    "macro_time_f1": 0.22,
     "macro_time_f1_n": 9,
     "macro_content_accuracy": 0.3167,
     "content_scored_task_count": 7,
-    "macro_joint_f1": 0.0666,
+    "macro_joint_f1": 0.0649,
     "joint_task_count": 7,
     "macro_content_acc_lb": 0.2463,
-    "macro_joint_f1_lb": 0.0518
+    "macro_joint_f1_lb": 0.0505
   },
   "per_task": {
     "cumulative_counting": {
@@ -143,22 +143,22 @@
       "content_acc": 0.05
     },
     "semantic_condition_alert": {
-      "n_samples": 20,
-      "n_gt": 62,
-      "n_emits": 247,
-      "time_precision": 0.1619,
-      "time_recall": 0.6452,
-      "time_f1": 0.2589,
-      "n_matched": 40,
-      "n_judged": 40,
+      "n_samples": 21,
+      "n_gt": 66,
+      "n_emits": 274,
+      "time_precision": 0.1533,
+      "time_recall": 0.6364,
+      "time_f1": 0.2471,
+      "n_matched": 42,
+      "n_judged": 42,
       "n_unjudged": 0,
       "content_complete": true,
       "content_coverage": 1.0,
-      "joint_f1_lb": 0.2589,
+      "joint_f1_lb": 0.2471,
       "content_acc_lb": 1.0,
-      "joint_precision": 0.1619,
-      "joint_recall": 0.6452,
-      "joint_f1": 0.2589,
+      "joint_precision": 0.1533,
+      "joint_recall": 0.6364,
+      "joint_f1": 0.2471,
       "content_acc": 1.0
     },
     "sequential_step_instruction": {
@@ -200,5 +200,5 @@
       "content_acc": 0.0
     }
   },
-  "n": 138
+  "n": 139
 }

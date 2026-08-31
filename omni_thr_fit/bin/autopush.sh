@@ -1,0 +1,122 @@
+#!/usr/bin/env bash
+# autopush.sh -- mirror the live trees into staging and push, unattended.
+#
+#   bash bin/autopush.sh --once          one cycle, then exit
+#   bash bin/autopush.sh --loop 3600     forever, one cycle an hour
+#
+# WHY THIS IS MOSTLY ASSERTIONS. An unattended push is a publishing action with
+# nobody reading the output, so every way it can go wrong has to stop it rather
+# than warn about it. Three things must never reach the remote -- .env (live API
+# keys), run.log (444 MB of per-tick logs), and the 2.4 GB repo/ tree copy -- and
+# `sync_stage.sh` re-checks all three on disk after every mirror. This script
+# treats a failed check as fatal: no add, no commit, no push, loud log, and the
+# next cycle re-tries from a clean state.
+#
+# It also never uses --force and never rewrites history. If the remote has moved
+# under it, the push fails, the cycle logs it, and a human sorts it out; a script
+# that resolves conflicts on its own is a script that can delete work at 3 a.m.
+set -uo pipefail
+
+THR_ROOT=${THR_ROOT:-/iopsstor/scratch/cscs/dthapa/system3_qwem_omni_8_28/omni_thr_fit}
+PUSH_STAGE=${PUSH_STAGE:?PUSH_STAGE must name the staging repo}
+REMOTE=${AUTOPUSH_REMOTE:-git@github.com:ankitbelbase17/Tuning_pertask_threshold_system3.git}
+BRANCH=${AUTOPUSH_BRANCH:-icl_ingester_writer}
+REFSPEC="$BRANCH:refs/heads/main"
+LOG=${AUTOPUSH_LOG:-$THR_ROOT/logs/autopush.log}
+LOCK=$THR_ROOT/.autopush.lock
+
+# Files that exist on disk but must never be committed. `None=0` is a 0-byte
+# artefact of a stray shell redirect; it is left in place rather than deleted
+# (nothing in this tree gets removed without being asked) and skipped here.
+SKIP=(omni_thr_fit/None=0)
+
+log () { printf '[autopush %s] %s\n' "$(date '+%m-%d %H:%M:%S')" "$*" >> "$LOG"; }
+
+cycle () {
+  cd "$PUSH_STAGE" || { log "FATAL staging dir missing: $PUSH_STAGE"; return 1; }
+
+  # The branch is checked, not assumed. Pushing the wrong local branch to
+  # refs/heads/main would look like a successful push and publish the wrong tree.
+  local br; br=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+  [ "$br" = "$BRANCH" ] || { log "FATAL staging is on '$br', expected '$BRANCH'"; return 1; }
+
+  local out; out=$(PUSH_STAGE="$PUSH_STAGE" bash "$THR_ROOT/bin/sync_stage.sh" 2>&1)
+  if [ $? -ne 0 ]; then log "FATAL sync failed"; printf '%s\n' "$out" >> "$LOG"; return 1; fi
+
+  # Parse the mirror's own safety re-check. Anything but zeroes stops the cycle.
+  local nenv nlog nrepo
+  nenv=$(printf '%s\n' "$out"  | sed -n 's/.*\.env on disk in staging: *//p'   | tail -1)
+  nlog=$(printf '%s\n' "$out"  | sed -n 's/.*run\.log on disk in staging: *//p'| tail -1)
+  nrepo=$(printf '%s\n' "$out" | sed -n 's/.*repo\/ present: *//p'             | tail -1)
+  if [ "${nenv:-1}" != "0" ] || [ "${nlog:-1}" != "0" ] || [ "${nrepo:-x}" != "no" ]; then
+    log "ABORT safety check failed: .env=$nenv run.log=$nlog repo=$nrepo -- nothing staged"
+    return 1
+  fi
+
+  git add -A >/dev/null 2>&1
+  for f in "${SKIP[@]}"; do git reset -q -- "$f" 2>/dev/null; done
+
+  if git diff --cached --quiet; then log "no change"; return 0; fi
+
+  # A blob over GitHub's 100 MB hard limit fails the push AFTER the commit is
+  # made, leaving staging with a commit that can never leave. Catch it before.
+  local big
+  big=$(git diff --cached --name-only | while read -r f; do
+          [ -f "$f" ] && [ "$(stat -c %s "$f")" -gt 52428800 ] && echo "$f"; done)
+  if [ -n "$big" ]; then log "ABORT file(s) over 50 MB staged: $big"; git reset -q; return 1; fi
+
+  # The README's status block is regenerated, not edited. A stale README is the
+  # failure this whole cycle exists to prevent, but a broken one is worse than a
+  # stale one -- so a refresh failure is logged and the push proceeds without it.
+  local stat
+  if stat=$(PUSH_STAGE="$PUSH_STAGE" python3 "$THR_ROOT/bin/refresh_readme.py" 2>&1); then
+    git add -A >/dev/null 2>&1
+    for f in "${SKIP[@]}"; do git reset -q -- "$f" 2>/dev/null; done
+  else
+    log "note: README block not refreshed (non-fatal): $stat"
+    stat="counts unavailable"
+  fi
+
+  local n; n=$(git diff --cached --name-only | wc -l)
+
+  git commit -q -F - <<EOF
+Autosync: $stat
+
+Unattended mirror of the live trees (bin/autopush.sh, hourly). Predictions,
+logs and generated artefacts only -- this path never edits source or docs.
+$n file(s) changed. Safety checks passed: no .env, no run.log, no repo/ copy,
+no blob over 50 MB.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+EOF
+  [ $? -eq 0 ] || { log "FATAL commit failed"; return 1; }
+
+  if git push "$REMOTE" "$REFSPEC" >>"$LOG" 2>&1; then
+    log "pushed $(git rev-parse --short HEAD)  ($n files)  $stat"
+  else
+    log "PUSH FAILED -- commit $(git rev-parse --short HEAD) is local only; next cycle retries"
+    return 1
+  fi
+}
+
+mkdir -p "$(dirname "$LOG")"
+MODE=${1:---once}
+if [ "$MODE" = "--once" ]; then
+  # A single manual run may share the machine with the loop; the lock is not
+  # optional just because this invocation is short.
+  if mkdir "$LOCK" 2>/dev/null; then trap 'rmdir "$LOCK" 2>/dev/null' EXIT; cycle
+  else log "skipped --once: another cycle holds the lock"; fi
+  exit $?
+fi
+
+INTERVAL=${2:-3600}
+log "loop starting: every ${INTERVAL}s -> $REMOTE ($REFSPEC)"
+while true; do
+  if mkdir "$LOCK" 2>/dev/null; then
+    cycle
+    rmdir "$LOCK" 2>/dev/null
+  else
+    log "cycle skipped: lock held (previous cycle still running?)"
+  fi
+  sleep "$INTERVAL"
+done

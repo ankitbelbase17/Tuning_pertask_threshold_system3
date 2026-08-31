@@ -86,3 +86,14 @@
 [lane 1] exit rc=0 16:11:03
 [lane 1] nid007645 gpu=1 shard=1/16 max_dur=285 start=16:31:54 1191s left
 [lane 1] exit rc=0 16:32:32
+[lane 1] nid007262 gpu=1 shard=1/16 max_dur=285 start=16:51:31 1192s left
+[lane 1] exit rc=0 16:52:09
+[lane 1] nid007247 gpu=1 shard=1/16 max_dur=283 start=17:11:11 1190s left
+[lane 1] exit rc=0 17:11:56
+[lane 1] nid007247 gpu=1 shard=1/16 max_dur=283 start=17:30:51 1191s left
+[lane 1] exit rc=0 17:31:34
+[lane 1] nid006123 gpu=1 shard=1/16 max_dur=283 start=17:50:31 1191s left
+[lane 1] exit rc=0 17:51:16
+[lane 1] nid006123 gpu=1 shard=1/8 max_dur=674 start=18:03:40 2510s left
+[lane 1] exit rc=124 18:45:01
+[lane 1] nid006123 gpu=1 shard=1/8 max_dur=674 start=18:45:20 2509s left

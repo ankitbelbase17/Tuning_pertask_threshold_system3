@@ -85,3 +85,15 @@
 [lane 0] nid007650 gpu=0 shard=0/16 max_dur=285 start=16:10:25 1191s left
 [lane 0] exit rc=124 16:31:37
 [lane 0] nid007645 gpu=0 shard=0/16 max_dur=285 start=16:31:54 1191s left
+[lane 0] exit rc=124 16:51:15
+[lane 0] nid007262 gpu=0 shard=0/16 max_dur=285 start=16:51:31 1192s left
+[lane 0] exit rc=124 17:10:54
+[lane 0] nid007247 gpu=0 shard=0/16 max_dur=283 start=17:11:11 1190s left
+[lane 0] exit rc=0 17:11:56
+[lane 0] nid007247 gpu=0 shard=0/16 max_dur=283 start=17:30:51 1191s left
+[lane 0] exit rc=0 17:31:34
+[lane 0] nid006123 gpu=0 shard=0/16 max_dur=283 start=17:50:31 1191s left
+[lane 0] exit rc=0 17:51:16
+[lane 0] nid006123 gpu=0 shard=0/8 max_dur=674 start=18:03:40 2510s left
+[lane 0] exit rc=124 18:45:02
+[lane 0] nid006123 gpu=0 shard=0/8 max_dur=674 start=18:45:20 2509s left
