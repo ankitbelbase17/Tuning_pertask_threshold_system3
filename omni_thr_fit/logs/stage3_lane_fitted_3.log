@@ -113,3 +113,7 @@
 [lane 3] nid006631 gpu=3 shard=3/8 max_dur=668 start=23:36:54 2519s left
 [lane 3] exit rc=124 00:18:24
 [lane 3] nid006631 gpu=3 shard=3/8 max_dur=668 start=00:18:40 2511s left
+[lane 3] exit rc=124 01:00:02
+[lane 3] nid006055 gpu=3 shard=3/8 max_dur=668 start=01:00:21 2510s left
+[lane 3] exit rc=124 01:41:42
+[lane 3] nid006055 gpu=3 shard=3/8 max_dur=667 start=01:42:03 2509s left
