@@ -55,7 +55,7 @@ containing zero on ≥ 7 of 9 tasks in pass 2 — came in at **9 of 9**.
 |---|---|
 | pass 1 (wide grid, 94 cells) | **complete** — 1,410/1,410 samples, all cells `reliable` |
 | pass 2 (refined grid, 45 cells) | **complete** — 675/675; `FINAL_THRESHOLDS.json` |
-| stage 3 arm 1 (`fitted`, per-task) | **running** — 1,331/2,700 banked at this commit |
+| stage 3 arm 1 (`fitted`, per-task) | **running** — 2,075/2,700 banked at this commit |
 | stage 3 arm 2 (`g015`, flat global 0.15) | queued behind arm 1 (`debug-qos` allows one job at a time) |
 
 `content_acc` and `joint_f1` are **`WITHHELD` throughout, never guessed**, until
@@ -94,7 +94,7 @@ carry what the fit *chose* with no evidence of what the run *loaded*.
 ## Reproducing the analysis without a GPU
 
 The banked predictions (`omni_thr_fit/results/**/online_pred.jsonl` — **572
-files, 3,428 records, 11.4 MB**) **are** committed. They cost roughly **356
+files, 4,172 records, 13.9 MB**) **are** committed. They cost roughly **438
 GPU-hours**, and every number in the study is re-scorable from them offline:
 
 ```bash
