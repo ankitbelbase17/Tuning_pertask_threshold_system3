@@ -666,6 +666,15 @@ at all, the control arm aborts if the export did not take. An unset `$S3_ARM`
 resolves to `fitted`, byte-identical to the pre-arm behaviour, which is what
 allowed an already-queued chain to be patched underneath.
 
+**And the records now say which arm made them.** `evaluate.py` already carried the
+slot — `pred["arm"] = os.environ.get("OMNIPRO_ARM", "")` — and stage 3 was leaving
+it empty, so the *directory* was the only surviving record of which gate produced a
+prediction and a file moved or merged by hand lost that fact silently.
+`stage3_worker.sh` now exports `OMNIPRO_ARM="$S3_ARM"`, which makes the per-lane
+assertion above a belt-and-braces check rather than the only line of defence.
+Records banked before 2026-08-31 carry `arm=""` and are all `fitted` — it is the
+only arm that had run while the field was empty.
+
 **Three bugs found while building it, two of them in the arm work itself:**
 
 1. *The arm was inherited from the submitting environment.* This is the identical

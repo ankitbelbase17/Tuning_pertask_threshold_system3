@@ -1,7 +1,12 @@
 # Per-task gate threshold fit — Qwen2.5-Omni-7B on OmniPro Online
 
-This repository mirrors the working directory `system3_qwem_omni_8_28/`, which
-holds two trees that are deliberately kept separate:
+**Question:** *when should a streaming model speak?* The system reads
+`p_hit = P(true)` off the logits on every tick and fires when it crosses a
+threshold. This repository is the record of an attempt to fit that threshold
+**per task**, and of what the attempt found instead.
+
+It mirrors the working directory `system3_qwem_omni_8_28/`, which holds two
+trees that are deliberately kept separate:
 
 | folder | what it is |
 |---|---|
@@ -11,20 +16,101 @@ holds two trees that are deliberately kept separate:
 ## Where to start
 
 - **What the system is, and the findings so far** → `system3_qwem_omni/CLAUDE.md`
-- **How the experiment is run** → `system3_qwem_omni/THRESHOLD_FIT_RUNBOOK.md`
-  (§2.5–2.7 carry the three substantive results)
+- **How the experiment is run, and every deviation from the spec** →
+  `system3_qwem_omni/THRESHOLD_FIT_RUNBOOK.md` (§2.5–2.9 carry the substantive
+  results; each one names the evidence file it came from)
 - **The spec** → `system3_qwem_omni/THRESHOLD_FIT_v2.md`
-- **The paper** → `omni_thr_fit/paper/` (nine sections, builds with `lib/build_pdf.py`)
+- **A narrative write-up of everything through pass 2** →
+  [`omni_thr_fit/report/PROGRESS_REPORT.pdf`](omni_thr_fit/report/PROGRESS_REPORT.pdf)
+- **The paper** → `omni_thr_fit/paper/` (builds with `lib/build_pdf.py`)
 
 ## The headline result
 
-`p_hit` does not rank event-adjacent ticks above quiet ones (per-task AUC
-0.431–0.551, every 95 % CI containing 0.5). A threshold on such a score buys
-emission *volume*, not *timing* — so pooled over all tasks a **single global**
-operating point is identified and stable (re-selected in 94 % of bootstrap
-resamples), while **per-task** thresholds are not (25–61 %, and no task's fitted
-value beats its own best rival outside noise). Details and the falsifiable
-predictions recorded in advance are in the runbook.
+**`p_hit` does not rank event-adjacent ticks above quiet ones** — per-task AUC
+0.431–0.551, every 95 % CI containing 0.5. A threshold on a score like that buys
+emission *volume*, not *timing*, and four independent code paths agree on it:
+
+1. the ROC itself (`PERCEPTION_AUDIT.json`);
+2. per-task precision is flat across the whole grid while recall falls;
+3. a paired bootstrap over videos — **no task's fitted threshold beats its own
+   best rival outside noise**, and the fitted value is re-selected in only
+   25–61 % of resamples (`FIT_NOISE_AUDIT.json`);
+4. a refined pass-2 grid around each winner **confirmed there was no gradient to
+   resolve** rather than resolving one (`FIT_NOISE_AUDIT_P2.json`).
+
+Pooled over all tasks a **single global** operating point *is* identified and
+stable (0.15, re-selected in 94 % of resamples against 10 % chance). Split nine
+ways over 15 videos each it is not. That is a **power** result, not a claim that
+the tasks are alike — which is why the full 2,700-sample run below is worth its
+GPU-hours.
+
+Predictions were **registered in writing before the data that tested them**, and
+the record includes the one that failed: §2.5 predicted every task would pin to
+the low rail, and picks scattered mid-grid instead. §2.6's prediction — CIs
+containing zero on ≥ 7 of 9 tasks in pass 2 — came in at **9 of 9**.
+
+## Status
+
+| stage | state |
+|---|---|
+| pass 1 (wide grid, 94 cells) | **complete** — 1,410/1,410 samples, all cells `reliable` |
+| pass 2 (refined grid, 45 cells) | **complete** — 675/675; `FINAL_THRESHOLDS.json` |
+| stage 3 arm 1 (`fitted`, per-task) | **running** — 1,331/2,700 banked at this commit |
+| stage 3 arm 2 (`g015`, flat global 0.15) | queued behind arm 1 (`debug-qos` allows one job at a time) |
+
+`content_acc` and `joint_f1` are **`WITHHELD` throughout, never guessed**, until
+an LLM judge is reachable. `time_f1` is judge-free and is what every number above
+is selected on.
+
+### Stage 3 runs twice, and the second arm is not optional
+
+The fitted arm alone yields a number with nothing to subtract it from: it would
+show that the fitted system scores *X*, not that per-task fitting bought
+anything. The comparison it needs was measured in pass 1 at
+**+0.0075, CI [−0.011, +0.027]** — but *in sample*, on the 135 videos the
+thresholds were fitted on, where the fitted arm has nine free parameters to the
+global arm's one. At 2,700 videos the CI half-width falls from ~0.019 to ~0.004,
+so this is the first version of that comparison able to resolve a sign.
+
+An arm is a **pairing**, never a loose flag: `STAGE3_ARMS.json` maps each arm to
+*both* its results directory and its threshold override, and `lib/arms.py` is the
+only reader. The failure that guards against is specific — an arm with the right
+directory and the wrong override completes normally and banks well-formed
+predictions under the other arm's name — so `bin/stage3_worker.sh` **asserts** the
+pairing per lane instead of trusting its caller, and stamps the arm into every
+prediction record.
+
+```bash
+export THR_ROOT=$PWD/omni_thr_fit
+bash omni_thr_fit/bin/preflight_stage3.sh                 # 5 assertions; refuses to pass on a mismatch
+S3_ARM=g015 bash omni_thr_fit/bin/preflight_stage3.sh     # the control arm
+sbatch omni_thr_fit/bin/run_stage3.sbatch 1 600 g015      # arm is POSITIONAL, not inherited
+```
+
+`STAGE3_CONFIG_APPLIED.diff` is the paper trail for preflight's first assertion:
+the run happens inside the excluded `repo/` copy, so without it the tree would
+carry what the fit *chose* with no evidence of what the run *loaded*.
+
+## Reproducing the analysis without a GPU
+
+The banked predictions (`omni_thr_fit/results/**/online_pred.jsonl` — **572
+files, 3,428 records, 11.4 MB**) **are** committed. They cost roughly **356
+GPU-hours**, and every number in the study is re-scorable from them offline:
+
+```bash
+export THR_ROOT=$PWD/omni_thr_fit REPO=$PWD/system3_qwem_omni
+for P in p1 p2; do
+  python omni_thr_fit/lib/score_cells.py     --pass $P    # cells -> CELLS.json
+  python omni_thr_fit/lib/pick.py            --pass $P    # winner per task
+  python omni_thr_fit/bin/audit_fit_noise.py --pass $P    # does the winner survive a bootstrap?
+done
+python omni_thr_fit/lib/ablation.py       --pass p1       # Table 4: gate families at equal budget
+python omni_thr_fit/bin/audit_perception.py               # the AUC that explains all of the above
+```
+
+Read `system3_qwem_omni/EVAL_PROTOCOL.md` first — scoring lives in
+`omniprofast/metrics.py` and **must not be reimplemented**; a second
+implementation is a second set of bugs.
 
 ## What is NOT in this repository, and why
 
@@ -33,25 +119,17 @@ that a re-run reproduces.
 
 | excluded | size | why |
 |---|---|---|
-| `omni_thr_fit/repo/` | 2.4 GB | a full copy of `system3_qwem_omni/`, made so a run never mutates the source tree. **Recreate it by copying that folder** — do not version it twice. |
+| `omni_thr_fit/repo/` | 2.4 GB | a full copy of `system3_qwem_omni/`, made so a run never mutates the source tree. **Recreate it by copying that folder** — do not version it twice. The one thing that copy holds and this tree needs is the applied gate, and that is committed as `STAGE3_CONFIG_APPLIED.diff`. |
 | `omni_thr_fit/**/run.log` | 444 MB | verbose per-tick logs; any re-run reproduces them |
 | core dumps | ~7 GB | torch crash artefacts |
+| model weights, video files | — | fetched from HF / the OmniPro release |
 | `.env` | — | **contains live API keys**; recreate locally with `GEMINI_API_KEY` and `OPENAI_API_KEY` |
 
-The banked predictions (`omni_thr_fit/results/**/online_pred.jsonl`, ~6.6 MB
-across 576 files) **are** committed. They represent roughly 150 GPU-hours, and
-every number in the study is re-scorable from them offline with no GPU at all:
+## Two rules this project learned the hard way
 
-```bash
-export THR_ROOT=$PWD/omni_thr_fit REPO=$PWD/system3_qwem_omni
-python omni_thr_fit/lib/score_cells.py --pass p1
-python omni_thr_fit/lib/pick.py        --pass p1
-python omni_thr_fit/bin/audit_fit_noise.py --pass p1
-python omni_thr_fit/lib/ablation.py    --pass p1
-```
-
-## Status
-
-Pass 1 complete (1410/1410 samples, 94/94 cells). Pass 2 in progress. Stage 3
-(the full 2,700-sample evaluation) not yet run — content-acc and joint-F1 are
-`WITHHELD` throughout until a judge is reachable, never guessed.
+- **The gate is three coupled knobs, not one** — `hit_threshold`, `mode`
+  (`edge`/`level`), `refractory_s`. Only the threshold was refitted here; modes
+  and refractories are inherited from the vision-only fit, and that is a stated
+  limitation, not an oversight. See `omniprofast/GATE_TUNING.md`.
+- **The eval is not bit-reproducible.** Treat ΔF1 < 0.03 as noise. Run-to-run
+  variance on one fixed config has been measured at F1 0.255 vs 0.051.

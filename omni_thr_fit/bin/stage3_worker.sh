@@ -54,6 +54,17 @@ else
   fi
 fi
 
+# STAMP THE ARM INTO EVERY PREDICTION. evaluate.py already carries the slot --
+# pred["arm"] = os.environ.get("OMNIPRO_ARM", "") -- and stage 3 was leaving it
+# empty, which is exactly the hole the pairing assertion above exists to cover:
+# the directory was the ONLY record of which gate produced a prediction, so a
+# file moved or merged by hand lost that fact silently. Now each record says so
+# itself, and the two arms cannot be confused even outside their directories.
+#
+# Records banked before 2026-08-31 carry arm="" and are all `fitted`: it is the
+# only arm that had run when the field was empty.
+export OMNIPRO_ARM="$S3_ARM"
+
 left=$(( DEADLINE - $(date +%s) ))
 if [ "$left" -lt "${MIN_SLICE:-240}" ]; then
   echo "[lane $LANE] only ${left}s left -- not starting" >> "$LOG"
