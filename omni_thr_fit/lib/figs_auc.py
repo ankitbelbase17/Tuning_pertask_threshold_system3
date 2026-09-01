@@ -172,6 +172,7 @@ def boot_auc(per_video, rng, nboot=NBOOT):
 
 def fig2(pass_, out):
     rng = random.Random(SEED)
+    auc_table = {}
     bench = os.environ.get("OMNIPRO_BENCHMARK_JSON")
     if not bench or not os.path.exists(bench):
         print("  fig2: SKIP (no benchmark json; set OMNIPRO_BENCHMARK_JSON)")
@@ -223,6 +224,16 @@ def fig2(pass_, out):
             ax.fill_between(pts[0], pts[1], color=FS.VIOLET, alpha=0.10, zorder=2)
         a = auc_score(d["y"], d["p"])
         lo, hi = boot_auc(d["per_video"], rng)
+        # PERSIST the table, not just the pixels. A number that exists only
+        # inside a figure cannot be quoted in prose, checked by a reader, or
+        # re-derived later -- and this pass covers all nine tasks where
+        # PERCEPTION_AUDIT.json covered only the five with a reference cell.
+        auc_table[task] = {"auc": round(a, 4),
+                           "ci95": [None if lo is None else round(lo, 4),
+                                    None if hi is None else round(hi, 4)],
+                           "n_videos": len(d["per_video"]), "n_ticks": len(d["y"]),
+                           "pos_rate": round(sum(d["y"]) / len(d["y"]), 4),
+                           "thr": round(float(d["thr"]), 4), "why": d["why"]}
         ci = f"\n[{lo:.2f}, {hi:.2f}]" if lo is not None else "\n[CI n/a]"
         # n is on every panel: sec.9.4 forbids a 15-video panel looking like a
         # 300-video one. pos% is there because AUC is meaningless without it.
@@ -242,6 +253,8 @@ def fig2(pass_, out):
     fig.tight_layout(pad=0.4)
     path = os.path.join(out, "fig2_roc.pdf")
     fig.savefig(path)
+    with open(os.path.join(ROOT, "AUC_TABLE.json"), "w") as fh:
+        json.dump(auc_table, fh, indent=1)
     # PDF is what LaTeX includes; the PNG exists only so the figure can actually
     # be LOOKED at -- there is no pdftoppm on this cluster and an unrendered
     # figure is an unchecked figure.
