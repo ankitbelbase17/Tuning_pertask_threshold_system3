@@ -1,0 +1,340 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{booktabs,array,xcolor,amssymb}
+\usepackage[colorlinks=true,linkcolor=black,urlcolor=blue]{hyperref}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\setlist[itemize]{leftmargin=1.4em,itemsep=2pt,topsep=3pt}
+\setlist[enumerate]{leftmargin=1.6em,itemsep=3pt,topsep=3pt}
+\titleformat{\section}{\large\bfseries}{\thesection}{0.6em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection}{0.6em}{}
+\sloppy
+\newcommand{\yes}{\textcolor{black!70}{\checkmark}}
+\newcommand{\no}{\textcolor{black!70}{$\times$}}
+% A shaded callout must be able to SPAN a page break and contain arbitrary
+% paragraphs; \colorbox cannot -- it is a single box, and splitting it across
+% \begin/\end is what produced "Extra \endgroup". framed's shaded env is built
+% for exactly this.
+\usepackage{framed}
+\definecolor{shadecolor}{gray}{0.93}
+\newenvironment{keybox}{\begin{shaded}\noindent}{\end{shaded}}
+
+\title{\textbf{Raising time-F1 and content-F1 on OmniPro Online}\\[2pt]
+\large A diagnosis of the Qwen2.5-Omni fork, and what to do next}
+\author{\normalsize Threshold-fit working notes}
+\date{\normalsize 1 September 2026}
+
+\begin{document}
+\maketitle
+\vspace{-1.2em}
+
+\begin{keybox}
+\textbf{The short answer.} The audio/video interleaving is \emph{not} the problem --- three
+separate checks clear it. The problem is upstream of the gate: the ICL control DSL that
+works on Qwen3-VL-8B \textbf{does not transfer} to Qwen2.5-Omni-7B. The controller
+generates a mean of \textbf{21.7 tokens per tick against a 300-token budget}, stopping on
+its own before the schema is finished; \texttt{fps} appears in \textbf{12 of 78{,}828}
+ticks and \texttt{next\_check\_s} in \textbf{8}. The gate is thresholding a boolean
+produced by a generation step that is not working, which is why AUC $\approx$ 0.5 and why
+no threshold helped. That is a \emph{fixable upstream cause}, not a property of the task.
+\end{keybox}
+
+\section{Where we actually are}
+
+Stage 3, arm 1 (fitted per-task thresholds), 2{,}512 of 2{,}700 samples banked, judge
+offline so content metrics are \textsc{withheld}.
+
+\begin{center}\small
+\begin{tabular}{lrrrrr}
+\toprule
+stratum & $n$ & $n_{gt}$ & $n_{emit}$ & t-P / t-R & \textbf{time-F1} \\
+\midrule
+audio required      & 1643 & 4916 & 16185 & 0.155 / 0.510 & 0.2375 \\
+audio not required  &  868 & 3511 & 12866 & 0.164 / 0.601 & 0.2578 \\
+\textbf{gross}      & 2511 & 8427 & 29051 & 0.159 / 0.548 & \textbf{0.2464} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Two facts frame everything below.
+
+\textbf{(1) The system emits 3.4$\times$ more often than there are events} (29{,}051
+emissions against 8{,}427 ground-truth triggers). Precision, not recall, is the binding
+constraint.
+
+\textbf{(2) The gate is nearly exhausted.} \S2.5 measured precision as \emph{flat} across
+the whole threshold grid. With $p$ pinned at 0.159, $F_1 = 2pr/(p+r)$ climbs monotonically
+as $r \to 1$ to a ceiling of $2p/(p{+}1) = \mathbf{0.274}$. We are at 0.246. Every
+remaining gate adjustment in existence is worth $\le 0.028$ --- \emph{inside} the 0.03
+noise band --- and collecting it means emitting even more. Note the corollary, which is
+counter-intuitive: cutting the 3.4$\times$ over-emission would \emph{lower} $F_1$, because
+precision will not rise to compensate.
+
+\subsection{Two different failure modes, not one}
+
+\begin{center}\small
+\begin{tabular}{llrrr}
+\toprule
+& task & gt/vid & emit/vid & time-F1 \\
+\midrule
+\textbf{A. over-emitting}
+& sequential\_step\_instruction & 5.65 & 17.24 & 0.3778 \\
+& realtime\_state\_monitor      & 4.43 & 22.43 & 0.2431 \\
+& cumulative\_counting          & 4.76 & 11.23 & 0.2337 \\
+& event\_narration              & 4.37 & 19.22 & 0.2285 \\
+& dedup\_counting               & 4.04 & 16.07 & 0.2097 \\
+& semantic\_condition\_alert    & 3.26 & 14.30 & 0.2071 \\
+\midrule
+\textbf{B. right count,}
+& explicit\_target\_grounding   & 1.10 &  1.05 & 0.1065 \\
+\textbf{wrong moment}
+& snapshot\_counting            & 1.00 &  1.00 & 0.0674 \\
+& instant\_event\_alert         & 1.31 &  1.00 & 0.0604 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{keybox}
+\textbf{The decisive row is \texttt{snapshot\_counting}.} Exactly 1.00 ground-truth event
+per video, exactly 1.00 emission per video --- the emission \emph{count is perfect} --- and
+time-F1 is 0.0674. The one emission lands within $\pm$3\,s of the truth roughly 7\% of the
+time. Nothing about \emph{how often} to speak is wrong there. \emph{When} is wrong. No gate
+parameter can repair that.
+\end{keybox}
+
+Only \texttt{instant\_event\_alert} is genuinely refractory-capped: a 600\,s refractory
+against 1.31 events per video caps recall at $\approx$0.76 by construction. The other two
+group-B tasks emit the right number and mis-time it.
+
+\section{Five hypotheses, tested}
+
+\begin{center}\small
+\begin{tabular}{p{5.4cm}cp{7.6cm}}
+\toprule
+hypothesis & verdict & evidence \\
+\midrule
+TMRoPE positions are wrong & \no\ cleared &
+numerically validated against \texttt{get\_rope\_index} (FORK \S3); a 2\,s / 50-token
+audio chunk from anchor 8 yields exactly $8\ldots57$ \\
+Position clock outruns trained RoPE range & \no\ cleared &
+max position reached $\approx$\textbf{10{,}300} vs \texttt{max\_position\_embeddings}
+=32{,}768; the loud guard fired \textbf{0} times in 2{,}500+ videos; eviction never fired \\
+Frozen perception (the parent's defect \#1) & \no\ cleared &
+median \textbf{110 distinct \texttt{seen}} per video over 187 ticks;
+\textbf{0 of 532} videos emitted a single frozen description \\
+Audio is not actually reaching the model & \no\ cleared &
+\texttt{use\_audio=True} on \textbf{2{,}514/2{,}514}, including all 1{,}645
+\texttt{audio\_dependency=required} \\
+\textbf{The ICL DSL does not transfer} & \yes\ \textbf{confirmed} & \S3 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{What is actually broken}
+
+\subsection{The controller stops generating after $\sim$22 tokens}
+
+\begin{center}\small
+\begin{tabular}{lr}
+\toprule
+measurement (78{,}828 controller ticks, 4 lanes) & value \\
+\midrule
+\texttt{controller\_max\_tokens} budget & 300 \\
+mean tokens actually generated per tick & \textbf{21.7} \ (max 108) \\
+ticks emitting \texttt{seen} & 100\% \\
+ticks emitting \texttt{answer} & 51\% \\
+ticks emitting \texttt{event\_time\_s} & 41\% \\
+ticks emitting \texttt{fps} & \textbf{12} \ (0.015\%) \\
+ticks emitting \texttt{next\_check\_s} & \textbf{8} \ (0.010\%) \\
+ticks emitting \texttt{question\_for\_next} & 21 \ (0.027\%) \\
+\midrule
+probe argmax is literally \texttt{true}/\texttt{false} & 84.5\% \\
+probe argmax agrees with the parsed JSON & 77\% \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The budget is 300 and the model uses 22. It is not being truncated --- it \textbf{chooses
+to stop}, mid-schema. Representative \texttt{seen} payloads from the live logs:
+
+\begin{center}\small\ttfamily
+"1 prices are ...' \textbackslash n * Do not other numbers" \quad\textbullet\quad
+"\{a single CJK character\}" \quad\textbullet\quad "0\textbackslash n\{"
+\end{center}
+
+\noindent with \texttt{answer} fields reading \texttt{"\{"} and \texttt{"1.0,"}. The JSON
+parses --- 0\% unparseable --- so nothing raises an error. This is the project's
+signature failure mode: \emph{a finished run and a number you could put in a table}.
+
+\begin{keybox}
+\textbf{Why this explains AUC $\approx$ 0.5.} \texttt{have\_enough\_info} is the boolean the
+gate thresholds. It is produced by the same degenerate generation step. A threshold on a
+boolean that the model is not really computing cannot rank event-adjacent ticks above quiet
+ones --- so the four independent measurements of ``no threshold helps'' were all measuring
+one upstream defect, not nine hard tasks.
+\end{keybox}
+
+\subsection{The self-pacing loop is dead}
+
+\texttt{fps} and \texttt{next\_check\_s} are how the ICL controller was supposed to
+\emph{schedule itself} --- look more often when something is happening, less when it is
+not. They appear in 20 ticks out of 78{,}828. The system is running at a fixed cadence with
+its adaptive machinery present in the prompt and absent from the output. This is the parent
+branch's defect \#7 (``fields simply never appeared'') recurring in a new form.
+
+\subsection{A verified structural divergence: the modality delimiters}
+
+The reference processor builds an interleaved A/V stream as
+
+\begin{center}\small\ttfamily
+\textless vision\_bos\textgreater\textless audio\_bos\textgreater\ [video chunk $j$][audio
+chunk $j$]$^{*}$ \textless audio\_eos\textgreater\textless vision\_eos\textgreater
+\end{center}
+
+\noindent Our \emph{ordering} matches it: video frames for $[t,t{+}2)$, then the 2\,s audio
+chunk for the same window. But \textbf{none of the four delimiter tokens appears anywhere in
+\texttt{async\_omni\_v2/}}. The model is fed an interleaved stream with no marker saying an
+interleaved stream has begun.
+
+This is a real divergence from training conditions, verified from the reference source. It
+is \textbf{not} established as a \emph{cause} --- no ablation has been run. It is cheap to
+test and belongs high on the list precisely because it is cheap, not because it is proven.
+
+\section{Why the original ICL branch appears to score so much higher}
+
+The number is \texttt{joint\_f1} \textbf{0.206}, recorded in \texttt{EXPERIENCE.md} as
+``roughly MiniCPM-o-4.5-level''. Its own parenthetical is the important part:
+\emph{``27-video, 9-task eval, older scoring.''}
+
+\texttt{LEARNINGS.md} \S6b then documents what ``older scoring'' meant --- six defects, all
+in the scorer:
+
+\begin{center}\small
+\begin{tabular}{clp{7.6cm}}
+\toprule
+\# & defect & effect on the number \\
+\midrule
+13 & LLM judge silently fell back to \textbf{word overlap} on any exception, while logging
+``google-genai judge active'' & every judged number \\
+17 & state matched by \textbf{substring}, not equality & ``RSM content accuracy inflated'' \\
+15 & \texttt{semantic\_condition\_alert} LLM-judged; upstream scores it \texttt{time\_only}
+& wrong metric entirely \\
+14 & \texttt{judge\_cache.json} clobbered by 4 concurrent writers & 24\,h of judging
+$\rightarrow$ 42 entries \\
+16 & \texttt{\_extract\_count} did not strip clock times: ``At 01:23, count is 5'' $=1$ &
+correct answers marked wrong \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Defect \#13 was caught by re-scoring in a bare shell \textbf{with no API key at all}, which
+reproduced the shipped \texttt{content\_acc} \emph{to four decimals}. A real judge and no
+judge cannot agree exactly --- so no judge had ever run.
+
+Aligning to the benchmark's real scorer then found \texttt{realtime\_state\_monitor} at
+\textbf{0.000, 296 of 296 wrong}: it emitted sentences where the benchmark compares the
+whole payload to \texttt{state\_to} by equality. That fix (emit the bare label) is commit
+\texttt{ab49ce9}, and it \emph{is} present in this fork's prompts.
+
+And the deepest one, \texttt{LEARNINGS} \S2: a null model using \textbf{only the timestamp},
+with zero pixel access, beat \texttt{p\_hit} on 3 of 4 tasks; \texttt{p\_hit} correlated with
+video time at $|r|$ up to \textbf{0.93}. In the repo's own words: \emph{``The system was
+scoring worse than a clock.''}
+
+\begin{keybox}
+\textbf{Conclusion.} 27 videos against our 2{,}700, a judge that was never running, and a
+control signal that was largely a clock. The 0.206 is not a target to chase. What \emph{is}
+real in that branch are its \textbf{mechanisms}: hysteresis with re-arm (\texttt{hyst2b}),
+the per-tick \texttt{seen} step, word-overlap dedup within a true stretch, and the
+``already reported'' history. Those survive the audit; the score does not.
+\end{keybox}
+
+\section{What to do, in priority order}
+
+Ordered by (evidence it will help) $\times$ (cheapness), not by ambition.
+
+\subsection*{Tier 1 --- attacks the confirmed root cause}
+
+\begin{enumerate}
+\item \textbf{Constrain the decode to the schema.} The model stops mid-JSON at 22 tokens.
+Guided/constrained decoding (a grammar or a logit-processor mask over the schema) makes the
+whole DSL structurally unskippable. This alone restores \texttt{answer} on the 49\% of ticks
+that currently lack it and \texttt{event\_time\_s} on the 59\% that lack it.
+\emph{Cost: hours. Expected effect: large and broad.}
+
+\item \textbf{Shrink the schema for this model.} Qwen2.5-Omni-7B is a weaker structured
+generator than Qwen3-VL-8B. Two fields (\texttt{have\_enough\_info},
+\texttt{event\_time\_s}) may outperform seven that it never finishes. Test the reduced
+schema against the full one at equal budget. \emph{Cost: hours.}
+
+\item \textbf{Use \texttt{event\_time\_s} --- the gate currently ignores it.} The model
+already names an onset time on 41\% of ticks, and the emission is timestamped at the
+\emph{crossing tick} instead. Emitting at the model's stated time is a different, possibly
+much better, timing signal that costs \textbf{no GPU} to evaluate: it is already in the
+banked logs. \emph{Do this first --- it is free.}
+\end{enumerate}
+
+\subsection*{Tier 2 --- cheap, plausible, unproven}
+
+\begin{enumerate}[resume]
+\item \textbf{Add the four modality delimiters} (\S3.3) and A/B one task. Cheap, and it
+restores a training-time invariant we are currently violating.
+
+\item \textbf{Detrend \texttt{p\_hit} within each video.} The parent measured $|r|$ up to
+0.93 between \texttt{p\_hit} and wall-clock. If that holds here, most of the score is a
+clock; z-scoring or differencing within a video could expose the residual. \textbf{Free} ---
+offline, from banked tick logs.
+
+\item \textbf{Gate on the derivative, not the level.} Events are \emph{changes}. A
+rising-edge gate on a level signal fires wherever the level is high. Also free to test
+offline.
+\end{enumerate}
+
+\subsection*{Tier 3 --- known-bounded gains}
+
+\begin{enumerate}[resume]
+\item \textbf{Refit mode and refractory} (never refitted; inherited from the vision-only
+model). The three gate knobs are coupled, so this is not optional in principle --- but the
+ceiling analysis says it repairs \emph{one} task (\texttt{instant\_event\_alert}), not
+three.
+
+\item \textbf{Do not chase the emission budget.} Matching emissions to event count would
+\emph{reduce} $F_1$ while precision stays flat. Revisit only after Tier 1 makes the score
+informative.
+\end{enumerate}
+
+\subsection*{Content-F1 specifically}
+
+\begin{enumerate}[resume]
+\item \textbf{Restore a judge.} \texttt{content\_acc} and \texttt{joint\_f1} are
+\textsc{withheld} --- never guessed --- and will stay so until one is reachable. The true
+value lies between the lower bound 0.038 and the timing ceiling 0.246; nothing narrows that
+without a judge. This blocks any comparison with MiniCPM-o 4.5 (0.209 \emph{joint}-F1, not
+time-F1, and judged by a different model on a different subset).
+
+\item \textbf{Fix \texttt{answer} degeneracy} --- same root cause as item 1. An
+\texttt{answer} of \texttt{"\{"} scores zero content no matter how good the timing is, so
+\emph{every} joint-F1 point is currently gated behind Tier 1.
+
+\item \textbf{Emit the benchmark's token form, not prose}, per task. Already done for
+\texttt{realtime\_state\_monitor}; audit the remaining constrained-format tasks the same
+way.
+\end{enumerate}
+
+\section{The honest bottom line}
+
+\begin{keybox}
+The threshold-fit study's negative result stands and is well-evidenced: \emph{given this
+control signal}, no per-task threshold recovers information the signal does not carry, and
+the fit does not overfit (fit-disjoint bias $+0.0007$ gross). What the study could not see
+from inside is that \textbf{the signal itself is the artefact of a broken generation step}.
+The right next move is not a better gate. It is to make the controller finish its sentence.
+\end{keybox}
+
+\vspace{0.6em}
+\noindent\small\textbf{Two caveats on this document.} (i) The DSL-collapse diagnosis is
+measured; the claim that fixing it raises $F_1$ is a \emph{hypothesis}, and item 3 is the
+free experiment that tests it before any GPU is spent. (ii) The audit of the parent branch's
+0.206 is read from this repository's own post-mortems; that branch has not been re-run here.
+
+\end{document}
