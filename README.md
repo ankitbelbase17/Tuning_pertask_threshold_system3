@@ -41,8 +41,8 @@ emission *volume*, not *timing*, and four independent code paths agree on it:
 Pooled over all tasks a **single global** operating point *is* identified and
 stable (0.15, re-selected in 94 % of resamples against 10 % chance). Split nine
 ways over 15 videos each it is not. That is a **power** result, not a claim that
-the tasks are alike — which is why the full 2,700-sample run below is worth its
-GPU-hours.
+the tasks are alike. Resolving it needed a one-parameter control run at full scale;
+that control was cancelled before launch (see below), so it stays unresolved.
 
 Predictions were **registered in writing before the data that tested them**, and
 the record includes the one that failed: §2.5 predicted every task would pin to
@@ -57,14 +57,14 @@ containing zero on ≥ 7 of 9 tasks in pass 2 — came in at **9 of 9**.
 |---|---|---|
 | pass 1 (wide grid, 94 cells) | 1,410/1,410 | **complete** |
 | pass 2 (refined grid, 45 cells) | 675/675 | **complete** |
-| stage 3 arm 1 (`fitted`, per-task) | 2,511/2,700 | **running** — 93% |
-| stage 3 arm 2 (`g015`, flat global 0.15) | 0/2,700 | queued behind arm 1 (`debug-qos` allows one job at a time) |
+| stage 3 arm 1 (`fitted`, per-task) | 2,512/2,700 | **running** — 93% |
+| stage 3 arm 2 (`g015`, flat global 0.15) | — | **not run** — cancelled 2026-09-01, before launch (see RUNBOOK §2.10) |
 
-**Banked at the last sync:** 572 prediction files, 4,596 sample-evals (4,608 raw records), 16.4 MB, ≈ 517 GPU-hours.
+**Banked at the last sync:** 572 prediction files, 4,597 sample-evals (4,609 raw records), 16.4 MB, ≈ 517 GPU-hours.
 
 **Integrity: 0 torn lines** across every generation and lane reshape, despite a SIGKILL at each 22-minute wall. Re-evaluations, counted per cell — p1 10, p2 2, full2700 0. The grid passes double-evaluated a handful (two lanes claiming the same unit before either banked it); stage 3's shard split with global `--done_glob` resume has produced **none**. Either way no score moves: `lib/score_cells.py` keys its records by id before scoring, so a repeat replaces rather than double-counts.
 
-Stage 3 arm labels: `arm=""` 1,365, `arm=fitted` 1,146. The empty label predates the 2026-08-31 fix that stamps `OMNIPRO_ARM` into each record; those are all `fitted`, the only arm that had run while the field was empty.
+Stage 3 arm labels: `arm=""` 1,365, `arm=fitted` 1,147. The empty label predates the 2026-08-31 fix that stamps `OMNIPRO_ARM` into each record; those are all `fitted`, the only arm that had run while the field was empty.
 
 `content_acc` and `joint_f1` stay **`WITHHELD`, never guessed**, until an LLM judge is reachable. `time_f1` is judge-free and is what every result is selected on.
 
@@ -72,15 +72,31 @@ Stage 3 arm labels: `arm=""` 1,365, `arm=fitted` 1,146. The empty label predates
 
 <!-- AUTOSYNC:END -->
 
-### Stage 3 runs twice, and the second arm is not optional
+### Stage 3 ran ONE arm — and that is a limitation, not a simplification
 
-The fitted arm alone yields a number with nothing to subtract it from: it would
-show that the fitted system scores *X*, not that per-task fitting bought
-anything. The comparison it needs was measured in pass 1 at
-**+0.0075, CI [−0.011, +0.027]** — but *in sample*, on the 135 videos the
-thresholds were fitted on, where the fitted arm has nine free parameters to the
-global arm's one. At 2,700 videos the CI half-width falls from ~0.019 to ~0.004,
-so this is the first version of that comparison able to resolve a sign.
+The plan was two arms: `fitted` (nine per-task thresholds) and `g015` (a flat
+global 0.15 forced on every task). The second was built, preflighted, and then
+**cancelled before launch on 2026-09-01**.
+
+It mattered because the fitted arm alone yields a number with nothing to subtract
+it from: it shows that the fitted system scores *X*, not that per-task fitting
+bought anything. The only fitted-vs-global measurement is pass 1's
+**+0.0075, CI [−0.011, +0.027]** — *in sample*, on the 135 videos the thresholds
+were fitted on, where the fitted arm has nine free parameters to the global arm's
+one. Every citation of it must carry that caveat. At 2,700 videos the CI
+half-width would have fallen from ~0.019 to ~0.004, enough to resolve the sign;
+that measurement does not exist, and the two predictions registered in advance for
+it are **withdrawn, not resolved**.
+
+What survives is not nothing. The absolute stage-3 numbers stand across all three
+audio strata, and `lib/overall.py`'s fit-disjoint rescore — the same predictions
+with the 135 fitting ids removed — puts the in-sample bias at **+0.0007 gross**,
+two orders of magnitude inside the noise band. The fit does not overfit. And the
+negative result about per-task threshold fitting rests on the AUC, the flat
+precision curve and the bootstrap (RUNBOOK §2.5–2.8), none of which needed arm 2.
+
+Reviving it is one command; `g015` writes to its own directory and resume makes it
+interruptible.
 
 An arm is a **pairing**, never a loose flag: `STAGE3_ARMS.json` maps each arm to
 *both* its results directory and its threshold override, and `lib/arms.py` is the

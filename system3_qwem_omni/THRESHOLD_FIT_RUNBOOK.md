@@ -698,6 +698,49 @@ records, `xRT_mean` 1.944 (against the 3.343 p95 prior the planner starts from),
 ~207 GPU-h left on this arm.
 
 
+### 2.10 Arm 2 cancelled — what the study can and cannot claim now — 2026-09-01
+
+**Decision:** stage 3 runs the `fitted` arm only. The `g015` control (flat global
+0.15 on every task, ~184 GPU-h) is not run. Recorded here because it changes what
+the paper is allowed to say, and because §2.9 registered two predictions that this
+cancellation makes **permanently untestable**.
+
+**The two predictions are withdrawn, not resolved.** §2.9 predicted that
+ΔF1(fitted − g015) would come in below the in-sample +0.0075 and land inside the
+0.03 noise band. Both required arm 2. They are struck from the register as
+*unresolved by cancellation* — not as failed, and emphatically not as confirmed.
+A prediction register only means anything if withdrawals are as visible as hits.
+
+**What is lost.** The out-of-sample comparison of *nine fitted parameters against
+one*. §2.7 measured it at **+0.0075, CI [−0.011, +0.027]**, but in sample on the
+135 fitting videos, where the fitted arm has nine free parameters to the global
+arm's one — the exact configuration in which an advantage is expected for free.
+At n=2,700 the CI half-width would have fallen ~0.019 → ~0.004, enough to resolve
+the sign. That measurement will not exist.
+
+**What survives, and it is not nothing:**
+
+- The absolute stage-3 numbers for the fitted gate on the complete benchmark
+  (`OVERALL.json`, Tables 2–3), across all three audio strata.
+- **The fit does not overfit.** `overall.py`'s fit-disjoint rescore — the same
+  predictions with the 135 fitting ids removed, free — puts the in-sample bias at
+  **+0.0007 gross**, two orders of magnitude inside the noise band. That is a
+  measurement, not an assumption, and it is the one §6.1 was designed around.
+- §2.5–2.8 are untouched: AUC ≈ 0.5, the flat precision curve, the bootstrap that
+  no task survives, and pass 2's 9/9 confirmation. The negative result about
+  per-task threshold fitting rests on those, not on arm 2.
+
+**What the paper must NOT say.** No claim that per-task fitting beats — or loses
+to — a single global threshold *out of sample*. The only fitted-vs-global number
+is §2.7's, and every mention of it must carry the words *in sample, n=135, nine
+free parameters against one*. Table 4 stays, with that caveat in its caption.
+
+**It stays cheap to revisit.** The arm machinery is built, preflighted on both
+arms, and `g015` writes to its own directory (`results/full2700_g015`), so
+`sbatch bin/run_stage3.sbatch 1 600 g015` starts it whenever, and resume makes it
+interruptible. Nothing about this decision is one-way.
+
+
 ## 3. Judge — offline, and selection on `time_f1`
 
 Decided: **no in-loop judging.** Lanes run with `GEMINI_API_KEY` / `OPENAI_API_KEY`

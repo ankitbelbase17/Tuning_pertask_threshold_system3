@@ -86,8 +86,11 @@ def block(files, tot, uniq, dups, gpu_s, arms, nbytes, torn):
         n = uniq.get(key, 0)
         state = "**complete**" if n >= denom else "**running** — %.0f%%" % (100.0 * n / denom)
         L.append("| %s | %s/%s | %s |" % (label, f"{n:,}", f"{denom:,}", state))
-    L.append("| stage 3 arm 2 (`g015`, flat global 0.15) | 0/2,700 | queued behind arm 1 "
-             "(`debug-qos` allows one job at a time) |")
+    # Arm 2 is reported as CANCELLED, not omitted. A control that was designed and
+    # then dropped is a limitation of the study; a table that simply stops listing
+    # it reads as though the study never needed one.
+    L.append("| stage 3 arm 2 (`g015`, flat global 0.15) | — | **not run** — cancelled "
+             "2026-09-01, before launch (see RUNBOOK §2.10) |")
     arm_txt = ", ".join("`arm=%s` %s" % (k or '""', f"{v:,}") for k, v in sorted(arms.items()))
     dup_txt = ", ".join("%s %d" % (k, dups.get(k, 0)) for k, _, _ in STAGES)
     return "\n".join([
