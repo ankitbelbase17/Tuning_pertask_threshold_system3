@@ -70,6 +70,10 @@ def fig6(out, pt):
     # The emission ratio is the explanation, so it shares the panel rather than
     # sitting in a second figure the reader has to hold in their head.
     ax2 = ax.twinx()
+    # The twin axes is drawn AFTER the primary, so ITS gridlines land on top of
+    # the bars -- which is what the earlier zorder fix on `ax` could never reach.
+    # One grid, on the primary, below everything.
+    ax2.grid(False)
     ax2.plot(x, ratio, "o-", color=S.ORANGE, lw=1.4, ms=4, label="emits per GT event")
     ax2.axhline(1.0, color=S.MUTED, lw=0.9, ls=":")
     ax2.set_ylabel("emits per GT event"); ax2.set_ylim(0, 6.5)
@@ -163,8 +167,8 @@ def main():
     for f in (fig6(a.out, pt), fig7(a.out), fig8(a.out, pt, a.parent)):
         print("  ->", f if f else "(skipped: parent table not readable)")
     json.dump({"overall": agg["overall"], "per_task": pt},
-              open(os.path.join(ROOT, "STAGE3_PARTIAL.json"), "w"), indent=1)
-    print("  wrote STAGE3_PARTIAL.json (partial -- NOT the final OVERALL.json)")
+              open(os.path.join(ROOT, "STAGE3_FIGDATA.json"), "w"), indent=1)
+    print("  wrote STAGE3_FIGDATA.json (figure inputs; the headline artefact is OVERALL.json)")
 
 
 if __name__ == "__main__":

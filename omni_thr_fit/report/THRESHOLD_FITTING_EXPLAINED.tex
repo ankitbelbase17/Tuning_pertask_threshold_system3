@@ -31,7 +31,8 @@ approach, results, figures, findings, and what none of it shows}
 speak. It decides by thresholding $p_{hit}$, a probability read off the frozen
 model's logits. This study fitted that threshold \emph{per task} over two grid
 passes on a frozen 135-video subset, then ran the complete 2{,}700-sample
-benchmark. \textbf{The fit does not hold up, and the reason is measurable}: across
+benchmark, which is now \textbf{finished: 2{,}700/2{,}700, gross time-F1 0.2265}.
+\textbf{The fit does not hold up, and the reason is measurable}: across
 all nine tasks the AUC of $p_{hit}$ against event-adjacency is \textbf{0.394--0.526}
 --- chance --- so a threshold controls \emph{how often} the system speaks and never
 \emph{when}. Nine fitted thresholds do not beat one global threshold outside noise.
@@ -114,7 +115,7 @@ stage & what it does & cells & sample-evals & status \\
 \midrule
 pass 1  & wide grid, 10 thresholds $\times$ 9 tasks & 94 & 1{,}410 & complete \\
 pass 2  & refine 5 points around each pass-1 winner & 45 &   675 & complete \\
-stage 3 & the full benchmark at the fitted values   &  1 & 2{,}700 & 95\% \\
+stage 3 & the full benchmark at the fitted values   &  1 & 2{,}700 & \textbf{complete} \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -310,31 +311,37 @@ of chance, pass 2 is no better}.
 
 Stage 3's 2{,}700 samples \emph{contain} the 135 fitting videos, making the headline
 $\approx$5\% in-sample. Rescoring with those ids removed --- free, the same
-predictions filtered --- gives an in-sample bias of \textbf{+0.0007 gross}, two
-orders of magnitude inside the noise band. Whatever else is true of this fit, it
+predictions filtered --- gives an in-sample bias of \textbf{+0.0003 gross} on the
+completed run (2{,}565 disjoint samples), and $+$0.0003 in both audio strata
+separately: two orders of magnitude inside the noise band. Whatever else is true of this fit, it
 generalises. The negative result is about \emph{identifiability}, not overfitting.
 
 \section{Stage 3: the full benchmark, per task}
 
-At 2{,}563 of 2{,}700 banked (95\%), judge offline:
+All \textbf{2{,}700 of 2{,}700} banked --- 2{,}700 unique ids, exactly 300 per task,
+\textbf{zero duplicates and zero torn records} across 76 generations and two lane
+reshapes, at a cost of \textbf{291.5 GPU-hours}. Judge offline, so content is withheld:
 
 \begin{center}\small
 \begin{tabular}{lrrrrrr}
 \toprule
 task & $n$ & $n_{gt}$ & $n_{emit}$ & emit/gt & t-P / t-R & \textbf{time-F1} \\
 \midrule
-sequential\_step\_instruction & 298 & 1685 & 5139 & 3.05 & 0.251 / 0.765 & \textbf{0.3778} \\
-realtime\_state\_monitor      & 271 & 1200 & 6197 & 5.16 & 0.143 / 0.739 & \textbf{0.2398} \\
-cumulative\_counting          & 288 & 1379 & 3291 & 2.39 & 0.165 / 0.393 & \textbf{0.2321} \\
-event\_narration              & 283 & 1236 & 5557 & 4.50 & 0.138 / 0.619 & \textbf{0.2252} \\
-dedup\_counting               & 285 & 1156 & 4713 & 4.08 & 0.127 / 0.519 & \textbf{0.2045} \\
-semantic\_condition\_alert    & 292 &  956 & 4322 & 4.52 & 0.123 / 0.557 & \textbf{0.2016} \\
-explicit\_target\_grounding   & 287 &  316 &  307 & 0.97 & 0.104 / 0.101 & \textbf{0.1027} \\
-snapshot\_counting            & 279 &  279 &  279 & 1.00 & 0.065 / 0.065 & \textbf{0.0645} \\
-instant\_event\_alert         & 280 &  366 &  280 & 0.77 & 0.068 / 0.052 & \textbf{0.0588} \\
+sequential\_step\_instruction & 300 & 1709 & 5270 & 3.08 & 0.248 / 0.765 & \textbf{0.3748} \\
+cumulative\_counting          & 300 & 1435 & 3704 & 2.58 & 0.152 / 0.393 & \textbf{0.2195} \\
+realtime\_state\_monitor      & 300 & 1340 & 8146 & 6.08 & 0.123 / 0.747 & \textbf{0.2110} \\
+event\_narration              & 300 & 1322 & 6642 & 5.02 & 0.125 / 0.628 & \textbf{0.2084} \\
+dedup\_counting               & 300 & 1234 & 5187 & 4.20 & 0.120 / 0.506 & \textbf{0.1944} \\
+semantic\_condition\_alert    & 300 &  984 & 4697 & 4.77 & 0.116 / 0.553 & \textbf{0.1915} \\
+explicit\_target\_grounding   & 300 &  332 &  332 & 1.00 & 0.099 / 0.099 & \textbf{0.0994} \\
+snapshot\_counting            & 300 &  300 &  300 & 1.00 & 0.060 / 0.060 & \textbf{0.0600} \\
+instant\_event\_alert         & 300 &  395 &  300 & 0.76 & 0.067 / 0.051 & \textbf{0.0576} \\
 \midrule
-\textbf{gross (micro)} & 2563 & 8573 & 30085 & 3.51 & 0.156 / 0.546 & \textbf{0.2423} \\
-\textbf{macro over tasks} & & & & & & \textbf{0.1897} \\
+\textbf{gross (micro)} & 2700 & 9051 & 34578 & 3.82 & 0.143 / 0.546 & \textbf{0.2265} \\
+\textbf{macro over tasks} & & & & & & \textbf{0.1796} \\
+\midrule
+audio required     & 1768 & 5288 & 19369 & 3.66 & 0.139 / 0.511 & \textbf{0.2190} \\
+audio not required &  932 & 3763 & 15209 & 4.04 & 0.147 / 0.596 & \textbf{0.2363} \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -348,22 +355,23 @@ often, three emit about once per video.}
 
 \subsection{Two failure regimes, not one}
 
-\textbf{Regime A --- over-emission (six tasks).} 2.4--5.2 emissions per event.
-Precision, not recall, is what limits these. Gross precision is 0.156 against recall
+\textbf{Regime A --- over-emission (six tasks).} 2.6--6.1 emissions per event.
+Precision, not recall, is what limits these. Gross precision is 0.143 against recall
 0.546: the system finds the moments and buries them in false positives.
 
 \textbf{Regime B --- one emission per video (three tasks).} These carry 300\,s and
 600\,s refractories inherited from the vision-only fit.
-\texttt{snapshot\_counting} is the clean case: exactly 1.00 ground-truth event per
-video, exactly 1.00 emission, and F1 \textbf{0.0645} --- so the single emission lands
-within $\pm$3\,s only about 6\% of the time. The \emph{count} is perfect; the
-\emph{moment} is wrong.
+\texttt{snapshot\_counting} is the clean case: exactly 300 ground-truth events over
+300 videos, exactly 300 emissions, and F1 \textbf{0.0600} --- so the single emission
+lands within $\pm$3\,s exactly 6\% of the time. The \emph{count} is perfect; the
+\emph{moment} is wrong. \texttt{explicit\_target\_grounding} is the same shape at
+1.00 and 0.0994.
 
 \begin{keybox}
 \textbf{The gate is nearly exhausted, and the intuitive fix is backwards.} With
 precision flat across the grid, $F_1 = 2pr/(p+r)$ rises monotonically as $r\to1$ to a
-ceiling of $2p/(p{+}1) = \mathbf{0.272}$. We sit at 0.242. So every remaining
-threshold adjustment in existence is worth $\le$0.03 --- inside the noise band ---
+ceiling of $2p/(p{+}1) = \mathbf{0.250}$. We sit at \textbf{0.2265}, so the entire
+remaining headroom in the gate is \textbf{0.024} --- inside the 0.03 noise band ---
 and \emph{cutting} the over-emission would \textbf{lower} F1, because precision will
 not rise to compensate.
 \end{keybox}
@@ -381,26 +389,31 @@ many events exist. A well-calibrated gate would track the diagonal.}
  & emits per event & micro time-F1 & macro time-F1 \\
 \midrule
 system\_3 (Qwen3-VL-8B, vision), $n{=}931$      & 1.48 & \textbf{0.2684} & \textbf{0.2565} \\
-omni (Qwen2.5-Omni-7B, A$+$V), $n{=}2563$      & 3.51 & \textbf{0.2423} & \textbf{0.1897} \\
+omni (Qwen2.5-Omni-7B, A$+$V), $n{=}2700$      & 3.82 & \textbf{0.2265} & \textbf{0.1796} \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-We win on 2 of 9 tasks. Micro-averaged we trail by 0.026 (borderline against the
-noise band); \textbf{macro-averaged by 0.067}, which is not. The micro figure
-flatters us because it is dominated by the tasks we do adequately.
+We win on \textbf{1 of 9} tasks on the completed run. Micro-averaged we trail by
+\textbf{0.042}, macro-averaged by \textbf{0.077} --- both now outside the noise band,
+where the 95\%-complete snapshot had the micro gap at a borderline 0.026. That
+movement is itself informative: \textbf{the long tail scores worse than the rest}, so
+every partial number in this study was optimistically biased and the final one is the
+only one to quote.
 
 \textbf{The two systems fail in opposite directions.} The predecessor emits
-1.48$\times$ per event at precision 0.225 / recall 0.333; we emit 3.51$\times$ at
-0.156 / 0.546. It is conservative and accurate; we are talkative and vague. Our two
-wins are both \texttt{level}-mode short-refractory tasks --- exactly where talking
-more pays.
+1.48$\times$ per event at precision 0.225 / recall 0.333; we emit 3.82$\times$ at
+0.143 / 0.546. It is conservative and accurate; we are talkative and vague. Our one
+win --- \texttt{event\_narration}, $+$0.039 --- is a \texttt{level}-mode
+short-refractory task, exactly where talking more pays. Worth stating precisely:
+\texttt{realtime\_state\_monitor} is a \emph{loss} by 0.0028, which is far inside the
+noise band, so the fair reading is \textbf{one clear win, one tie, seven losses}.
 
 \textbf{And where we lose most, it simply gets more attempts.} On the three regime-B
 tasks the predecessor emits 2.85 / 3.07 / 1.33 times per event where our inherited
 refractories permit $\approx$1.00. Inverting $F_1 = 2\,tp/(k{+}1)$ for one event and
 $k$ emissions: it converts $\approx$53\% of \texttt{snapshot\_counting} videos into a
-hit with 2.85 attempts ($\approx$24\% per attempt); we convert 6\% with one. So
+hit with 2.85 attempts ($\approx$24\% per attempt); we convert exactly 6\% with one. So
 \emph{both} factors are real --- our per-emission timing is $\approx$4$\times$ worse
 \emph{and} we take a third as many attempts.
 
@@ -434,8 +447,9 @@ throughout. No LLM judge has produced a verdict in any run of this fork: the wor
 \texttt{unset} the API keys deliberately, and the configured model
 (\texttt{gemini-3-flash}) 404s when tried. Seven of nine tasks are content-scored by
 deterministic parsers (count, position, state, or \texttt{time\_only}); the two
-free-text tasks are unjudged, so the \emph{pooled} figure cannot be formed. The true
-joint-F1 lies between the lower bound 0.038 and the timing ceiling 0.242. No
+free-text tasks are unjudged, so the \emph{pooled} figure cannot be formed. On the
+completed run the true joint-F1 lies between the lower bound \textbf{0.0349} and the
+timing ceiling \textbf{0.2265}, at 57\% judge coverage. No
 comparison with published baselines (MiniCPM-o 4.5 at 0.209 \emph{joint}-F1) is
 available --- and they used a different judge on a different subset.
 
