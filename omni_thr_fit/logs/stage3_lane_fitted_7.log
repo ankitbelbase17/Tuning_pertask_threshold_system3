@@ -158,3 +158,5 @@
 [lane 7] exit rc=0 14:54:24
 [lane 7] nid006068 gpu=3 shard=7/8 max_dur=655 start=15:35:02 2511s left
 [lane 7] exit rc=0 15:35:51
+[lane 7] nid007497 gpu=3 shard=7/8 max_dur=655 start=16:16:42 2508s left
+[lane 7] exit rc=0 16:18:12
