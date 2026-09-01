@@ -95,16 +95,21 @@ precision will not rise to compensate.
 \end{center}
 
 \begin{keybox}
-\textbf{The decisive row is \texttt{snapshot\_counting}.} Exactly 1.00 ground-truth event
-per video, exactly 1.00 emission per video --- the emission \emph{count is perfect} --- and
-time-F1 is 0.0674. The one emission lands within $\pm$3\,s of the truth roughly 7\% of the
-time. Nothing about \emph{how often} to speak is wrong there. \emph{When} is wrong. No gate
-parameter can repair that.
+\textbf{\texttt{snapshot\_counting} isolates the timing problem.} Exactly 1.00 ground-truth
+event per video, exactly 1.00 emission per video, and time-F1 0.0674 --- so the single
+emission lands within $\pm$3\,s only about 7\% of the time. Per-emission timing, not
+emission volume, is what fails here.
 \end{keybox}
 
-Only \texttt{instant\_event\_alert} is genuinely refractory-capped: a 600\,s refractory
-against 1.31 events per video caps recall at $\approx$0.76 by construction. The other two
-group-B tasks emit the right number and mis-time it.
+\noindent\textbf{But volume is \emph{also} a lever on these tasks, and \S5's comparison
+proves it.} The parent system scores 0.2776 on \texttt{snapshot\_counting} while emitting
+\textbf{2.85} times per ground-truth event, against our 1.00. Inverting $F_1 = 2\,tp/(k+1)$
+for one GT event and $k$ emissions: the parent converts $\approx$53\% of videos into a hit
+with 2.85 attempts ($\approx$24\% per attempt); we convert 6.7\% with one. \emph{Both}
+factors are real --- our per-emission timing is roughly 3.5$\times$ worse \emph{and} we take
+a third as many attempts. The 600\,s / 300\,s refractories inherited from the vision-only
+fit are therefore binding on all three group-B tasks, not just
+\texttt{instant\_event\_alert}.
 
 \section{Five hypotheses, tested}
 
@@ -249,6 +254,69 @@ the per-tick \texttt{seen} step, word-overlap dedup within a true stretch, and t
 ``already reported'' history. Those survive the audit; the score does not.
 \end{keybox}
 
+\section{Head to head: the parent's fitted table vs ours}
+
+The parent's own fitted per-task table (\texttt{output\_full9/fitted\_full\_table.json},
+Qwen3-VL-8B, vision only, its shipped thresholds, \textbf{judge running}) against stage-3
+arm 1 (Qwen2.5-Omni-7B, vision + audio, fitted thresholds, judge off). \textbf{time-F1
+only} --- it is the one metric both sides measure the same way.
+
+\begin{center}\small
+\begin{tabular}{lrrr@{\hskip 1.2em}rrr@{\hskip 1.2em}r}
+\toprule
+& \multicolumn{3}{c}{\textbf{system\_3} Qwen3-VL-8B (V)} &
+  \multicolumn{3}{c}{\textbf{omni} Qwen2.5-Omni (A+V)} & \\
+\cmidrule(r){2-4}\cmidrule(r){5-7}
+task & $n$ & e/gt & time-F1 & $n$ & e/gt & time-F1 & $\Delta$ \\
+\midrule
+cumulative\_counting          & 101 & 3.50 & 0.2466 & 283 & 2.36 & 0.2337 & $-$0.013 \\
+dedup\_counting               & 283 & 0.67 & 0.3059 & 278 & 3.95 & 0.2097 & $-$0.096 \\
+event\_narration              &  96 & 2.56 & 0.1697 & 279 & 4.40 & 0.2285 & \textbf{$+$0.059} \\
+explicit\_target\_grounding   &  12 & 3.07 & 0.2295 & 280 & 0.95 & 0.1065 & $-$0.123 \\
+instant\_event\_alert         &  38 & 1.33 & 0.2105 & 272 & 0.76 & 0.0604 & $-$0.150 \\
+realtime\_state\_monitor      & 142 & 1.06 & 0.2138 & 268 & 5.06 & 0.2431 & \textbf{$+$0.029} \\
+semantic\_condition\_alert    &  38 & 1.42 & 0.2644 & 286 & 4.39 & 0.2071 & $-$0.057 \\
+sequential\_step\_instruction & 148 & 1.08 & 0.3905 & 298 & 3.05 & 0.3778 & $-$0.013 \\
+snapshot\_counting            &  73 & 2.85 & 0.2776 & 267 & 1.00 & 0.0674 & $-$\textbf{0.210} \\
+\midrule
+\textbf{overall (micro)}      & 931 & 1.48 & \textbf{0.2684} & 2511 & 3.45 & \textbf{0.2464} & $-$0.022 \\
+\textbf{macro over tasks}     &     &      & \textbf{0.2565} &      &      & \textbf{0.1927} & $-$\textbf{0.064} \\
+\midrule
+t-P / t-R                     & \multicolumn{3}{c}{0.225 / 0.333} & \multicolumn{3}{c}{0.159 / 0.548} & \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent\textbf{The omni fork wins on 2 of 9 tasks.} Micro-averaged it trails by 0.022 ---
+inside the 0.03 noise band --- but \textbf{macro-averaged it trails by 0.064}, which is not.
+The micro figure flatters us because it is dominated by the tasks we do adequately; the
+macro figure exposes that our three worst tasks are much worse.
+
+\vspace{4pt}
+\noindent\textbf{The two systems fail in opposite directions.} The parent emits
+\textbf{1.48} times per event at precision 0.225 / recall 0.333; we emit \textbf{3.45} times
+at precision 0.159 / recall 0.548. It is conservative and accurate; we are talkative and
+vague. Our advantage on \texttt{event\_narration} and \texttt{realtime\_state\_monitor} --- both
+\texttt{level}-mode, short-refractory tasks --- is exactly where talking more pays.
+
+\vspace{4pt}
+\noindent\textbf{Where we lose most, the parent simply gets more attempts.} On the three
+group-B tasks the parent emits 2.85 / 3.07 / 1.33 times per event where our inherited
+refractories permit 1.00 / 0.95 / 0.76.
+
+\begin{keybox}
+\textbf{Read this table with four caveats.} (i) \emph{Different subsets} --- the parent's
+$n$ is uneven and small on exactly the tasks where it wins most
+(\texttt{explicit\_target\_grounding} $n{=}12$, \texttt{instant\_event\_alert} $n{=}38$); ours is
+$\approx$280 per task. Those two rows are the weakest in the table. (ii) \emph{Different
+modality and backbone} --- this is not an ablation of audio, it is two different systems.
+(iii) \emph{Content is not comparable at all}: the parent ran with a working judge
+(\texttt{n\_unjudged}=0), ours is \textsc{withheld}. Only time-F1 is being compared, and only
+because the $\pm$3\,s greedy match is the same code path in both trees. (iv) The parent's
+numbers are read from another account's scratch, which this project has already been burned
+by once; they should be re-derived before publication.
+\end{keybox}
+
 \section{What to do, in priority order}
 
 Ordered by (evidence it will help) $\times$ (cheapness), not by ambition.
@@ -294,9 +362,11 @@ offline.
 
 \begin{enumerate}[resume]
 \item \textbf{Refit mode and refractory} (never refitted; inherited from the vision-only
-model). The three gate knobs are coupled, so this is not optional in principle --- but the
-ceiling analysis says it repairs \emph{one} task (\texttt{instant\_event\_alert}), not
-three.
+model). \emph{Promoted after the \S5 comparison}: the parent emits 2.85$\times$ per event on
+\texttt{snapshot\_counting} and 3.07$\times$ on \texttt{explicit\_target\_grounding} where our
+600\,s / 300\,s refractories permit 1.00, and it scores 0.28 and 0.23 against our 0.07 and
+0.11. This is worth more than the earlier ceiling analysis suggested --- it binds on all
+three group-B tasks, which are our three worst.
 
 \item \textbf{Do not chase the emission budget.} Matching emissions to event count would
 \emph{reduce} $F_1$ while precision stays flat. Revisit only after Tier 1 makes the score

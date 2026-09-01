@@ -57,14 +57,14 @@ containing zero on ≥ 7 of 9 tasks in pass 2 — came in at **9 of 9**.
 |---|---|---|
 | pass 1 (wide grid, 94 cells) | 1,410/1,410 | **complete** |
 | pass 2 (refined grid, 45 cells) | 675/675 | **complete** |
-| stage 3 arm 1 (`fitted`, per-task) | 2,524/2,700 | **running** — 93% |
+| stage 3 arm 1 (`fitted`, per-task) | 2,525/2,700 | **running** — 94% |
 | stage 3 arm 2 (`g015`, flat global 0.15) | — | **not run** — cancelled 2026-09-01, before launch (see RUNBOOK §2.10) |
 
-**Banked at the last sync:** 572 prediction files, 4,609 sample-evals (4,621 raw records), 16.5 MB, ≈ 520 GPU-hours.
+**Banked at the last sync:** 572 prediction files, 4,610 sample-evals (4,622 raw records), 16.5 MB, ≈ 520 GPU-hours.
 
 **Integrity: 0 torn lines** across every generation and lane reshape, despite a SIGKILL at each 22-minute wall. Re-evaluations, counted per cell — p1 10, p2 2, full2700 0. The grid passes double-evaluated a handful (two lanes claiming the same unit before either banked it); stage 3's shard split with global `--done_glob` resume has produced **none**. Either way no score moves: `lib/score_cells.py` keys its records by id before scoring, so a repeat replaces rather than double-counts.
 
-Stage 3 arm labels: `arm=""` 1,365, `arm=fitted` 1,159. The empty label predates the 2026-08-31 fix that stamps `OMNIPRO_ARM` into each record; those are all `fitted`, the only arm that had run while the field was empty.
+Stage 3 arm labels: `arm=""` 1,365, `arm=fitted` 1,160. The empty label predates the 2026-08-31 fix that stamps `OMNIPRO_ARM` into each record; those are all `fitted`, the only arm that had run while the field was empty.
 
 `content_acc` and `joint_f1` stay **`WITHHELD`, never guessed**, until an LLM judge is reachable. `time_f1` is judge-free and is what every result is selected on.
 
