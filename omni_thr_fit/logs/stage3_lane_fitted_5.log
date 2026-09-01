@@ -117,3 +117,5 @@
 [lane 5] nid006110 gpu=1 shard=5/8 max_dur=668 start=01:00:21 2510s left
 [lane 5] exit rc=124 01:41:43
 [lane 5] nid006110 gpu=1 shard=5/8 max_dur=667 start=01:42:04 2508s left
+[lane 5] exit rc=124 02:23:23
+[lane 5] nid006101 gpu=1 shard=5/8 max_dur=666 start=02:23:42 2510s left
