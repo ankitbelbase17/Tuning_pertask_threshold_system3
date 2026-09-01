@@ -77,3 +77,6 @@ To github.com:ankitbelbase17/Tuning_pertask_threshold_system3.git
 To github.com:ankitbelbase17/Tuning_pertask_threshold_system3.git
    76e23cc..5aa9982  icl_ingester_writer -> main
 [autopush 09-01 13:00:43] pushed 5aa9982  (21 files)  arm 1 at 2,669/2,700 (99%); 4,754 sample-evals, 563 GPU-h, 17.4 MB in 572 files
+To github.com:ankitbelbase17/Tuning_pertask_threshold_system3.git
+   5aa9982..de1b8e3  icl_ingester_writer -> main
+[autopush 09-01 14:00:58] pushed de1b8e3  (21 files)  arm 1 at 2,684/2,700 (99%); 4,769 sample-evals, 569 GPU-h, 17.5 MB in 572 files
