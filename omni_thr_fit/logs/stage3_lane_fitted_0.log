@@ -125,3 +125,5 @@
 [lane 0] nid006806 gpu=0 shard=0/8 max_dur=665 start=03:47:01 2510s left
 [lane 0] exit rc=124 04:28:22
 [lane 0] nid006806 gpu=0 shard=0/8 max_dur=665 start=04:28:42 2510s left
+[lane 0] exit rc=124 05:10:03
+[lane 0] nid006806 gpu=0 shard=0/8 max_dur=664 start=05:10:22 2510s left
