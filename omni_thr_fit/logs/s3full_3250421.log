@@ -4,3 +4,6 @@
 [s3] xRT_mean=1.979 p95=n/a longest_remaining=594.6s
 [s3] window-fit cap for this shape: max_dur=663s (0 = take everything)
 [s3] gen 71 queued: nodes=2 time=00:44:00
+[s3] gen 70 end: 2616/2700 samples banked, 84 left
+[s3]   next shape: nodes=2 max_dur=660s fit_n=84
+[s3] gen 70 exit Tue Sep  1 09:20:02 AM CEST 2026
