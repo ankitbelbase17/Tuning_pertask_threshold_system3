@@ -1,0 +1,386 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{booktabs,array,xcolor,amssymb,amsmath}
+\usepackage[colorlinks=true,linkcolor=black,urlcolor=blue]{hyperref}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{framed}
+\setlist[itemize]{leftmargin=1.4em,itemsep=2.5pt,topsep=3pt}
+\setlist[enumerate]{leftmargin=1.7em,itemsep=3pt,topsep=3pt}
+\titleformat{\section}{\large\bfseries}{\thesection}{0.6em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection}{0.6em}{}
+\definecolor{shadecolor}{gray}{0.93}
+\newenvironment{keybox}{\begin{shaded}\noindent}{\end{shaded}}
+\sloppy
+
+\title{\textbf{Per-task gate threshold fitting}\\[3pt]
+\large Qwen2.5-Omni-7B on OmniPro Online --- what it is, what it found,\\
+and what it does not show}
+\author{}
+\date{1 September 2026}
+
+\begin{document}
+\maketitle
+\vspace{-2.2em}
+
+\section{The question, in one page}
+
+The system is a \textbf{proactive streaming assistant}. A video plays; the model
+watches and listens as it arrives; at some moment it should \emph{speak} --- report
+a count, name a state change, alert on an event. The research question is not
+\emph{what} to say. It is \textbf{when}.
+
+The machinery for deciding is small. Once per tick the system asks the frozen model
+a yes/no question --- ``do we have enough information / has the event happened?''
+--- and reads the probability of \texttt{true} straight off the logits. Call it
+$p_{hit}$. If $p_{hit}$ crosses a threshold, the system speaks.
+
+That threshold is the object of this study. There are nine tasks, and the guess
+motivating the work was that they want \emph{different} thresholds: a task that
+should alert once per video is not a task that should narrate continuously.
+
+\begin{keybox}
+\textbf{So the study asks:} does fitting one threshold \emph{per task} produce a
+better streaming system than a single threshold shared by all nine? And the answer
+turns out to be more interesting than a yes or a no.
+\end{keybox}
+
+\noindent\textbf{The benchmark} is OmniPro Online: 9 tasks $\times$ 300 videos =
+\textbf{2{,}700} samples, 24.1\,s to 594.6\,s long, 65\% of them requiring audio.
+\textbf{The metric} is \texttt{time\_f1}: an emission counts if it lands within
+$\pm$3\,s of a ground-truth trigger, matched greedily one-to-one. It needs no LLM
+judge, which is why every decision in this study is made on it.
+
+\section{Why it had to be done at all: the threshold was doing nothing}
+
+Before any fitting, an audit of the shipped system found the knob was
+\textbf{disconnected}.
+
+Under the shipped \texttt{gate\_strategy="hysteresis"}, the test that actually
+decides whether to fire was \texttt{p\_hit >= gate\_high\_thr} --- a fixed global
+\textbf{0.5}. The per-task \texttt{hit\_threshold} only decided whether an answer got
+\emph{decoded}. Across a completed 2{,}700-sample run (581{,}403 ticks, 50{,}433
+fires) \textbf{not one fire occurred below $p_{hit}=0.500$}. The four tasks
+configured at or under 0.5 were all silently running at 0.5. Two further
+parameters, \texttt{task\_gate\_modes} and \texttt{task\_refractory\_s}, were read
+\textbf{nowhere at all}.
+
+\begin{keybox}
+This is the pattern the whole project keeps meeting: \textbf{the failure was silent}.
+It produced a finished run and a number you could put in a table. Fixing the gate so
+the threshold is genuinely in the firing path is what made a fit meaningful --- and
+it means the ``shipped'' thresholds were never really tested at their stated values.
+\end{keybox}
+
+\noindent A second defect surfaced while the fit was already running. $p_{hit}$ is
+\emph{high on the very first tick} of every video --- the model answers the question
+from the prompt before it has seen anything ($\ge$0.05 for 98--100\% of samples,
+median 0.34--0.64). Seeding the gate's \texttt{prev\_above} to \texttt{False} made
+that first tick a rising edge, so a task with a long refractory spent its single
+allowed emission at $t\approx1$\,s against ground truth at 26--98\,s. The fix is
+definitional --- an edge requires a predecessor, so \texttt{prev\_above} starts
+\texttt{None}. Offline best time-F1 rose 0.0535\,$\rightarrow$\,0.0900
+(\texttt{snapshot\_counting}) and 0.0636\,$\rightarrow$\,0.0751
+(\texttt{instant\_event\_alert}); short-refractory tasks moved by $\pm$0.001.
+
+\noindent\textbf{The size of that effect tracks the refractory} --- which is the
+practical reason the gate's three knobs (\texttt{threshold}, \texttt{mode},
+\texttt{refractory}) cannot honestly be fitted one at a time.
+
+\section{The approach}
+
+Three stages, deliberately cheap before expensive.
+
+\begin{center}\small
+\begin{tabular}{llrrl}
+\toprule
+stage & what it does & cells & sample-evals & status \\
+\midrule
+pass 1 & wide grid, 10 thresholds $\times$ 9 tasks & 94 & 1{,}410 & complete \\
+pass 2 & refine 5 points around each pass-1 winner & 45 & 675 & complete \\
+stage 3 & full benchmark at the fitted values & 1 & 2{,}700 & 94\% \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent\textbf{The frozen subset.} Passes 1 and 2 run on a fixed 5\% all-audio
+subset --- \textbf{15 videos per task, 135 in total} --- chosen once and never
+changed. Freezing it is what makes the two passes comparable to each other and to
+the bootstrap that audits them.
+
+\noindent\textbf{Protocol rules that shaped every number here:}
+
+\begin{itemize}
+\item \textbf{The bootstrap resamples \emph{videos}, never ticks or events.} Ticks
+within one video are serially correlated through a shared KV cache; resampling them
+would manufacture confidence that is not there.
+\item \textbf{Paired.} Every threshold is scored on the \emph{same} resampled video
+set, and the selection rule is re-run inside each draw rather than an argmax being
+taken --- so the audit measures the stability of \emph{the procedure}, not of a
+number.
+\item \textbf{Re-selection is always divided by chance.} A grid of 10 cells has a
+10\% chance rate, one of 5 cells has 20\%. Comparing raw re-selection rates across
+grids of different size is meaningless.
+\item \textbf{A 0.03 noise band.} The eval is not bit-reproducible; run-to-run
+variance on one fixed config has been measured at F1 0.255 vs 0.051. Differences
+below 0.03 are not treated as real.
+\item \textbf{Content metrics are \textsc{withheld}, never estimated}, whenever the
+LLM judge is unreachable. A blank cell is a fact; a guessed cell is a lie that
+survives into a paper.
+\end{itemize}
+
+\section{What the fit produced}
+
+\begin{center}\small
+\begin{tabular}{lrrrrrr}
+\toprule
+task & shipped & \textbf{fitted} & gap vs rival & grid span & re-sel & chance \\
+\midrule
+cumulative\_counting          & 0.925 & \textbf{0.6167} & $-$0.0017 & 0.048 & 48\% & 20\% \\
+dedup\_counting               & 0.992 & \textbf{0.5500} & $+$0.0243 & 0.055 & 70\% & 20\% \\
+event\_narration              & 0.100 & \textbf{0.6500} & $+$0.0037 & 0.023 & 74\% & 20\% \\
+explicit\_target\_grounding   & 0.500 & \textbf{0.7167} & $+$0.0039 & 0.065 & 47\% & 20\% \\
+instant\_event\_alert         & 0.450 & \textbf{0.4500} & $+$0.0645 & 0.065 & 63\% & 20\% \\
+realtime\_state\_monitor      & 0.800 & \textbf{0.4500} & $-$0.0093 & 0.029 & 38\% & 20\% \\
+semantic\_condition\_alert    & 0.980 & \textbf{0.2167} & $+$0.0091 & 0.066 & 42\% & 20\% \\
+sequential\_step\_instruction & 0.010 & \textbf{0.1500} & $+$0.0025 & 0.022 & 41\% & 20\% \\
+snapshot\_counting            & 0.985 & \textbf{0.3833} & $+$0.0667 & 0.133 & 56\% & 20\% \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent The fitted values move a long way from the shipped ones --- but read the
+next section before treating any of them as a discovery. \texttt{instant\_event\_alert}
+did not move: it scored \textbf{0.000 at every threshold} in pass 1, so the selection
+rule correctly flagged it \textsc{flat} and kept the shipped value rather than
+picking a winner out of noise.
+
+\section{The findings, in the order they arrived}
+
+\subsection{Finding 1 --- $p_{hit}$ does not rank event-adjacent ticks above quiet ones}
+
+This is the central result. On the five tasks with a complete reference cell, the
+ROC of per-tick $p_{hit}$ against a $\pm$3\,s positive label:
+
+\begin{center}\small
+\begin{tabular}{lrrr}
+\toprule
+task & ticks & distinct $p_{hit}$ & \textbf{AUC} \\
+\midrule
+semantic\_condition\_alert  & 3{,}323 & 253 & \textbf{0.431} \\
+cumulative\_counting        & 2{,}833 & 284 & \textbf{0.469} \\
+explicit\_target\_grounding & 2{,}947 & 232 & \textbf{0.512} \\
+snapshot\_counting          & 3{,}703 & 280 & \textbf{0.526} \\
+instant\_event\_alert       & 4{,}047 & 247 & \textbf{0.551} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{0.5 is chance.} Every 95\% CI contains it. And the obvious escapes were all
+checked and closed: it is not a clock offset (swept $\pm$10\,s --- no peak), not too
+tight a tolerance ($\pm$10\,s --- unchanged), not a degenerate score (232--284
+distinct values spanning 0.000--0.997).
+
+\begin{keybox}
+\textbf{Why this governs everything else.} A threshold is a \emph{ranking} device: it
+works only if the score is higher near events than away from them. If AUC is 0.5, the
+threshold controls \emph{how often} the system speaks, never \emph{when}. Every
+result below is this fact arriving again by a different route.
+\end{keybox}
+
+\subsection{Finding 2 --- no task's fitted threshold survives its own bootstrap}
+
+Pass 1 completed (1{,}410/1{,}410, 94/94 cells) and the rule returned a winner for
+all nine tasks. Then the paired bootstrap:
+
+\begin{itemize}
+\item \textbf{9 of 9} tasks have a $\Delta$F1-against-best-rival CI \textbf{containing
+zero}.
+\item Re-selection is 25--61\% against an 8--10\% chance rate ---
+\texttt{semantic\_condition\_alert} at just \textbf{6\%}, i.e.\ \emph{below} chance.
+\item Two ``fits'' are artefacts: \texttt{instant\_event\_alert} scores 0.000
+everywhere, and \texttt{explicit\_target\_grounding}'s entire curve is one matched
+event or zero out of 16.
+\end{itemize}
+
+The only reproducible structure in the whole grid is the collapse at 0.95 --- i.e.\
+the threshold controls emission \emph{volume}, exactly as an AUC of 0.5 predicts.
+
+\subsection{Finding 3 --- the gate has one identifiable degree of freedom, not nine}
+
+A fair arena, all arms scored on the same videos at equal budget:
+
+\begin{center}\small
+\begin{tabular}{lrrrl}
+\toprule
+arm & time-P & time-R & \textbf{time-F1} & vs.\ best single global \\
+\midrule
+\texttt{shipped\_per\_task}     & 0.151 & 0.356 & 0.2115 & $-$0.0354, CI $[-0.055,-0.016]$ \\
+\texttt{global\_0.5}            & 0.142 & 0.565 & 0.2271 & $-$0.0198, CI $[-0.039,-0.003]$ \\
+\texttt{best\_single\_global} (0.15) & 0.155 & 0.601 & 0.2469 & --- \\
+\texttt{fitted\_per\_task}      & 0.163 & 0.582 & \textbf{0.2544} & $+$0.0075, CI $[-0.011,+0.027]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Nine fitted thresholds beat one global threshold by \textbf{+0.0075 with a
+CI straddling zero} --- \emph{in sample}, where the nine have nine free parameters to
+its one. Yet the single global value is \emph{solid}: re-running the sweep inside
+every bootstrap draw, \textbf{0.15 is re-selected in 94\%} of them against a 10\%
+chance rate.
+
+\begin{keybox}
+Pooled over 135 videos the operating point is identified. Split nine ways over 15
+videos each, it is not. \textbf{That is a power problem, not a claim that the nine
+tasks are alike.} Note also that the \emph{shipped} per-task thresholds are
+significantly \emph{worse} than a flat 0.15 ($-$0.0354), and the damage is in recall
+(0.356 vs 0.601): they were strangling the system.
+\end{keybox}
+
+\subsection{Finding 4 --- pass 2 confirmed a prediction made before the data existed}
+
+Before pass 2 finished, a prediction was registered in writing: the refined grid's
+CIs would contain zero on \emph{at least seven of nine} tasks.
+
+\textbf{The outcome was 9 of 9.} Across each refined neighbourhood the entire F1 span
+is 0.021--0.133, and on four tasks \emph{every} cell sits within the 0.03 noise band
+of the best. Refining did not resolve a winner; it confirmed there was no gradient to
+resolve.
+
+Two honesty notes carried in the record: two rows report CI $[+0.000,+0.200]$ whose
+lower bound is \emph{exactly} zero and therefore does not exclude it (those tasks
+match 0--2 events out of 15--16); and pass 2's re-selection of 38--74\% looks better
+than pass 1's 25--61\% only until you divide by chance --- 20\% here against 8--10\%
+there. \textbf{As a multiple of chance, pass 2 is no better.}
+
+\subsection{Finding 5 --- the fit does not overfit}
+
+Stage 3's 2{,}700 samples \emph{contain} the 135 fitting videos, so the headline is
+$\approx$5\% in-sample. Rescoring with those ids removed --- free, the same
+predictions filtered --- gives an in-sample bias of \textbf{+0.0007 gross}, two orders
+of magnitude inside the noise band. Whatever else is true of this fit, it generalises.
+
+\section{Stage 3: the full benchmark}
+
+At 94\% banked (2{,}553 of 2{,}700), judge offline:
+
+\begin{center}\small
+\begin{tabular}{lrrrrr}
+\toprule
+stratum & $n$ & $n_{gt}$ & $n_{emit}$ & t-P / t-R & \textbf{time-F1} \\
+\midrule
+audio required     & 1643 & 4916 & 16185 & 0.155 / 0.510 & 0.2375 \\
+audio not required &  868 & 3511 & 12866 & 0.164 / 0.601 & 0.2578 \\
+\textbf{gross}     & 2511 & 8427 & 29051 & 0.159 / 0.548 & \textbf{0.2464} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent The system emits \textbf{3.4$\times$ more often than there are events}.
+Precision, not recall, is what limits the score. And because precision is flat across
+the whole grid, the gate's absolute ceiling is $2p/(p{+}1)=\mathbf{0.274}$: every
+remaining threshold adjustment in existence is worth $\le$0.028, i.e.\ inside the
+noise band.
+
+\subsection{Against the vision-only parent}
+
+The parent system (Qwen3-VL-8B, vision only, its own fitted thresholds, and a
+\emph{working} judge) versus ours, on time-F1 only:
+
+\begin{center}\small
+\begin{tabular}{lrrr}
+\toprule
+ & emits per event & micro time-F1 & macro time-F1 \\
+\midrule
+system\_3 (Qwen3-VL-8B, V), $n{=}931$   & 1.48 & \textbf{0.2684} & \textbf{0.2565} \\
+omni (Qwen2.5-Omni-7B, A+V), $n{=}2511$ & 3.45 & \textbf{0.2464} & \textbf{0.1927} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent We win on 2 of 9 tasks. Micro-averaged we trail by 0.022 (inside the noise
+band); \textbf{macro-averaged by 0.064}, which is not. The micro figure flatters us
+because it is dominated by the tasks we do adequately. The parent is conservative and
+accurate; we are talkative and vague. \emph{Caveat:} different subsets, different
+backbone, different modality --- and the parent's $n$ is as low as 12 on a task where
+it beats us most. This is a signpost, not a controlled comparison.
+
+\section{Limitations --- read this section before quoting any number}
+
+\begin{enumerate}
+\item \textbf{Only one of the gate's three knobs was refitted.} \texttt{mode} and
+\texttt{refractory\_s} are inherited unchanged from the vision-only model. The
+document's own evidence says they are coupled to the threshold, so this bounds what
+any threshold result can mean. It shows up concretely: the 600\,s / 300\,s
+refractories permit $\approx$1 emission per video on three tasks, and those are our
+three worst.
+
+\item \textbf{There is no out-of-sample nine-vs-one comparison.} A control arm (flat
+global 0.15 over all 2{,}700) was built, preflighted, and then \textbf{cancelled
+before launch} on 1 September 2026. The only fitted-vs-global number is the in-sample
+$+0.0075$ above, and it must always be cited as \emph{in sample, $n{=}135$, nine free
+parameters against one}. Two predictions registered for that arm are
+\textbf{withdrawn, not resolved}.
+
+\item \textbf{15 videos per cell is underpowered}, and the study says so rather than
+working around it. That is the direct cause of Findings 2--4.
+
+\item \textbf{\texttt{content\_acc} and \texttt{joint\_f1} are \textsc{withheld}}
+throughout --- the judge is unreachable. The true joint-F1 lies between the lower
+bound 0.038 and the timing ceiling 0.246, and nothing narrows that without a judge.
+No comparison to published baselines (MiniCPM-o 4.5 at 0.209 \emph{joint}-F1) is
+available, and they were judged by a different model on a different subset anyway.
+
+\item \textbf{The eval is not bit-reproducible.} Treat $<$0.03 as noise, always.
+
+\item \textbf{And the deepest one:} a separate diagnosis found the controller's ICL
+schema \emph{collapsing} on this backbone --- a mean of 21.7 generated tokens against
+a 300-token budget, with the self-pacing fields appearing in 20 ticks out of 78{,}828.
+The boolean this study thresholds is produced by that generation step. So Finding 1's
+AUC $\approx$ 0.5 is very plausibly \textbf{an artefact of a broken upstream stage
+rather than a property of the task}, which would mean this study measured the gate of
+a system that was not perceiving properly. That does not invalidate the findings ---
+they are correct \emph{about the system as it ran} --- but it changes what they
+predict about a repaired system.
+\end{enumerate}
+
+\section{What it all means}
+
+\begin{keybox}
+\textbf{The honest summary.} Per-task threshold fitting did not work, and the study
+is strong evidence about \emph{why}: not because the tasks are alike, but because the
+signal being thresholded carries no timing information, and because 15 videos per
+task cannot identify nine parameters. A single global threshold (0.15) is the only
+operating point this data identifies, and it is identified well. The shipped per-task
+thresholds are measurably worse than that single value, so replacing them is a real
+improvement even though the per-task \emph{fit} is not.
+\end{keybox}
+
+\noindent\textbf{What is worth carrying forward:}
+
+\begin{itemize}
+\item \textbf{A negative result, properly established} --- by four independent code
+paths (ROC, flat precision curve, paired bootstrap, refined grid), with predictions
+registered before the data and \emph{withdrawals recorded as visibly as hits}.
+\item \textbf{The fit generalises} (+0.0007 in-sample bias), so the negative result is
+about identifiability, not overfitting.
+\item \textbf{The next move is not a better gate.} With precision flat, the gate has
+$\le$0.028 left in it. The gains are upstream: make the controller finish its schema,
+and use the onset time the model already names on 41\% of ticks and the gate currently
+throws away.
+\end{itemize}
+
+\vspace{0.8em}
+\hrule
+\vspace{0.5em}
+\noindent\small\textbf{Where the evidence lives.} Every number above is recomputed from
+banked predictions and can be re-derived without a GPU:
+\texttt{PERCEPTION\_AUDIT.json} (Finding 1), \texttt{FIT\_NOISE\_AUDIT.json} and
+\texttt{FIT\_NOISE\_AUDIT\_P2.json} (2 and 4), \texttt{ABLATION.json} (3),
+\texttt{FINAL\_THRESHOLDS.json} (the fitted values),
+\texttt{STAGE3\_CONFIG\_APPLIED.diff} (what stage 3 actually loaded),
+\texttt{FIRST\_TICK\_AUDIT.json} and \texttt{REFRACTORY\_AUDIT.json} (\S2). The full
+running record, including every deviation from the original spec and why, is
+\texttt{THRESHOLD\_FIT\_RUNBOOK.md} \S2.1--2.10.
+
+\end{document}

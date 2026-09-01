@@ -127,3 +127,5 @@
 [lane 6] nid006859 gpu=2 shard=6/8 max_dur=665 start=04:28:44 2508s left
 [lane 6] exit rc=124 05:10:02
 [lane 6] nid006859 gpu=2 shard=6/8 max_dur=664 start=05:10:23 2509s left
+[lane 6] exit rc=124 05:51:43
+[lane 6] nid006859 gpu=2 shard=6/8 max_dur=664 start=05:52:01 2510s left
